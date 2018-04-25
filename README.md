@@ -1,13 +1,8 @@
 ### Development Instructions
-To launch the React app and run the server at the same time, run:
+To run the express server, use:
 ```
 yarn dev
 ```
-If either Express or React exit with a non-zero status code, the other process will be killed.
+This will use nodemon to run the server. This very conveniently restarts the server when you change files.
 
-The React client will run on port *3000*.
-The Express backend runs on port *3200*.
-The React client is configured to proxy unrecognized URLs to the Express backend.
-(e.g. making a `fetch('/api/test')` call will make a request to the Express server.)
-
-Try to write each of the views in React, while serving data from the Express API through /api/path.
+The server runs on **localhost:3200**.
