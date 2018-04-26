@@ -1,5 +1,71 @@
 <%- include partials/header.ejs %>
 
-<p> Account Creation Page </p>
+<div class="container">
+    <div class="row">
+        <h2> Account Creation Page </h2>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Enter username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+
+                <div class="form-group"> <!-- TODO: add logic here -->
+                    <label for="passwordDupe">Confirm Password</label>
+                    <input type="password" class="form-control" id="passwordDupe" placeholder="Re-enter Password">
+                </div>
+                <br>
+                <label for="userRadios">Select Account Type:</label>            
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="userradios" id="profRadio" value="professor">
+                    <label class="form-check-label" for="profRadio">
+                        Professor
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="userradios" id="taRadio" value="TA">
+                    <label class="form-check-label" for="taRadio">
+                        Teaching Assistant (TA)
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="userradios" id="studentRadio" value="student">
+                    <label class="form-check-label" for="studentRadio">
+                        Student
+                    </label>
+                </div>
+                <br>
+                <!-- 
+                    TODO: So I'm thinking maybe make this a multi-page process, and use radio button values to determine what 
+                    kind of code we ask for, since Profs only need one, and TAs and Students can have multiple.
+                    OR we can just ask for one code, and let students/TAs add more later once they're logged in.
+                -->
+                <div class="form-group">
+                    <label for="enrollCode">Verification/Enrollment Code</label>
+                    <input type="text" class="form-control" id="enrollCode" aria-describedby="codeHelp" placeholder="Enter code">
+                    <small id="codeHelp" class="form-text text-muted">
+                        If you're a Professor, you should have received a code from a site admin before signing up. 
+                        If you're a student/TA, you should have an enrollment code from a Professor.
+                    </small>                    
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
 
 <%- include partials/footer.ejs %>
