@@ -6,6 +6,19 @@
     http queries allow you to send arrays
 -->
 
+<script type="text/javascript">
+function addVerificationCodeField() {
+    var container = document.getElementById('vcodes');
+    var textBox = document.createElement('input');
+    textBox.className = 'form-control';
+    textBox.id = 'enrollCode';
+    textBox.placeholder = 'Enter code (Optional)';
+    textBox.type = 'text';
+    container.appendChild(document.createElement('br'));    
+    container.appendChild(textBox);
+}
+</script>
+
 <div class="container">
     <div class="row">
         <div class="col-md-3"></div>        
@@ -73,7 +86,7 @@
                     kind of code we ask for, since Profs only need one, and TAs and Students can have multiple.
                     OR we can just ask for one code, and let students/TAs add more later once they're logged in.
                 -->
-                <div class="form-group">
+                <div class="form-group" id="vcodes">
                     <label for="enrollCode">Verification/Enrollment Code</label>
                     <input type="text" class="form-control" id="enrollCode" aria-describedby="codeHelp" placeholder="Enter code">
                     <small id="codeHelp" class="form-text text-muted">
@@ -81,7 +94,8 @@
                         If you're a student, you should have an enrollment code from an Instructor.
                     </small>                    
                 </div>
-                
+
+                <button type="button" class="btn btn-secondary" onclick="addVerificationCodeField()">Enter Another Code</button>
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
         </div>
