@@ -1,5 +1,106 @@
 <%- include partials/header.ejs %>
 
-<p> Account Creation Page </p>
+<!-- TODO:
+    can you put (Optional) after verification/enrollment code and allow the user to add additional codes?
+    you can do this using js to add a new input box if they press a button
+    http queries allow you to send arrays
+-->
+
+<script type="text/javascript">
+function addVerificationCodeField() {
+    var container = document.getElementById('vcodes');
+    var textBox = document.createElement('input');
+    textBox.className = 'form-control';
+    textBox.id = 'enrollCode';
+    textBox.placeholder = 'Enter code (Optional)';
+    textBox.type = 'text';
+    container.appendChild(document.createElement('br'));    
+    container.appendChild(textBox);
+}
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>        
+        <div class="col-md-6">
+            <h2> Account Creation Page </h2>
+        </div>
+        <div class="col-md-3"></div>        
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <form>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="firstname">First Name</label>                        
+                            <input type="text" class="form-control" id="firstname" placeholder="First name">
+                        </div>
+                    </div>
+                    <div class="col-sm-6">                    
+                        <div class="form-group">
+                            <label for="lastname">Last Name</label>                                                
+                            <input type="text" class="form-control" id="lastname" placeholder="Last name">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" class="form-control" id="username" placeholder="Enter username">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" placeholder="Password">
+                </div>
+
+                <div class="form-group"> <!-- TODO: add logic here -->
+                    <label for="passwordDupe">Confirm Password</label>
+                    <input type="password" class="form-control" id="passwordDupe" placeholder="Re-enter Password">
+                </div>
+                <br>
+                <label for="userRadios">Select Account Type:</label>            
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="userradios" id="instRadio" value="instructor">
+                    <label class="form-check-label" for="profRadio">
+                        Instructor
+                    </label>
+                </div>
+                
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="userradios" id="studentRadio" value="student">
+                    <label class="form-check-label" for="studentRadio">
+                        Student
+                    </label>
+                </div>
+                <br>
+                <!-- 
+                    TODO: So I'm thinking maybe make this a multi-page process, and use radio button values to determine what 
+                    kind of code we ask for, since Profs only need one, and TAs and Students can have multiple.
+                    OR we can just ask for one code, and let students/TAs add more later once they're logged in.
+                -->
+                <div class="form-group" id="vcodes">
+                    <label for="enrollCode">Verification/Enrollment Code</label>
+                    <input type="text" class="form-control" id="enrollCode" aria-describedby="codeHelp" placeholder="Enter code">
+                    <small id="codeHelp" class="form-text text-muted">
+                        If you're an Instructor, you should have received a code from a site admin before signing up. 
+                        If you're a student, you should have an enrollment code from an Instructor.
+                    </small>                    
+                </div>
+
+                <button type="button" class="btn btn-secondary" onclick="addVerificationCodeField()">Enter Another Code</button>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <div class="col-md-3"></div>        
+    </div>
+</div>
 
 <%- include partials/footer.ejs %>
