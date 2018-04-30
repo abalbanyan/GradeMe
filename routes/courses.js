@@ -4,7 +4,7 @@ var router =  express.Router();
 var mockData = [
     {courseName: "Operating Systems",
      courseNum: 111},
-     {courseName: "Computer networks",
+     {courseName: "Computer Networks",
      courseNum: 118}
 ];
 
