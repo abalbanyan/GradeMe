@@ -3,9 +3,13 @@ var router =  express.Router();
 
 var mockData = [
     {assignName: "Stack Breaking!",
-     dueDate: new Date()},
+     dueDate: new Date(),
+     status: "submitted!",
+     grade: "100/100"},
      {assignName: "Build another server!! HAHA",
-     dueDate: new Date()}
+     dueDate: new Date(),
+     status: "not submitted!",
+     grade: "N/A"}
 ];
 
 router.get('/', function(req, res, next) {
