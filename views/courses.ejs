@@ -10,29 +10,30 @@
         <div class="col-md-3"></div>        
     </div>
     <div class="row">
-        <div class="col-md-3"></div>
-        <div class="col-md-6">
+        <div class="col-md-2"></div>
+        <div class="col-md-8">
             <ul class="list-group">
             <% courselist.forEach(function(dat) { %>
-                <li class="list-group-item list-group-item-action">
+                <!-- TODO: make this go to specific course page - How will we structure URLs? -->
+                <a class="list-group-item list-group-item-action" href="/course">
                     <div class="container">
-                        <div class="row">
-                            <div class="col-8">
+                        <div class="row justify-content-between">
+                            <div class="col-9">
                                 <b>Course Name:</b> <%= dat.courseName %> <br>
                                 <b>Course Number:</b> <%= dat.courseNum%>
                             </div>
-                            <div class="col">
+                            <div class="col-3">
                                 <!-- TODO: Add delete course onclick handler 
                                     + logic to authenticate deletion (owns course).-->
                                 <button type="button" class="btn btn-danger" onclick="">Delete Course</button>
                             </div>
                         </div>
                     </div>
-                </li>
+                </a>
             <% }); %>
             </ul>
         </div>
-        <div class="col-md-3"></div>        
+        <div class="col-md-2"></div>        
     </div>
 </div>
 
