@@ -13,7 +13,8 @@ var mockData = [
 ];
 
 router.get('/', function(req, res, next) {
-    // TODO: replace mock data.
+    // TODO: replace mock data. Mock data should be retrieved based on
+    //       URL + auth (ensure user has access to course requested).
     res.render('course', {coursename: "tempCourseName", assignments: mockData } );
 });
 
