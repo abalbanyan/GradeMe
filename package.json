@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.1",
     "dockerode": "^2.5.5",
     "ejs": "^2.5.9",
     "express": "^4.16.3",

@@ -10,7 +10,6 @@ class GradingContainer {
         this.env = env;
         this.userId = userId;
         this.srcArchive = srcArchive;
-        return;
     }
 
     // make container, copy srcArchive into container, unpack
