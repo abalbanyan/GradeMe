@@ -29,6 +29,18 @@ async function authChecker(req, res, next) {
 }
 
 /**
+ * Returns current userid.
+ */
+async function getUserID(req) {
+    let token = req.cookies['access-token'];
+    if (!token) {
+        return null;
+    }
+    let decodedtoken = await jwt.verify(token, secret);
+    return decodedtoken.id;
+}
+
+/**
  * Creates and sends a jwt token to the user as a cookie.
  * 
  * @param {Express Response} res
@@ -49,13 +61,11 @@ function sendCookie(res, userid) {
  */
 async function isAuthenticated(req) {
     // Check if cookie exists.
-    let token = req.cookies['access-token'];
-    if (!token) {
+    let userid = await getUserID(req);
+    if (!userid) {
         return false;
     }
-    // Check if cookie is valid.
-    let decodedtoken = await jwt.verify(token, secret);
-    let user = await db.User.findById(new mongoose.Types.ObjectId(decodedtoken.id)).exec();
+    let user = await db.User.findById(new mongoose.Types.ObjectId(userid)).exec();
     return (user !== null);
 }
 
@@ -91,5 +101,6 @@ module.exports = {
     isAuthenticated: isAuthenticated,
     authenticateUser: authenticateUser,
     sendCookie: sendCookie,
-    authChecker: authChecker     
+    authChecker: authChecker,
+    getUserID: getUserID
 }
