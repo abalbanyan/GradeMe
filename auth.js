@@ -65,7 +65,7 @@ async function isAuthenticated(req) {
     if (!userid) {
         return false;
     }
-    let user = await db.User.findById(new mongoose.Types.ObjectId(userid)).exec();
+    let user = await db.User.findById(userid).exec();
     return (user !== null);
 }
 

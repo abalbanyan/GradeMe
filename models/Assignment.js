@@ -1,9 +1,11 @@
 let mongoose = require('mongoose');
+let shortid = require('shortid');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
 // Assignment model.
 let AssignmentSchema = new Schema({
+    _id: { type: String, 'default': shortid.generate },
     name:                       { type: String, required: true },
     desc:                       { type: String },
     spec:                       { type: String },

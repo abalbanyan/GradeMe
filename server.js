@@ -29,6 +29,7 @@ app.use('/course', require('./routes/course'));
 app.use('/create-assignment', require('./routes/create-assignment'));
 app.use('/assignment', require('./routes/assignment'));
 app.use('/edit-assignment', require('./routes/edit-assignment'));
+app.use('/api', require('./api'));
 
 /* GET home page. */
 app.get('/', function(req, res, next) {
