@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
 const createError = require('http-errors');
+const cookieParser = require('cookie-parser')
+const auth = require('./auth.js');
 
 const app = express();
 const port = process.env.PORT || 3200;
@@ -8,9 +10,12 @@ const port = process.env.PORT || 3200;
 app.set('views', path.join(__dirname, 'views')); // Templates are located in /views.
 app.set('view engine', 'ejs');
 
+// Define middleware.
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public'))); // Files in /public are staticly served.
+app.use(cookieParser());
+app.use(auth.authChecker);
 
 // Include the routes.
 app.use('/admin', require('./routes/admin'));

@@ -7,16 +7,28 @@
 -->
 
 <script type="text/javascript">
-function addVerificationCodeField() {
-    var container = document.getElementById('vcodes');
-    var textBox = document.createElement('input');
-    textBox.className = 'form-control';
-    textBox.id = 'enrollCode';
-    textBox.placeholder = 'Enter code (Optional)';
-    textBox.type = 'text';
-    container.appendChild(document.createElement('br'));    
-    container.appendChild(textBox);
-}
+    function addVerificationCodeField() {
+        var container = document.getElementById('vcodes');
+        var textBox = document.createElement('input');
+        textBox.className = 'form-control';
+        textBox.id = 'enrollCode';
+        textBox.placeholder = 'Enter code (Optional)';
+        textBox.type = 'text';
+        container.appendChild(document.createElement('br'));    
+        container.appendChild(textBox);
+    }
+
+    function passwordCheck() {
+        if (document.getElementById('password').value == document.getElementById('confirmpassword').value 
+                || document.getElementById('confirmpassword').value == '') {
+            document.getElementById('confirmpassword').style.color = 'green';
+            document.getElementById('passwordmessage').innerHTML = '';
+        } else {
+            document.getElementById('confirmpassword').style.color = 'red';
+            document.getElementById('passwordmessage').style.color = 'red';
+            document.getElementById('passwordmessage').innerHTML = 'Passwords do not match.';
+        }
+    }
 </script>
 
 <div class="container">
@@ -30,41 +42,38 @@ function addVerificationCodeField() {
     <div class="row">
         <div class="col-md-3"></div>
         <div class="col-md-6">
-            <form>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input onkeyup='passwordCheck()' type="password" class="form-control" id="password" name="password" placeholder="Password">
+                </div>
+                <div class="form-group"> <!-- TODO: add logic here -->
+                    <label for="confirmpassword">Confirm Password</label>
+                    <input onkeyup='passwordCheck()' type="password" class="form-control" id="confirmpassword" name="confirmpassword" placeholder="Re-enter Password">
+                    <span id='passwordmessage'></span>
+                </div>
+
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="form-group">
                             <label for="firstname">First Name</label>                        
-                            <input type="text" class="form-control" id="firstname" placeholder="First name">
+                            <input type="text" class="form-control" name="firstname" placeholder="First name">
                         </div>
                     </div>
                     <div class="col-sm-6">                    
                         <div class="form-group">
                             <label for="lastname">Last Name</label>                                                
-                            <input type="text" class="form-control" id="lastname" placeholder="Last name">
+                            <input type="text" class="form-control" name="lastname" placeholder="Last name">
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email">
-                    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
-                </div>
 
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" class="form-control" id="username" placeholder="Enter username">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" placeholder="Password">
-                </div>
-
-                <div class="form-group"> <!-- TODO: add logic here -->
-                    <label for="passwordDupe">Confirm Password</label>
-                    <input type="password" class="form-control" id="passwordDupe" placeholder="Re-enter Password">
-                </div>
                 <br>
                 <label for="userRadios">Select Account Type:</label>            
                 <div class="form-check">
