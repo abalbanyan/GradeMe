@@ -1,17 +1,12 @@
-CC=g++
-CFLAGS=-Wall -g -std=c++11
-TARGET=a.out
+env: clean-env
+	tar -czvf env.tar.gz -C env .
 
-all: payroll.o employee.o main.o
-	$(CC) $^ -o $(TARGET)
+sample sample-bad: clean-submission
+	tar -czvf submission.tar.gz -C $@ .
 
-%.o: %.cpp
-	$(CC) $(CFLAGS) -c $<
+clean-%:
+	rm $*.tar.gz 2> /dev/null || true
 
-clean:
-	rm -rf *.o $(TARGET)
-
-dist:
-	tar -czvf submission.tar.gz *.?pp
-
-.PHONY: clean
+clean: clean-env clean-submission
+	
+.PHONY: env sample sample-bad clean-% clean

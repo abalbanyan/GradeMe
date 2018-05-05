@@ -6,8 +6,7 @@
 # student submission.
 
 FROM gcc:7
-COPY Makefile test.sh /usr/src/app/
-WORKDIR /usr/src/app/
-ADD ${SUBMISSION_TAR} /usr/src/app/
-RUN make
+ARG APPDIR
+WORKDIR $APPDIR
 CMD ['/bin/bash', 'test.sh']
+COPY Makefile test.sh ./
