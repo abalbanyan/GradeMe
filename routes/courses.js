@@ -1,20 +1,18 @@
 var express = require('express');
 var router =  express.Router();
+let getUserID = require('../auth.js').getUserID;
+let db = require('../db.js');
 
-var mockData = [
-    {courseName: "Operating Systems",
-     courseNum: 111},
-     {courseName: "Computer Networks",
-     courseNum: 118}
-];
-
-router.get('/', function(req, res, next) {
-    // todo: figure out how to add middleware to all that passes data to all pages
-    // TODO: When adding authentication function, add a thing to pass in usertype.
-    // res.locals.usertype = "instructor";  // TEMPORARY
-    res.render('courses', {courselist: mockData});  
-    // TODO: put real data here. 
-    // retrieve based on who is logged in (DB should be storing list of courses user is in)
+router.get('/', async function(req, res, next) {
+    let userid = await getUserID(req);
+    let user = await db.utils.getUser(userid);
+    let instructor = user.instructor;
+    let courses = await db.utils.getCourses(userid, instructor);
+    
+    res.render('courses', {
+        instructor: instructor,
+        courselist: courses
+    });
 });
 
 module.exports = router;
