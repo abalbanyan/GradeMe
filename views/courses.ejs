@@ -18,13 +18,28 @@
                         <b>Course Name:</b> <%= course.name %> 
                     </a>
                     <% if (instructor) { %>
-                        <a href='<%= "/edit-course?courseid=" + course._id %>'>
-                            <i style="float: right;" class="material-icons">settings</i>
-                        </a>
+                    <a href='<%= "/edit-course?courseid=" + course._id %>'>
+                        <i style="float: right;" class="material-icons">settings</i>
+                    </a>
                     <% } %>
                 </li>
                 <br>
             <% }); %>
+                <li style='border-style:dashed;' class="list-group-item">
+                    <a href='/enroll'>Join a course</a>
+                    <a href='/enroll'>
+                        <i style="float: right;" class="material-icons">add</i>
+                    </a>
+                </li>
+                <br>
+                <% if (instructor) { %>
+                <li style='border-style:dashed;' class="list-group-item">
+                    <a href='/create-course'>Create a course</a>
+                    <a href='/create-course'>
+                        <i style="float: right;" class="material-icons">add</i>
+                    </a>
+                </li>    
+                <% } %>
             </ul>
         </div>
     </div>
