@@ -14,8 +14,7 @@ let AssignmentSchema = new Schema({
     grading: {
         // TODO: Update. How are we storing files?
         dockerfile:                 { type: String },
-        test_cases:                 { type: String },   
-        weight:                     { type: Number, default: 1, required: true }, // What is the relative weight of this assignment to other assignments?
+        test_cases:                 { type: String },
         due_date:                   { type: Date },
         total:                      { type: Number, required: true, default: 100 }
     }
