@@ -20,8 +20,8 @@ let Grade = require('./models/Grade.js');
 // DB Utils.
 /**
  * Returns the user associated with this id, or null if none exist.
- * 
- * @param {String} userid 
+ *
+ * @param {String} userid
  * @return {User}
  */
 async function getUser(userid) {
@@ -31,8 +31,8 @@ async function getUser(userid) {
 
 /**
  * Retrieves the list of courses this user belongs to.
- * 
- * @param {String} userid 
+ *
+ * @param {String} userid
  * @param {Boolean} instructor - Is the user an instructor?
  * @param {Boolean} admin - Is the user an admin?
  */
@@ -48,6 +48,17 @@ async function getCourses(userid, instructor = false, admin = false) {
     return courses;
 }
 
+/**
+ * Checks if a course has the specified instructor
+ *
+ * @param {String} courseid
+ * @param {String} instructorid
+ */
+async function isCourseInstructor(courseid, instructorid) {
+    let courses = await Course.find({_id: courseid, instructors: instructorid}).exec();
+    return courses.length >= 1;
+}
+
 // TODO: How are we storing user submissions? Might need a "Submission" model.
 
 module.exports = {
@@ -57,6 +68,7 @@ module.exports = {
     Grade: Grade,
     utils: {
         getUser: getUser,
-        getCourses: getCourses
+        getCourses: getCourses,
+        isCourseInstructor: isCourseInstructor
     }
 }
