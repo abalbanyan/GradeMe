@@ -13,14 +13,18 @@ let db = require('./db.js');
 /**
  * Authenticates the user, redirecting them to /login if not logged in.
  * Middleware function, to be called before every route.
+ * Important: this also makes the logged-in user's information available to all routes.
  */
 async function authChecker(req, res, next) {
     if (req.path == '/login' || req.path == '/create-account') {
         // Some pages don't require authentication.
         next();
     } else {
-        let authenticated = await isAuthenticated(req);
-        if (authenticated) {
+        let user = await isAuthenticated(req);
+        if (user) {
+            // Make user's info available to the view.
+            res.locals.user = user;
+            res.locals.path = req.path;
             next();
         } else {
             res.redirect('/login');
@@ -54,10 +58,10 @@ function sendCookie(res, userid) {
 }
 
 /**
- * Checks if the user is authenticated.
+ * Checks if the user is authenticated. If so, returns the user's db entry.
  * 
  * @param {Express Request} req
- * @return {Boolean}
+ * @return {User}
  */
 async function isAuthenticated(req) {
     // Check if cookie exists.
@@ -66,7 +70,7 @@ async function isAuthenticated(req) {
         return false;
     }
     let user = await db.User.findById(userid).exec();
-    return (user !== null);
+    return user;
 }
 
 /**

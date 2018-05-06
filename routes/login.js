@@ -4,8 +4,8 @@ let auth = require('../auth.js');
 
 router.use('/', function(req, res, next) {
     // Shouldn't be trying to log in if already authenticated.
-    auth.isAuthenticated(req).then(authenticated => {
-        if (authenticated) {
+    auth.isAuthenticated(req).then(user => {
+        if (user) {
             res.redirect('/courses');
             return;
         } else {
