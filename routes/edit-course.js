@@ -48,12 +48,13 @@ router.post('/', async function(req, res, next) {
         db.Course.findByIdAndUpdate(courseid, courseupdate, (err, course) => {
             if(err) {
                 console.log(err);
-                res.render('edit-course', {
-                    course: course,
-                    error: "Error modifying course."
-                });
-            } else {
                 res.redirect('error');
+                // res.render('edit-course', {
+                //     course: course,
+                //     error: "Error modifying course."
+                // });
+            } else {
+                res.redirect('courses');
             }
         })
     } else {
@@ -71,14 +72,14 @@ router.delete('/', async function(req, res, next) {
         db.Course.findByIdAndRemove(courseid, (err) => {
             if(err) {
                 console.log(err);
-                res.redirect('error');
+                res.sendStatus(404);
             } else {
                 // TODO: This redirect call currently does not work in a delete call
-                res.redirect('courses');
+                res.sendStatus(200);
             }
         });
     } else {
-        res.redirect('error');
+        res.sendStatus(401);
     }
 });
 

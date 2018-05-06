@@ -27,10 +27,16 @@
 </div>
 
 <script>
+    // TODO: Add a confirmation dialogue box before deletion
     async function deleteCourse() {
         let response = await fetch('#', {
             credentials: 'include', method: 'DELETE'
         });
+        if(response.ok) {
+            window.location.href = '/courses';
+        } else {
+            window.location.href = '/error';
+        }
     }
 </script>
 
