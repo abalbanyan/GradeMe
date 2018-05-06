@@ -18,6 +18,7 @@
     text-decoration: none;
     color:inherit;
 }
+
 .assignment-link:hover {
     text-decoration: none;
     color:inherit;
@@ -37,6 +38,9 @@
     width: 80%;
     height: 100%;
     float: left;
+}
+.assignment-title.student {
+    width: 100%;
 }
 
 .assignment-options:hover{

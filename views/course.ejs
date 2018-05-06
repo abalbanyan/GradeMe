@@ -11,12 +11,14 @@
         <% assignments.forEach(function(assignment) { %>
         <div class="assignment">
             <div class="assignment-header">
-                <a href="/assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-title">
+                <a href="/assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-title <%= (user.instructor)? 'instructor' : 'student' %>">
                     <%= assignment.name %>
                 </a>
+                <% if (user.instructor) { %>
                 <a href="/edit-assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-options">
                     <i class="material-icons">settings</i>
                 </a>
+                <% } %>
             </div>
             <a class="assignment-link"  href="/assignment?assignid=<%=assignment._id%>">
                 <div class="assignment-body">
