@@ -43,8 +43,6 @@ let course = new db.Course({
     students: [danny._id],
     instructors: [willy._id],
     main_instructor: [willy._id],
-    student_enrollment_code: 1337,
-    instructor_enrollment_code: 420,
     visible: true 
 });
 course.save(err => {if(err) console.error(err)});
@@ -56,8 +54,6 @@ let course2 = new db.Course({
     students: [danny._id],
     instructors: [willy._id],
     main_instructor: [willy._id],
-    student_enrollment_code: 6969,
-    instructor_enrollment_code: 666,
     visible: true 
 });
 course2.save(err => {if(err) console.error(err)});
