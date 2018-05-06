@@ -16,6 +16,7 @@ let db = require('./db.js');
  * Important: this also makes the logged-in user's information available to all routes.
  */
 async function authChecker(req, res, next) {
+    res.locals.path = req.path;
     if (req.path == '/login' || req.path == '/create-account') {
         // Some pages don't require authentication.
         next();
@@ -24,7 +25,6 @@ async function authChecker(req, res, next) {
         if (user) {
             // Make user's info available to the view.
             res.locals.user = user;
-            res.locals.path = req.path;
             next();
         } else {
             res.redirect('/login');
@@ -37,7 +37,7 @@ async function authChecker(req, res, next) {
  */
 async function getUserID(req) {
     let token = req.cookies['access-token'];
-    if (!token) {
+    if (!token || token == 0) {
         return null;
     }
     let decodedtoken = await jwt.verify(token, secret);

@@ -8,6 +8,7 @@
 </head>
 
 <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+        <% if (locals.user) { %>
         <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item <%= (path == '/courses')? 'active' : '' %> ">
@@ -18,12 +19,14 @@
                 </li>
             </ul>
         </div>
+        <% } %>
         <div class="mx-auto order-0">
             <a class="navbar-brand mx-auto" href="/courses">GradeMe</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
                 <span class="navbar-toggler-icon"></span>
             </button>
         </div>
+        <% if (locals.user) { %>
         <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
             <ul class="navbar-nav ml-auto">
                 <li>
@@ -31,10 +34,11 @@
                 </li>
                 -
                 <li>
-                    <a class="nav-link" href="#">Log Out</a>
+                    <a class="nav-link" href="/login?logout=1">Log Out</a>
                 </li>
             </ul>
         </div>
+        <% } %>
 </nav>
 
 <br>
