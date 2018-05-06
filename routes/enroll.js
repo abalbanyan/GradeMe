@@ -18,12 +18,10 @@ router.post('/', async function(req, res, next){
         }
     } catch (err) {
         res.render('enroll', {error: 'Error occured while updating.'});
-        console.log(err);
         return;
     }
     if (course == null) {
         res.render('enroll', {error: 'Invalid code. Not added to any courses.'});
-        console.log("2");
         return;
     }
     res.redirect('course?courseid=' + course._id);

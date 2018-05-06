@@ -49,6 +49,42 @@ async function getCourses(userid, instructor = false, admin = false) {
 }
 
 /**
+ * Retrieves the list of assignments belonging to a course.
+ * 
+ * @param {String} courseid
+ * @param {Boolean} showhidden - Show hidden courses?
+ * @return {[Assignment]}
+ */
+async function getAssignments(courseid, showhidden) {
+    let course = await Course.findById(courseid);
+    let assignments = [];
+    if (showhidden) {
+        assignments = await Assignment.find({'_id' : {$in : course.assignments} }).exec();
+    } else {
+        assignments = await Assignment.find({'_id' : {$in : course.assignments}, 'visible' : true}).exec();
+    }
+    return assignments;
+}
+
+/**
+ * Determines whether a user belongs to a specific course.
+ * 
+ * @param {String} courseid
+ * @param {String} userid
+ * @param {Boolean} instructor - Is this user an instructor?
+ * @return {Boolean}
+ */
+async function belongsToCourse(courseid, userid, instructor) {
+    let course = null;
+    if (instructor) {
+        course = await Course.findOne({_id: courseid, instructors: userid}).exec();
+    } else {
+        course = await Course.findOne({_id: courseid, students: userid}).exec();
+    }
+    return (course != null);
+}
+
+/**
  * Checks if a course has the specified instructor
  *
  * @param {String} courseid
@@ -69,6 +105,8 @@ module.exports = {
     utils: {
         getUser: getUser,
         getCourses: getCourses,
-        isCourseInstructor: isCourseInstructor
+        isCourseInstructor: isCourseInstructor,
+        getAssignments: getAssignments,
+        belongsToCourse: belongsToCourse
     }
 }

@@ -1,0 +1,76 @@
+.assignments-container {
+    font-size: 16px;
+    margin-top: 35px;
+    display: flex;
+    flex-flow: row wrap;
+    /* justify-content: space-around; */
+}
+
+.assignment {
+    width: 350px;
+    height: 220px;
+    margin: 15px auto;
+}
+.assignment:hover {
+    opacity: 0.8;
+}
+.assignment-link {
+    text-decoration: none;
+    color:inherit;
+}
+.assignment-link:hover {
+    text-decoration: none;
+    color:inherit;
+}
+.assignment-header {
+    height: 25%;
+    background-color: #373940;
+    color: #dadbbb;
+    font-weight: bold;
+}
+
+.assignment-title {
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */    
+
+    width: 80%;
+    height: 100%;
+    float: left;
+}
+
+.assignment-options:hover{
+    opacity: 0.4;
+}
+
+.assignment-options {
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */    
+
+    width: 20%;
+    height: 100%;
+    float: left;
+    background-color: black;
+}
+
+.assignment-body {
+    padding-left: 20px;
+    padding-top: 20px;
+    height: 75%;
+    background-color: #969495;
+    color: #373940;
+}
+
+.add-assignment {
+    display: flex;
+    justify-content: center; /* align horizontal */
+    align-items: center; /* align vertical */    
+
+    background-color: #969495;
+    border: dashed;
+    border-color: #373940;
+    color: #373940;
+    font-size: 24px;
+    font-weight: bold;
+}
