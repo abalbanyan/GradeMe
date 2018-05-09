@@ -10,12 +10,12 @@ router.get('/', async function(req, res, next) {
     let course = await db.Course.findById(req.query.courseid).exec();
 
     // Does this user have access to this course?
-    let belongs = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, res.locals.user.instructor);
+    let belongs = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, res.locals.user.instructor, res.locals.user.admin);
     if (!belongs) {
-        res.render('error', {message: "You do not have access to this course."});
+        return res.render('error', {message: "You do not have access to this course."});
     }
 
-    let assignments = await db.utils.getAssignments(req.query.courseid, res.locals.user.instructor);
+    let assignments = await db.utils.getAssignments(req.query.courseid, res.locals.user.instructor, res.locals.user.admin);
     // TODO: Retrieve grade if user is a student.
     /*
     if (!res.locals.user.instructor) {
@@ -25,7 +25,7 @@ router.get('/', async function(req, res, next) {
         if (assignment.)
     }
     */
-    res.render('course', {course: course, assignments: assignments } );
+    return res.render('course', {course: course, assignments: assignments } );
 });
 
 module.exports = router;

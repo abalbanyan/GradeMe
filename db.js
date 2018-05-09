@@ -55,10 +55,10 @@ async function getCourses(userid, instructor = false, admin = false) {
  * @param {Boolean} showhidden - Show hidden courses?
  * @return {[Assignment]}
  */
-async function getAssignments(courseid, showhidden) {
+async function getAssignments(courseid, showhidden, admin = false) {
     let course = await Course.findById(courseid);
     let assignments = [];
-    if (showhidden) {
+    if (showhidden || admin) {
         assignments = await Assignment.find({'_id' : {$in : course.assignments} }).exec();
     } else {
         assignments = await Assignment.find({'_id' : {$in : course.assignments}, 'visible' : true}).exec();
@@ -74,8 +74,11 @@ async function getAssignments(courseid, showhidden) {
  * @param {Boolean} instructor - Is this user an instructor?
  * @return {Boolean}
  */
-async function belongsToCourse(courseid, userid, instructor) {
+async function belongsToCourse(courseid, userid, instructor, admin = false) {
     let course = null;
+    if (admin) {
+        return true;
+    }
     if (instructor) {
         course = await Course.findOne({_id: courseid, instructors: userid}).exec();
     } else {

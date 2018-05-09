@@ -6,6 +6,7 @@ let db = require('./db.js');
 
 let admin = new db.User({
     email: 'admin@grademe.edu',
+    name: {first: "Joe", last: "Bruin"},
     password: 'admin',
     instructor: true,
 });

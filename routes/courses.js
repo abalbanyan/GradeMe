@@ -5,7 +5,8 @@ let db = require('../db.js');
 
 router.get('/', async function(req, res, next) {
     let instructor = res.locals.user.instructor;
-    let courses = await db.utils.getCourses(res.locals.user._id, instructor);
+    let admin = res.locals.user.admin;
+    let courses = await db.utils.getCourses(res.locals.user._id, instructor, admin);
     
     res.render('courses', {
         instructor: instructor,

@@ -6,29 +6,13 @@ router.get('/', async function(req, res, next) {
     const courseid = req.query.courseid;
     const instructor = res.locals.user.instructor;
     const userid = res.locals.user._id;
+    const admin = res.locals.user.admin;
 
-    if(courseid && instructor && await db.utils.isCourseInstructor(courseid, userid)) {
-        db.Course.findById(courseid, (err, course) => {
-            if(err) {
-                // Redirect to course page and display error message
-                // TODO: Display error message on course page
-                console.log(err);
-                res.redirect('courses');
-            } else {
-                let instructorid = res.locals.user._id;
-                if(course.instructors.includes(instructorid)) {
-                    res.render('edit-course', {
-                        course: course
-                    });
-                } else {
-                    // TODO: error message about not having access to course
-                    res.redirect('courses');
-                }
-            }
-        });
+    if(courseid && instructor && await db.utils.belongsToCourse(courseid, userid, instructor, admin)) {
+        let course = await db.Course.findById(courseid);
+        res.render('edit-course', {course: course});
     } else {
-        // TODO: error message about no course id being provided
-        res.redirect('error');
+        res.render('error', {message: "You do not have access to this course."});
     }
 });
 

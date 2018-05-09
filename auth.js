@@ -40,8 +40,12 @@ async function getUserID(req) {
     if (!token || token == 0) {
         return null;
     }
-    let decodedtoken = await jwt.verify(token, secret);
-    return decodedtoken.id;
+    try {
+        let decodedtoken = await jwt.verify(token, secret);
+        return decodedtoken.id;
+    } catch (err) {
+        return null;
+    }
 }
 
 /**

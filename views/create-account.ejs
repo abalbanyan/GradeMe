@@ -11,7 +11,7 @@
         var container = document.getElementById('vcodes');
         var textBox = document.createElement('input');
         textBox.className = 'form-control';
-        textBox.id = 'enrollCode';
+        textBox.name = 'codes';
         textBox.placeholder = 'Enter code (Optional)';
         textBox.type = 'text';
         container.appendChild(document.createElement('br'));    
@@ -97,7 +97,7 @@
                 -->
                 <div class="form-group" id="vcodes">
                     <label for="enrollCode">Verification/Enrollment Code</label>
-                    <input type="text" class="form-control" id="enrollCode" aria-describedby="codeHelp" placeholder="Enter code">
+                    <input type="text" class="form-control" name="codes" aria-describedby="codeHelp" placeholder="Enter code">
                     <small id="codeHelp" class="form-text text-muted">
                         If you're an Instructor, you should have received a code from a site admin before signing up. 
                         If you're a student, you should have an enrollment code from an Instructor.

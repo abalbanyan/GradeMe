@@ -56,4 +56,16 @@
         </div>
 </nav>
 
+<% if (locals.errormessage) { %>
+    <div class="alert alert-danger">
+        <strong>Error!</strong> <%= errormessage %>
+    </div>
+<% } %>
+
+<% if (locals.statusmessage) { %>
+    <div class="alert alert-success alert-dismissable">
+        <%= statusmessage %>
+    </div>
+<% } %>
+
 <br>
