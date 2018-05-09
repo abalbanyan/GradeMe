@@ -2,6 +2,9 @@ var express = require('express');
 var router =  express.Router();
 var db = require('../db.js');
 
+let multer = require('multer');
+let upload = multer({dest: 'course-data/uploads'});
+
 router.get('/', async function(req, res, next) {
     // TODO: Test validation more.
     let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, true);
@@ -13,30 +16,27 @@ router.get('/', async function(req, res, next) {
     }
 });
 
-router.post('/', async function(req, res, next) {
+router.post('/', upload.single('spec'), async function(req, res, next) {
     // Verify that this user is allowed to make this request.
     let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, true);
     if (!res.locals.user.instructor || !isCourseInstructor) {
         return res.status(500);
     }
 
-    // TODO: Validate input.
-    let name = req.body.name;
-    let duedate = req.body.dueDate;
-    let pointvalue = req.body.pointValue;
-    let desc = req.body.desc;
-    let specFile = req.body.specFile;
     let realtimegrading = (req.body.RTGRadios === 'yes');
     let testcasesvisible = (req.body.testCasesViewableRadios === 'yes');
 
     let newassignment = new db.Assignment({
-        name: name,
-        desc: desc,
-        grading: {
-            due_date: duedate,
-            total: pointvalue
+        name: req.body.name,
+        desc: req.body.desc,
+        duedate: req.body.dueDate,
+        gradetotal: req.body.pointvalue,
+        spec: {
+            path: req.file.path,
+            filetype: 'pdf' // Currently all we have support for.
         }
     });
+
     newassignment.save(async (err) => {
         if (err) return res.status(500);
     

@@ -10,7 +10,6 @@ let admin = new db.User({
     password: 'admin',
     instructor: true,
 });
-admin.save(err => {if(err) console.error(err)});
 
 let danny = new db.User({
     email: 'danny@gmail.com',
@@ -19,7 +18,6 @@ let danny = new db.User({
     admin: false,
     name: {first: "Danny", last: "Jung"}
 });
-danny.save(err => {if(err) console.error(err)});
 
 let willy = new db.User({
     email: 'willy@gmail.com',
@@ -27,13 +25,18 @@ let willy = new db.User({
     instructor: true,
     name: {first: 'William', last: 'Hsiao'}
 });
+admin.save(err => {if(err) console.error(err)});
 willy.save(err => {if(err) console.error(err)});
+danny.save(err => {if(err) console.error(err)});
 
 let assignment = new db.Assignment({
     name: "GradeMe",
     desc: "this lmao",
-    spec: "Wes Anderson umami biodiesel YOLO, Terry Richardson helvetica tousled street art master cleanse selfies Godard cornhole 8-bit pork belly scenester. Blog blue bottle Neutra, polaroid pug cliche dreamcatcher. Ethnic wolf church-key, Wes Anderson tattooed meh tumblr direct trade literally jean shorts swag shabby chic chillwave DIY pug. Tousled lomo letterpress, flexitarian bitters Schlitz messenger bag Carles. Brooklyn shabby chic letterpress, gluten-free blog Etsy ennui umami cliche hashtag leggings hoodie bitters. Pickled scenester Austin craft beer, 3 wolf moon squid sriracha letterpress occupy. Flexitarian Odd Future semiotics, church-key lomo 8-bit ethnic artisan seitan brunch.",
-    due_date: new Date(2020, 1, 1)
+    duedate: new Date(2020, 1, 1),
+    spec: {
+        path: 'course-data/uploads/loremipsum.pdf',
+        filetype: 'pdf'
+    },
 });
 assignment.save(err => {if(err) console.error(err)});
 
@@ -44,9 +47,8 @@ let course = new db.Course({
     students: [danny._id],
     instructors: [willy._id],
     main_instructor: [willy._id],
-    visible: true 
+    visible: true
 });
-course.save(err => {if(err) console.error(err)});
 
 let course2 = new db.Course({
     name: 'CS136 Computer Security',
@@ -57,11 +59,6 @@ let course2 = new db.Course({
     main_instructor: [willy._id],
     visible: true 
 });
-course2.save(err => {if(err) console.error(err)});
 
-let grade = new db.Grade({
-    assignmentid: assignment._id,
-    studentid: danny._id, 
-    grade: 75
-});
-grade.save(err => {if(err) console.error(err)});
+course.save(err => {if(err) console.error(err)});
+course2.save(err => {if(err) console.error(err)});

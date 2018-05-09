@@ -15,7 +15,7 @@ mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
 let User = require('./models/User.js');
 let Course = require('./models/Course.js');
 let Assignment = require('./models/Assignment.js');
-let Grade = require('./models/Grade.js');
+let Submission = require('./models/Submission.js');
 
 // DB Utils.
 /**
@@ -104,7 +104,7 @@ module.exports = {
     User: User,
     Course: Course,
     Assignment: Assignment,
-    Grade: Grade,
+    Submission: Submission,
     utils: {
         getUser: getUser,
         getCourses: getCourses,
