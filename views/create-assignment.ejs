@@ -1,5 +1,89 @@
 <%- include partials/header.ejs %>
 
-<p> Assignment Creation Page </p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>        
+        <div class="col-md-6">
+            <h2> Assignment Creation Page </h2>
+        </div>
+        <div class="col-md-3"></div>        
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <form method="POST">
+                <input type="hidden" name="courseid" value="<%= courseid %>">
+
+                <div class="form-group has-danger">
+                    <label for="name">Name</label>
+                    <input type="text" class="form-control" name="name" id="name_id" placeholder="Enter assignment name">
+                </div>
+
+                <div class="form-group has-danger">
+                    <label for="dueDate">Due Date</label>
+                    <input type="text" class="form-control" name="dueDate" id="dueDate_id">
+                </div>
+
+                <div class="form-group has-danger">
+                    <label for="pointValue">Point Value</label>
+                    <input type="number" class="form-control" name="pointValue" id="pointValue_id" min="0">
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" rows="4" name="desc" id="description"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="specFile">Upload Assignment Specification</label>
+                    <input type="file" class="form-control-file" id="specFile" aria-describedby="specHelp">
+                    <small id="specHelp" class="form-text text-muted">Upload a PDF</small>
+                </div> 
+
+               <!-- TODO: when to make assignment visible -->
+
+                <h4>Core Settings</h4>
+                <fieldset class="form-group has-danger">
+                <label for="RTGRadios" aria-describedby="realTimeGradingHelp">Real-time Grading:</label>
+                <small id="realTimeGradingHelp" class="form-text text-muted">Students get their grade immediately upon submission.</small>
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="RTGRadios" id="yesRTGRadio" value="yes">
+                            Yes
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="RTGRadios" id="noRTGRadio" value="no">
+                            No
+                        </label>
+                    </div>
+                </fieldset>
+
+                <fieldset class="form-group has-danger">
+                <label for="testCasesViewableRadios">Test Cases Viewable:</label>
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="testCasesViewableRadios" id="yesTCVRadio" value="yes">
+                            Yes
+                        </label>
+                    </div>
+                    
+                    <div class="form-check form-check-inline">
+                        <label class="form-check-label">
+                            <input class="form-check-input" type="radio" name="testCasesViewableRadios" id="noTCVRadio" value="no">
+                            No
+                        </label>
+                    </div>
+                </fieldset>
+                <br>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>
 
 <%- include partials/footer.ejs %>

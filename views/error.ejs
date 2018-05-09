@@ -1,7 +1,11 @@
 <%- include partials/header.ejs %>
 
-<h1>Error</h1>
-<p><%= message %></p>
-<p><%= error.stats %></p>
-<br>
-<div><%= error.stack %></div>
+<div class="container" >
+    <br>
+    <div class="alert alert-danger">
+        <strong>Error!</strong> <%= (locals.message)? message : '' %>
+    </div>
+    <p><%= (locals.error)? error.stats : ''%></p>
+    <br>
+    <div><%= (locals.error)? error.stack : '' %></div>
+</div>

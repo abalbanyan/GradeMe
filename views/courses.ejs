@@ -1,7 +1,6 @@
 <%- include partials/header.ejs %>
 
 <div class="container">
-
     <div class="row">
         <div class="col-md-3"></div>        
         <div class="col-md-6">
@@ -13,27 +12,36 @@
         <div class="col-md-2"></div>
         <div class="col-md-8">
             <ul class="list-group">
-            <% courselist.forEach(function(dat) { %>
-                <!-- TODO: make this go to specific course page - How will we structure URLs? -->
-                <a class="list-group-item list-group-item-action" href="/course">
-                    <div class="container">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-9">
-                                <b>Course Name:</b> <%= dat.courseName %> <br>
-                                <b>Course Number:</b> <%= dat.courseNum%>
-                            </div>
-                            <div class="col-3">
-                                <!-- TODO: Add delete course onclick handler 
-                                    + logic to authenticate deletion (owns course).-->
-                                <button type="button" class="btn btn-danger" onclick="">Delete Course</button>
-                            </div>
-                        </div>
-                    </div>
-                </a>
+            <% courselist.forEach(function(course) { %>
+                <li class="list-group-item">
+                    <a href='<%= "/course?courseid=" + course._id %>'>
+                        <b>Course Name:</b> <%= course.name %> 
+                    </a>
+                    <% if (instructor) { %>
+                    <a href='<%= "/edit-course?courseid=" + course._id %>'>
+                        <i style="float: right;" class="material-icons">settings</i>
+                    </a>
+                    <% } %>
+                </li>
+                <br>
             <% }); %>
+                <li style='border-style:dashed;' class="list-group-item">
+                    <a href='/enroll'>Join a course</a>
+                    <a href='/enroll'>
+                        <i style="float: right;" class="material-icons">add</i>
+                    </a>
+                </li>
+                <br>
+                <% if (instructor) { %>
+                <li style='border-style:dashed;' class="list-group-item">
+                    <a href='/create-course'>Create a course</a>
+                    <a href='/create-course'>
+                        <i style="float: right;" class="material-icons">add</i>
+                    </a>
+                </li>    
+                <% } %>
             </ul>
         </div>
-        <div class="col-md-2"></div>        
     </div>
 </div>
 

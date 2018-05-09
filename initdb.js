@@ -6,6 +6,7 @@ let db = require('./db.js');
 
 let admin = new db.User({
     email: 'admin@grademe.edu',
+    name: {first: "Joe", last: "Bruin"},
     password: 'admin',
     instructor: true,
 });
@@ -43,11 +44,20 @@ let course = new db.Course({
     students: [danny._id],
     instructors: [willy._id],
     main_instructor: [willy._id],
-    student_enrollment_code: 1337,
-    instructor_enrollment_code: 420,
     visible: true 
 });
 course.save(err => {if(err) console.error(err)});
+
+let course2 = new db.Course({
+    name: 'CS136 Computer Security',
+    desc: 'hewwo OwO',
+    assignments: [assignment._id],
+    students: [danny._id],
+    instructors: [willy._id],
+    main_instructor: [willy._id],
+    visible: true 
+});
+course2.save(err => {if(err) console.error(err)});
 
 let grade = new db.Grade({
     assignmentid: assignment._id,

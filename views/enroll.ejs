@@ -1,5 +1,47 @@
 <%- include partials/header.ejs %>
 
-<p> Course Enrollment Page </p>
+<body>
+    <div class="container">
+        <h2>Add Course</h2>
+        <br>
+        <form class="enroll-form" method="POST" action="/enroll" >
+            <div class="form-group">
+                <label for="code">Enrollment Code</label>
+                <input id="code" name="code" class="form-control" onkeyup="verifyCode(this)" placeholder="">
+                <small id="codeHelp" class="form-text text-muted">
+                    Enter the enrollment code provided by <%= user.instructor? "the course admin" : "a courseinstructor" %> here.
+                </small>
+                <div class="container codedialogue">
+                    <br>
+                    <div id='codemessage'></div>
+                    <br>
+                    <button id='enrollbutton' style="display: none" type="submit" class="btn btn-outline-success">Enroll</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+<script>
+    async function verifyCode(el) {
+        if (el.value.length > 7) {
+            let response = await fetch('/api/verifycode?instructor=<%=user.instructor? 1 : 0 %>&code=' + el.value,
+                { method: 'GET', credentials: 'include'});
+            let json = await response.json();
+            let data = JSON.parse(json);
+            let message = document.getElementById('codemessage');
+            let button = document.getElementById('enrollbutton');
+            if (data.valid) {
+                message.style.color = 'green';
+                message.innerHTML = 'Would you like to enroll in <b>' + data.coursename + '</b>?';
+                button.style.display = 'block';
+            } else {
+                message.style.color = 'red';
+                message.innerHTML = 'This code is invalid. ' + (data.err? data.err : '');
+                button.style.display = 'none';
+            }
+        }
+    }
+</script>
 
 <%- include partials/footer.ejs %>
