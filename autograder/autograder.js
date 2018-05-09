@@ -5,14 +5,23 @@
  * - Dockerfile
  * - test.sh
  *
- * images named by assignmentid::userid
- * containers named by assignmentid::userid
+ * images named by assignmentid
+ * containers named by assignmentid-userid
  *
  * archive formats supported by Docker:
  * - .tar
  * - .tar.gz
  * - .tar.bz2
  * - .tar.xz
+ * 
+ * TODO:
+ * - better managment of running container instances:
+ *   - running containers cannot be rebuilt, must be stopped first
+ *   - no retesting because we close the docker container
+ * - parse make output
+ * - specify a test script format to parse
+ * - give TAs control over appdir using Dockerfile
+ * - give TAs control over name testing command/script
  */
 
 var Docker = require('dockerode');
@@ -28,31 +37,52 @@ class GradingContainer {
         this.exec = null;
     }
 
+    /**
+     * Build a student submission.
+     * @returns {Promise} Resolves with a reference to this grading container.
+     */
     build() {
-        this.container.start()
-        .then((container) =>
+        return this.container.start()
+        .then((container) => 
             container.exec({
-                Cmd: ['/bin/bash', '-c', 'make'],
+                Cmd: ['make'],
                 AttachStdout: true,
                 AttachStderr: true
             })
+        ).then((exec) =>
+            exec.start()
         ).then((exec) => {
-            // TODO: promisify this; don't like these callbacks
-            exec.start((err, stream) => {
-                this.container.modem.demuxStream(stream, process.stdout, process.stdin);
-                exec.inspect((err, data) => {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        console.log(data);
-                    }
-                });
+            // TODO: collect output from the build instead of printing
+            this.container.modem.demuxStream(exec.output, process.stdout, process.stderr);
+            return new Promise((resolve, reject) => {
+                exec.output.on('end', () => resolve(this));
+                exec.output.on('error', (err) => reject(err));
             });
         });
     }
 
+    /**
+     * Test a student submission that's been built.
+     * @returns {Promise} Resolves with a reference to this grading container.
+     */
     test() {
-        console.log('have a listen to avocado andrew; short song, big mood');
+        this.container.exec({
+            Cmd: ['/bin/bash', 'test.sh'],
+            AttachStdout: true,
+            AttachStderr: true
+        }).then((exec) =>
+            exec.start()
+        ).then((exec) => {
+            // TODO: collect output from the tests instead of printing
+            this.container.modem.demuxStream(exec.output, process.stdout, process.stderr);
+            return new Promise((resolve, reject) => {
+                exec.output.on('end', () => {
+                    this.container.stop(); // calling test() twice results in an error
+                    resolve(this);
+                });
+                exec.output.on('error', (err) => reject(err));
+            });
+        });
     }
 }
 
@@ -65,7 +95,6 @@ class GradingEnvironment {
     constructor(envArchive, assignmentId) {
         this.envArchive = envArchive;
         this.imageId = assignmentId.toString();
-        this.appDir = '/usr/src/app/';
         this.buildPromise = null;
     }
 
@@ -76,11 +105,8 @@ class GradingEnvironment {
     buildImage(onProgress) {
         this.buildPromise = docker.buildImage(this.envArchive, {
             t: this.imageId,
-            buildargs: {
-                APPDIR: this.appDir
-            }
+            buildargs: {}
         }).then((stream) => {
-            console.log(stream.statusCode);
             if (onProgress) {
                 stream.on('data', (buf) => onProgress(buf.toString()));
             } else {
@@ -111,17 +137,19 @@ class GradingEnvironment {
                 AttachStdin: false,
                 AttachStdout: false,
                 AttachStderr: true,
-                Tty: false,
+                Tty: true,
                 OpenStdin: false,
                 StdinOnce: false,
-                AutoRemove: true
+                AutoRemove: true,
+                Entrypoint: ['/bin/bash']
             })
         ).then((container) =>
             // XXX: potential to overwrite TA files with student files?
-            container.putArchive(this.srcArchive, {
-                path: '/usr/src/app', // path inside the container
-                noOverwriteDirNonDir: true
-            }).then(() =>
+            // TODO: archive upload not working
+            container.putArchive(srcArchive, {
+                path: '/usr/src/app', // not relative to WORKDIR :<
+                noOverwriteDirNonDir: false
+            }).then((_) =>
                 new GradingContainer(container)
             )
         );
