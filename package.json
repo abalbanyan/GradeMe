@@ -28,6 +28,7 @@
     "jest": "^22.4.3",
     "mongodb-memory-server": "^1.7.3",
     "nodemon": "^1.17.3",
-    "opn-cli": "^3.1.0"
+    "opn-cli": "^3.1.0",
+    "supertest": "^3.0.0"
   }
 }
