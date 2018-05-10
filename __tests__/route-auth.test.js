@@ -10,6 +10,7 @@ const app = require('../app.js');
 const auth = require('../auth.js');
 const util = require('../jest/jestutil.js');
 const User = require('../models/User.js');
+const Course = require('../models/Course.js');
 
 const checkRedirect = async (route, location) => {
     const response = await request(app).get(route);
@@ -89,9 +90,35 @@ const routes = [
 ];
 
 let mongoServer;
+let visibleCourse;
+let invisibleCourse;
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
+    await util.example.admin.save();
+    await util.example.student.save();
+    await util.example.instructor.save();
+    await util.example.assignment.save();
+    visibleCourse = new Course({
+        name: 'Visible',
+        desc: 'idk',
+        assignments: [util.example.assignment._id],
+        students: [util.example.student._id],
+        instructors: [util.example.instructor._id],
+        main_instructor: [util.example.instructor._id],
+        visible: true
+    });
+    invisibleCourse = new Course({
+        name: 'Invisible',
+        desc: 'idk',
+        assignments: [util.example.assignment._id],
+        students: [util.example.student._id],
+        instructors: [util.example.instructor._id],
+        main_instructor: [util.example.instructor._id],
+        visible: false
+    });
+    await visibleCourse.save();
+    await invisibleCourse.save();
 });
 
 afterAll(() => {
@@ -182,4 +209,8 @@ describe('while logged in as student', async () => {
             });
         }
     }
+
+    test('cannot access non-visible course', async () => {
+        await checkStatus('/course?courseid=' + invisibleCourse._id, 302);
+    });
 });

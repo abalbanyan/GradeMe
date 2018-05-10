@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const MongodbMemoryServer = require('mongodb-memory-server');
 const User = require('../models/User.js');
+const Assignment = require('../models/Assignment.js');
 
 mongoose.Promise = Promise;
 
@@ -31,6 +32,16 @@ const willy = new User({
     admin: false
 });
 
+const assignment = new Assignment({
+    name: "GradeMe",
+    desc: "this lmao",
+    duedate: new Date(2020, 1, 1),
+    spec: {
+        path: 'course-data/uploads/loremipsum.pdf',
+        filetype: 'pdf'
+    },
+});
+
 const startMongo = async () => {
     let mongoServer = new MongodbMemoryServer.default();
     const mongoUri = await mongoServer.getConnectionString();
@@ -54,6 +65,7 @@ module.exports = {
     example: {
         student: danny,
         instructor: willy,
-        admin: admin
+        admin: admin,
+        assignment: assignment
     }
 };
