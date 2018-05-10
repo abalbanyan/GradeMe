@@ -6,7 +6,9 @@ For our unit and integration tests [Jest](https://facebook.github.io/jest/) will
 
 There are two ways to create a test. One is to put the JavaScript files in a `__tests__` directory, the other is to name the file `something.test.js`. Either way is fine and can be adapted to how you best see fit.
 
-For a few examples of how to write some basic tests, take a look on the [Jest Docs](https://facebook.github.io/jest/docs/en/getting-started.html) or in our repo [here](jest/example).
+For a few examples of how to write some basic tests, take a look on the [Jest Docs](https://facebook.github.io/jest/docs/en/getting-started.html) or in our repo [here](example).
+
+After you've written some new code or tests you can quickly run them locally with `yarn test`.
 
 A few quick gotchas that can pop up frequently:
 
