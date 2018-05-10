@@ -47,15 +47,15 @@
             <form action="/assignment" method="POST" enctype="multipart/form-data">
                 <div class="input-group">
                     <div class="custom-file">
-                        <input type="file" name="submission" class="custom-file-input" id="submission" onchange="setFilename(this, true)" multiple>
-                        <label class="custom-file-label" for="submission">Choose file(s)</label>
+                        <input type="file" name="submission" class="custom-file-input" id="submission" onchange="setFilename(this, false)">
+                        <label class="custom-file-label" for="submission">Choose file</label>
                     </div>
                     <div class="input-group-append">
                         <input type="hidden" name="assignid" value="<%= assignment._id %>">
                         <button class="btn btn-outline-secondary" type="submit">Save</button>
                     </div>
                 </div>
-                Selected files: <label id="submission-label"></label> 
+                Selected file: <label id="submission-label"></label> 
             </form>
 
 
