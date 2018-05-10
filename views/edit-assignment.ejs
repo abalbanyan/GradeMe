@@ -1,6 +1,9 @@
 <%- include partials/header.ejs %>
 
-<div class="container">
+<!-- TODO: each file submit is separate from the others. Fix this if the page refreshes and user loses files uploaded to several 
+inputs at once. (just move form thing to encompass multiple things and make sure files arent deleted -->
+
+<div class="container-fluid">
     <div class="row">
         <div class="col-md-3"></div>        
         <div class="col-md-6">
@@ -21,48 +24,57 @@
             <div class="row">
                 <div class="col">
                     <h5>Upload Specs</h5>
-                    <div class="input-group">
-                        <div class="custom-file">
-                            <input type="file" name="specs" class="custom-file-input" id="specs" onchange="setFilename(this, false)">
-                            <label class="custom-file-label" for="specs">Choose file</label>
+                    <form action="/edit-assignment" method="POST" enctype="multipart/form-data">                                               
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" name="specs" class="custom-file-input" id="specs" onchange="setFilename(this, false)">
+                                <label class="custom-file-label" for="specs">Choose file</label>
+                            </div>
+                            <div class="input-group-append">
+                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
+                                <button class="btn btn-outline-secondary" type="submit">Save</button>
+                            </div>
                         </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Save</button>
-                        </div>
-                    </div>
-                    Selected files: <label id="specs-label"></label>                        
+                        Selected files: <label id="specs-label"></label>     
+                    </form>                   
                 </div>
             </div>
             <br>
             <div class="row">
                 <div class="col">
                     <h5>Upload Grading Script(s)</h5>
-                    <div class="input-group">
-                        <div class="custom-file">
-                            <input type="file" name="grading-script" class="custom-file-input" id="grading-script" onchange="setFilename(this, true)" multiple>
-                            <label class="custom-file-label" for="grading-script">Choose file(s)</label>
+                    <form action="/edit-assignment" method="POST" enctype="multipart/form-data">                                               
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" name="grading-script" class="custom-file-input" id="grading-script" onchange="setFilename(this, true)" multiple>
+                                <label class="custom-file-label" for="grading-script">Choose file(s)</label>
+                            </div>
+                            <div class="input-group-append">
+                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
+                                <button class="btn btn-outline-secondary" type="submit">Save</button>
+                            </div>
                         </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Save</button>
-                        </div>
-                    </div>
-                    Selected files: <label id="grading-script-label"></label>                                            
+                        Selected files: <label id="grading-script-label"></label>      
+                    </form>                                      
                 </div>
             </div>
             <br>
             <div class="row">
                 <div class="col">
                     <h5>Upload Test Cases</h5>
-                    <div class="input-group">
-                        <div class="custom-file">
-                            <input type="file" name="test-cases" class="custom-file-input" id="test-cases" onchange="setFilename(this, true)" multiple>
-                            <label class="custom-file-label" for="test-cases">Choose file(s)</label>
+                    <form action="/edit-assignment" method="POST" enctype="multipart/form-data">                                               
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" name="test-cases" class="custom-file-input" id="test-cases" onchange="setFilename(this, true)" multiple>
+                                <label class="custom-file-label" for="test-cases">Choose file(s)</label>
+                            </div>
+                            <div class="input-group-append">
+                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
+                                <button class="btn btn-outline-secondary" type="submit">Save</button>
+                            </div>
                         </div>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button">Save</button>
-                        </div>
-                    </div>
-                    Selected files: <label id="test-cases-label"></label>                                            
+                        Selected files: <label id="test-cases-label"></label>    
+                    </form>                                        
                 </div>
             </div>
             <br>
@@ -94,6 +106,8 @@
                             (otherwise, submission must be manually triggered by the instructor from the assignment page)
                         </label>
                     </div>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
                 </div>
             </div>
             <br>
@@ -108,17 +122,20 @@
                     
                     <!-- This is for instructors to upload makefiles, etc. -->   
                     <div class="collapse" id="advanced"> 
-                        <h6>Upload files for grading environment (docker config, etc.)</h6>      
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" name="grading-env" class="custom-file-input" id="grading-env" onchange="setFilename(this, true)" multiple>
-                                <label class="custom-file-label" for="grading-env">Choose file(s)</label>
+                        <h6>Upload files for grading environment (docker config, etc.)</h6>   
+                        <form action="/edit-assignment" method="POST" enctype="multipart/form-data">                           
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" name="grading-env" class="custom-file-input" id="grading-env" onchange="setFilename(this, true)" multiple>
+                                    <label class="custom-file-label" for="grading-env">Choose file(s)</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <input type="hidden" name="assignid" value="<%= assignment._id %>">                                        
+                                    <button class="btn btn-outline-secondary" type="submit">Save</button>
+                                </div>
                             </div>
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-secondary" type="button">Save</button>
-                            </div>
-                        </div>
-                    Selected files: <label id="grading-env-label"></label>                                                                    
+                            Selected files: <label id="grading-env-label"></label>     
+                        </form>                                                               
                     </div>
                 </div>
             </div>
@@ -126,29 +143,7 @@
         <div class="col-md-1"></div>
     </div>
 </div>
-
-<script>
-    function setFilename(thisVar, multipleAllowed) {
-        var fileName = "";
-        for (var i = 0; i < thisVar.files.length; ++i) {
-            var name = thisVar.files.item(i).name;
-            fileName += name;
-            if (thisVar.files.length > 1 && i < thisVar.files.length - 1) {
-                fileName += ", ";
-            }
-        }
-        if (fileName) {
-            document.getElementById(thisVar.id + "-label").innerHTML = fileName;                
-            if (multipleAllowed) {
-                $(thisVar).next('.custom-file-label').html(thisVar.files.length + " Files Selected");
-            } else {
-                $(thisVar).next('.custom-file-label').html(fileName);                
-            }
-        } else {
-            $(thisVar).next('.custom-file-label').html("Choose file" + (multipleAllowed ? "(s)" : ""));   
-            document.getElementById(thisVar.id + "-label").innerHTML = "";                     
-        }
-    }
-</script>
+<br>
+<script src="/js/file-ui.js"></script>
 
 <%- include partials/footer.ejs %>
