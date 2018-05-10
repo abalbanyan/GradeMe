@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "opn http://localhost:3200 && nodemon server.js"
+    "dev": "opn http://localhost:3200 && nodemon server.js",
+    "test": "jest --runInBand"
   },
   "author": "",
   "license": "ISC",
@@ -24,6 +25,8 @@
     "shortid": "^2.2.8"
   },
   "devDependencies": {
+    "jest": "^22.4.3",
+    "mongodb-memory-server": "^1.7.3",
     "nodemon": "^1.17.3",
     "opn-cli": "^3.1.0"
   }
