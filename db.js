@@ -3,13 +3,15 @@ let shortid = require('shortid');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
-mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
-.then(() => {
-    console.log('Database connection successful.');
-})
-.catch(err => {
-    console.log('Database connection error.');
-});
+if(process.env.NODE_ENV !== 'test') {
+    mongoose.connect(mongoUri)
+    .then(() => {
+        console.log('Database connection successful.');
+    })
+    .catch(err => {
+        console.log('Database connection error.');
+    });
+}
 
 // DB Models.
 let User = require('./models/User.js');
@@ -50,7 +52,7 @@ async function getCourses(userid, instructor = false, admin = false) {
 
 /**
  * Retrieves the list of assignments belonging to a course.
- * 
+ *
  * @param {String} courseid
  * @param {Boolean} showhidden - Show hidden courses?
  * @return {[Assignment]}
@@ -68,7 +70,7 @@ async function getAssignments(courseid, showhidden, admin = false) {
 
 /**
  * Determines whether a user belongs to a specific course.
- * 
+ *
  * @param {String} courseid
  * @param {String} userid
  * @param {Boolean} instructor - Is this user an instructor?
