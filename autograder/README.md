@@ -4,14 +4,14 @@ Go to test/ subdirectory and run
 
 ``` bash
 $ make env sample
-$ node test.js
+$ node grade.js
 ```
 
 Alternatively, to test a submission that doesn't compile, use
 
 ``` bash
 $ make env sample-bad
-$ node test.js
+$ node grade.js
 ```
 
 

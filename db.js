@@ -4,7 +4,7 @@ let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
 if(process.env.NODE_ENV !== 'test') {
-    mongoose.connect(mongoUri)
+    mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
     .then(() => {
         console.log('Database connection successful.');
     })
