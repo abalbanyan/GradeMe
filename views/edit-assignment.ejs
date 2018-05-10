@@ -1,5 +1,154 @@
 <%- include partials/header.ejs %>
 
-<p> Assignment Customization Page </p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>        
+        <div class="col-md-6">
+            <h2>  Edit Assignment Page for "<%- assignment.name %>" </h2>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col">                    
+                    <a class="btn btn-outline-dark" href="/assignment?assignid=<%= assignment._id %>">Back to Assignment Page</a>
+                </div>
+            </div>
+            <br>
+        </div>        
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-9">
+            <div class="row">
+                <div class="col">
+                    <h5>Upload Specs</h5>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" name="specs" class="custom-file-input" id="specs" onchange="setFilename(this, false)">
+                            <label class="custom-file-label" for="specs">Choose file</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">Save</button>
+                        </div>
+                    </div>
+                    Selected files: <label id="specs-label"></label>                        
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>Upload Grading Script(s)</h5>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" name="grading-script" class="custom-file-input" id="grading-script" onchange="setFilename(this, true)" multiple>
+                            <label class="custom-file-label" for="grading-script">Choose file(s)</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">Save</button>
+                        </div>
+                    </div>
+                    Selected files: <label id="grading-script-label"></label>                                            
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>Upload Test Cases</h5>
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" name="test-cases" class="custom-file-input" id="test-cases" onchange="setFilename(this, true)" multiple>
+                            <label class="custom-file-label" for="test-cases">Choose file(s)</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">Save</button>
+                        </div>
+                    </div>
+                    Selected files: <label id="test-cases-label"></label>                                            
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>Assignment Settings</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="assignVisible" id="assignVisible">
+                        <label class="form-check-label" for="assignVisible">
+                            Students can see assignment
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="studentPregrade" id="studentPregrade">
+                        <label class="form-check-label" for="studentPregrade">
+                            Students can pregrade assignment
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="studentViewTests" id="studentViewTests">
+                        <label class="form-check-label" for="studentViewTests">
+                            Students can view test cases
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="gradeOnSubmission" id="gradeOnSubmission">
+                        <label class="form-check-label" for="gradeOnSubmission">
+                            Assignments are graded upon submission 
+                            (otherwise, submission must be manually triggered by the instructor from the assignment page)
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>
+                        <a data-toggle="collapse" href="#advanced" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Advanced <!-- expandable, TODO: fill in action -->
+                            <i class="material-icons">keyboard_arrow_down</i>
+                        </a>
+                    </h5>
+                    
+                    <!-- This is for instructors to upload makefiles, etc. -->   
+                    <div class="collapse" id="advanced"> 
+                        <h6>Upload files for grading environment (docker config, etc.)</h6>      
+                        <div class="input-group">
+                            <div class="custom-file">
+                                <input type="file" name="grading-env" class="custom-file-input" id="grading-env" onchange="setFilename(this, true)" multiple>
+                                <label class="custom-file-label" for="grading-env">Choose file(s)</label>
+                            </div>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button">Save</button>
+                            </div>
+                        </div>
+                    Selected files: <label id="grading-env-label"></label>                                                                    
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+
+<script>
+    function setFilename(thisVar, multipleAllowed) {
+        var fileName = "";
+        for (var i = 0; i < thisVar.files.length; ++i) {
+            var name = thisVar.files.item(i).name;
+            fileName += name;
+            if (thisVar.files.length > 1 && i < thisVar.files.length - 1) {
+                fileName += ", ";
+            }
+        }
+        if (fileName) {
+            document.getElementById(thisVar.id + "-label").innerHTML = fileName;                
+            if (multipleAllowed) {
+                $(thisVar).next('.custom-file-label').html(thisVar.files.length + " Files Selected");
+            } else {
+                $(thisVar).next('.custom-file-label').html(fileName);                
+            }
+        } else {
+            $(thisVar).next('.custom-file-label').html("Choose file" + (multipleAllowed ? "(s)" : ""));   
+            document.getElementById(thisVar.id + "-label").innerHTML = "";                     
+        }
+    }
+</script>
 
 <%- include partials/footer.ejs %>
