@@ -1,3 +1,9 @@
+@import url("https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro");
+
+* {
+    font-family: "Montserrat";
+}
+
 .body {
     background-color: #dadbbb;
 }
