@@ -226,6 +226,6 @@ describe('while logged in as student', async () => {
     }
 
     test('cannot access non-visible course', async () => {
-        await checkStatus('/course?courseid=' + invisibleCourse._id, 302);
+        await checkStatus('/course?courseid=' + invisibleCourse._id, 403);
     });
 });

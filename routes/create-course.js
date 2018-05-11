@@ -9,7 +9,6 @@ router.get('/', function(req, res, next) {
         res.render('create-course');
     } else {
         res.status(403);
-        // res.redirect('courses');
         return res.render('error', {message: "You do not have access to this page."});
     }
 });
@@ -48,7 +47,6 @@ router.post('/', function(req, res, next) {
         });
     } else {
         res.status(403);
-        // res.redirect('courses');
         return res.render('error', {message: "You do not have access to this page."});
     }
 });
