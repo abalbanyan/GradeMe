@@ -34,9 +34,9 @@ AssignmentSchema.pre('save', async function(next) {
     if (this.isNew) {
         await fileutils.createAssignment(this._id);
         // Copy default grading env files.
-        this.gradingenv.makefile = 'course-data/' + this._id + '/Makefile';
-        this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
-        this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
+        this.gradingenv.makefile = 'course-data/assign-' + this._id + '/Makefile';
+        this.gradingenv.dockerfile = 'course-data/assign-' + this._id + '/Dockerfile';
+        this.gradingenv.testscript = 'course-data/assign-' + this._id + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
     }
     return next();
