@@ -112,6 +112,7 @@ async function gradeSubmission(studentid, assignid) {
     }
 
     let gradingEnvironment = new GradingEnvironment(assignment._id, assignment.gradingenv.archive);
+    gradingEnvironment.buildImage();
     let gradingContainer = await gradingEnvironment.containerize(studentid, mostrecent.submissionpath);
     await gradingContainer.build();
     let output = await gradingContainer.test();
