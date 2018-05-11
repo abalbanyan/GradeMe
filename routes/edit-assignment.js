@@ -66,8 +66,8 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
             if (!envArchive) { throw new Error(); }
 
             // Update the autograder grading environment.
-            let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
-            await gradingEnvironment.buildImage();
+            // let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
+            // await gradingEnvironment.buildImage();
         }
 
     } catch (err) {

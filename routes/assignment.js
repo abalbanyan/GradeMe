@@ -56,8 +56,7 @@ router.post('/upload/submission', upload.single('file'), async function(req, res
         if (err) {
             res.json(JSON.stringify({ upload: false, error: "Please try again." }));
         } else {
-            let output = await db.utils.gradeSubmission(userid, assignid);
-            console.log(output);
+            await db.utils.gradeSubmission(userid, assignid);
             res.json(JSON.stringify({ upload: true }));
         }
     });

@@ -38,6 +38,10 @@ AssignmentSchema.pre('save', async function(next) {
         this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
         this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
+            
+        // Initialize the autograder grading environment.
+        // let gradingEnvironment = new GradingEnvironment(this._id, this.gradingenv.archive);
+        // await gradingEnvironment.buildImage();
     }
     return next();
 });
