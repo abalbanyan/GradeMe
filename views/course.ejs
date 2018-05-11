@@ -13,9 +13,7 @@
             <tr>
                 <th scope="col">Name</th>
                 <th scope="col">Due Date</th>
-                <% if (false) { %>
                 <th scope="col">Status</th>
-                <% } %>
                 <% if (user.instructor) { %>
                 <th scope="col"></th>
                 <% } %>
@@ -29,10 +27,10 @@
                             <%= assignment.name %>
                         </a>
                     </th>
-                    <td><%= assignment.duedate%></td>
-                    <% if (false) { %>
+                    <td class="<%= assignment.duedate_overdue? 'overdue' : '' %>" ><%= assignment.duedate_formatted %></td>
+                    <% if (assignment.status) { %>
                     <td>
-                        Status
+                        <b> <%= assignment.status %> </b>
                     </td>
                     <% } %>
                     <% if (user.instructor) { %>
