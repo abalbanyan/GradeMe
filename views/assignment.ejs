@@ -5,24 +5,16 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-3"></div>        
-        <div class="col-md-6">
+        <div class="col assignment-details">
             <h2> Assignment Page for "<%- assignment.name %>" </h2>
-        </div>
-        <div class="col-md-3">
             <% if (instructor) { %> 
                 <div class="row">
-                    <div class="col">                    
+                    <div class="col">
                         <a class="btn btn-outline-dark" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
                     </div>
                 </div>
                 <br>
             <% } %>
-        </div>        
-    </div>
-    <div class="row">
-        <div class="col-8 scroll-col">
-            
             <!--
                 I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
                 Let's keep it simple for now. 
@@ -42,42 +34,32 @@
                     </form>
                 </div>
             </div> -->
-            <h4 class="text-center">Submission</h4>
+            <h4>Submission</h4>
             <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
             <% let param_url = 'assignment/upload/submission' %>
             <% let param_file = 'submission' %>
             <%- include partials/file-upload.ejs %>
 
+
+            <h5>View test cases</h5>
+            <!-- TODO -->
+    
+            <h5>Run test script</h5>
+            <!-- TODO -->                    
+    
+            <h5>Run grading script</h5>
+            <!-- TODO -->
             <br>
+            
 
-            <div class="row">
-                <div class="col">                            
-                    <h5>View test cases</h5>
-                    <!-- TODO -->
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col">                
-                    <h5>Run test script</h5>
-                    <!-- TODO -->                    
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col">                                
-                    <h5>Run grading script</h5>
-                    <!-- TODO -->                    
-                </div>
-            </div>
-            
-            </div>
-
+        </div>
+        <div class="col">
             <% if (locals.assignment.spec && locals.assignment.spec.path) { %>
                     <iframe class="spec col scroll-col off-white-bg" src="<%= assignment.spec.path %>" frameborder="0"></iframe>
             <% } %>
-            </div>
         </div>
+    </div>
+</div>
 
 <script src="/js/file-upload.js"></script>        
         
