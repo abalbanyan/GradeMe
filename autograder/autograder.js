@@ -33,7 +33,23 @@ var _ = require('lodash/core');
 
 const { Transform } = require('stream');
 
+var envMap = new Map(); // TODO: assumes that Node.js will never crash?
+
 // Wrap a dockerode container and expose a nicer API
+
+function actuallyGrade(arr) {
+    current = 0;
+    total_score = 0;
+
+    for (let i of arr) {
+        if (i.pass) {
+            current += i.score;
+        }
+        total_score += i.score
+    }
+
+    return [current, total_score];
+}
 
 class GradingContainer {
     constructor(dockerContainer) {
@@ -71,7 +87,7 @@ class GradingContainer {
      * @returns {Promise} Resolves with a reference to this grading container.
      */
     test() {
-        this.container.exec({
+        return this.container.exec({
             Cmd: ['/bin/bash', 'test.sh'],
             AttachStdout: true,
             AttachStderr: true
@@ -89,7 +105,6 @@ class GradingContainer {
                 exec.output.on('error', reject);
                 exec.output.on('end', () => {
                     this.container.stop();
-                    console.log(testArray);
                     resolve(testArray);
                 });
             });
@@ -107,7 +122,6 @@ class GradingContainer {
         let testStdErr = new Transform({ transform(chunk, encoding, callback) {} });
         let testStdOut = new Transform({readableObjectMode: true});
         testStdOut._transform = function(chunk, encoding, done) {
-            console.log(chunk.toString());
             let parse;
             let testInfo = {};
             do {
@@ -138,16 +152,30 @@ class GradingContainer {
  */
 class GradingEnvironment {
     constructor(assignmentId, envArchive) {
-        this.envArchive = envArchive;
-        this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
-        this.buildPromise = null;
+        let existingEnv = envMap.get(assignmentId);
+        if (existingEnv) {
+            return existingEnv;
+        } else {
+            envMap.set(assignmentId, this);
+            this.envArchive = envArchive;
+            this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
+            this.buildPromise = null;
+        }
     }
 
     /**
      * Creates an image encapsulating the grading environment
-     * @param   {Function} onProgress Called with progress descriptions (optional)
+     * @param {String}   envArchive Rebuild with a new environment
+     * @param {Function} onProgress Called with progress descriptions (optional)
      */
-    buildImage(onProgress) {
+    buildImage(envArchive, onProgress) {
+        if (typeof envArchive === 'string') {
+            this.envArchive = envArchive;
+        }
+        if (typeof envArchive === 'function') {
+            onProgress = envArchive;
+        }
+
         this.buildPromise = docker.buildImage(this.envArchive, {
             t: this.imageId,
             buildargs: {}
@@ -201,4 +229,7 @@ class GradingEnvironment {
     }
 }
 
-module.exports = GradingEnvironment;
+module.exports = {
+    GradingEnvironment: GradingEnvironment,
+    actuallyGrade: actuallyGrade
+}

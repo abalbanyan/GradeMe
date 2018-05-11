@@ -1,8 +1,8 @@
 let mongoose = require('mongoose');
 let shortid = require('shortid');
-let GradingEnvironment = require('./autograder/autograder.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
+const { GradingEnvironment } = require('./autograder/autograder.js');
 
 if(process.env.NODE_ENV !== 'test') {
     mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
@@ -111,14 +111,10 @@ async function gradeSubmission(studentid, assignid) {
         }
     }
 
-    // Grade the most recent submission.
-    if (!assignment.autograder) {
-        console.error("No autograder."); // TODO: Just make an autograder in this case.
-    }
-    let gradingEnvironment = new GradingEnvironment(assignment.gradingenv.archive, assignment._id);
-    let gradingContainer = await gradingEnvironment.containerize(mostrecent.submissionpath, studentid);
+    let gradingEnvironment = new GradingEnvironment(assignment._id, assignment.gradingenv.archive);
+    let gradingContainer = await gradingEnvironment.containerize(studentid, mostrecent.submissionpath);
     await gradingContainer.build();
-    let output = await test();
+    let output = await gradingContainer.test();
 
     console.log(output);
     Submission.findByIdAndUpdate(mostrecent._id, {grade: 100});

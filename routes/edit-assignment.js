@@ -2,7 +2,7 @@ var express = require('express');
 var router =  express.Router();
 let db = require('../db.js');
 let fileutils = require('../fileutils.js');
-let GradingEnvironment = require('../autograder/autograder.js');
+const { GradingEnvironment } = require('../autograder/autograder.js');
 
 let multer = require('multer');
 let upload = multer({dest: 'course-data/uploads'});
@@ -66,10 +66,8 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
             if (!envArchive) { throw new Error(); }
 
             // Update the autograder grading environment.
-            let autograder = new GradingEnvironment(envArchive, assignid);
-            await autograder.buildImage();
-
-            await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.archive' : envArchive, autograder: autograder});
+            let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
+            await gradingEnvironment.buildImage();
         }
 
     } catch (err) {

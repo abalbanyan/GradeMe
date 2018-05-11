@@ -1,9 +1,9 @@
 let mongoose = require('mongoose');
 let shortid = require('shortid');
 let fileutils = require('../fileutils.js');
-let GradingEnvironment = require('../autograder/autograder.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
+const { GradingEnvironment } = require('../autograder/autograder.js');
 
 // Assignment model.
 let AssignmentSchema = new Schema({
@@ -16,7 +16,6 @@ let AssignmentSchema = new Schema({
     },
     visible:                    { type: Boolean, default: true},
     creation_date:              { type: Date, default: Date.now },
-    autograder:                 { type: Object }, /* autograder.GradingEnvironment */
     gradingenv: {
         // These are all pathnames.
         dockerfile:             { type: String },
@@ -39,10 +38,6 @@ AssignmentSchema.pre('save', async function(next) {
         this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
         this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
-
-        // Build the autograder grading environment.
-        this.autograder = new GradingEnvironment(this.gradingenv.archive, this._id);
-        await this.autograder.buildImage();
     }
     return next();
 });
