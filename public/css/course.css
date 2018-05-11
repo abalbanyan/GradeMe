@@ -5,3 +5,7 @@
 .add-assignment .material-icons {
     font-size: 36px;
 }
+
+.overdue {
+    color: red;
+}

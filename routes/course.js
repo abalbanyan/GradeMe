@@ -18,15 +18,32 @@ router.get('/', async function(req, res, next) {
     }
 
     let assignments = await db.utils.getAssignments(req.query.courseid, res.locals.user.instructor, res.locals.user.admin);
+
+    // Make the due dates more pleasant to read.
+    let dateoptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    for (let i = 0; i < assignments.length; i++) {
+        assignments[i].duedate_formatted = assignments[i].duedate.toLocaleDateString("en-US", dateoptions);
+        assignments[i].duedate_overdue = (assignments[i].duedate < Date.now());
+    }
+
     // TODO: Retrieve grade if user is a student.
-    /*
     if (!res.locals.user.instructor) {
-        db.Submission.find({user: res.locals.user._id, assignment: {$in : assignments}})
+        for (let i = 0; i < assignments.length; i++) {
+            let submissions = await db.Submission.find({'userid': res.locals.user._id, 'assignmentid': assignments[i]._id}).exec();
+            console.log(submissions);
+            if (!submissions || submissions.length == 0) {
+                assignments[i].status = 'Unsubmitted';
+            } else {
+                let mostrecent = submissions.reduce((prev, cur) => (prev.submissiondate > cur.submissiondate)? prev : cur);
+                assignments[i].status = mostrecent.grade? (mostrecent.grade + '/' + assignments[i].gradetotal) : 'Submitted';
+            }
+        }
+    } else {
+        for (let i = 0; i < assignments.length; i++) {
+            assignments[i].status = assignments[i].visible? 'Visible' : 'Not Visible';
+        }
     }
-    for each (assignment in assignments) {
-        if (assignment.)
-    }
-    */
+
     return res.render('course', {course: course, assignments: assignments } );
 });
 
