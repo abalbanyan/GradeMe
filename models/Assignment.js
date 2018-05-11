@@ -34,9 +34,10 @@ AssignmentSchema.pre('save', async function(next) {
     if (this.isNew) {
         await fileutils.createAssignment(this._id);
         // Copy default grading env files.
-        this.gradingenv.makefile = 'course-data/' + this._id + '/Makefile';
-        this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
-        this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
+        let assigndir = 'course-data/assign-' + this._id;
+        this.gradingenv.makefile = assigndir + '/Makefile';
+        this.gradingenv.dockerfile = assigndir + '/Dockerfile';
+        this.gradingenv.testscript = assigndir + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
             
         // Initialize the autograder grading environment.
