@@ -3,6 +3,7 @@ let shortid = require('shortid');
 let fileutils = require('../fileutils.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
+const { GradingEnvironment } = require('../autograder/autograder.js');
 
 // Assignment model.
 let AssignmentSchema = new Schema({
@@ -25,6 +26,7 @@ let AssignmentSchema = new Schema({
     // submissions:                { type: [String] }, // List of student submission ids.
     duedate:                    { type: Date },
     gradetotal:                 { type: Number, required: true, default: 100 },
+    gradeonsubmission:          { type: Boolean }
 });
 // TODO: Validate input.
 
@@ -32,9 +34,10 @@ AssignmentSchema.pre('save', async function(next) {
     if (this.isNew) {
         await fileutils.createAssignment(this._id);
         // Copy default grading env files.
-        this.gradingenv.makefile = 'course-data/' + this._id + '/Makefile';
-        this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
-        this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
+        this.gradingenv.makefile = 'course-data/assign-' + this._id + '/Makefile';
+        this.gradingenv.dockerfile = 'course-data/assign-' + this._id + '/Dockerfile';
+        this.gradingenv.testscript = 'course-data/assign-' + this._id + '/test.sh';
+        this.gradingenv.archive = fileutils.makeEnvTar(this._id);
     }
     return next();
 });

@@ -52,10 +52,12 @@ router.post('/upload/submission', upload.single('file'), async function(req, res
         userid: userid,
         submissionpath: req.file.path
     });
-    submission.save(err => {
+    submission.save(async (err) => {
         if (err) {
             res.json(JSON.stringify({ upload: false, error: "Please try again." }));
         } else {
+            let output = await db.utils.gradeSubmission(userid, assignid);
+            console.log(output);
             res.json(JSON.stringify({ upload: true }));
         }
     });

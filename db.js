@@ -2,6 +2,7 @@ let mongoose = require('mongoose');
 let shortid = require('shortid');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
+const { GradingEnvironment } = require('./autograder/autograder.js');
 
 if(process.env.NODE_ENV !== 'test') {
     mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
@@ -90,6 +91,37 @@ async function belongsToCourse(courseid, userid, instructor, admin = false) {
 }
 
 /**
+ * Looks for this student's most recent submission in this assignment, and grades it.
+ */
+async function gradeSubmission(studentid, assignid) {
+    let submissions = await Submission.find({
+        userid: studentid,
+        assignmentid: assignid}
+    ).exec();
+    let assignment = await Assignment.findById(assignid);
+
+    // Look for the most recent submission.
+    if (!submissions) {
+        return null;
+    }
+    let mostrecent = submissions[0];
+    for (let submission of submissions) {
+        if (mostrecent.submissiondate > submission.submissiondate) {
+            mostrecent = submission;
+        }
+    }
+
+    let gradingEnvironment = new GradingEnvironment(assignment._id, assignment.gradingenv.archive);
+    gradingEnvironment.buildImage();
+    let gradingContainer = await gradingEnvironment.containerize(studentid, mostrecent.submissionpath);
+    await gradingContainer.build();
+    let output = await gradingContainer.test();
+
+    console.log(output);
+    Submission.findByIdAndUpdate(mostrecent._id, {grade: 100});
+}
+
+/**
  * Checks if a course has the specified instructor
  *
  * @param {String} courseid
@@ -112,6 +144,7 @@ module.exports = {
         getCourses: getCourses,
         isCourseInstructor: isCourseInstructor,
         getAssignments: getAssignments,
-        belongsToCourse: belongsToCourse
+        belongsToCourse: belongsToCourse,
+        gradeSubmission: gradeSubmission
     }
 }

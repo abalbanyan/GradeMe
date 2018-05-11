@@ -1,7 +1,9 @@
-var autograder = require('../autograder.js');
-var env = new autograder('env.tar.gz', 12345);
+const { GradingEnvironment, actuallyGrade } = require('../autograder.js');
+var env = new GradingEnvironment(12345, 'env.tar.gz'); // changed arg order!
 env.buildImage();
-env.containerize('submission.tar.gz', 6789)
+var env2 = new GradingEnvironment(12345, 'env.tar.gz');
+env2.containerize(6789, 'submission.tar.gz') // changed arg order!
 .then((container) => container.build())
 .then((container) => container.test())
+.then((results) => console.log(actuallyGrade(results)))
 .catch((err) => console.log(err));

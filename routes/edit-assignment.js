@@ -2,6 +2,7 @@ var express = require('express');
 var router =  express.Router();
 let db = require('../db.js');
 let fileutils = require('../fileutils.js');
+const { GradingEnvironment } = require('../autograder/autograder.js');
 
 let multer = require('multer');
 let upload = multer({dest: 'course-data/uploads'});
@@ -61,9 +62,12 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
         // Remake grading tar if dockerfile, testscript, or makefile were updated.
         if (newassignment) {
             let gradingenvfiles =  [ newassignment.gradingenv.dockerfile, newassignment.gradingenv.testscript, newassignment.gradingenv.makefile ];
-            let tarpath = await fileutils.makeEnvTar(assignid, gradingenvfiles, 'env.tar');
-            if (!tarpath) { throw new Error(); }
-            await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.archive' : tarpath});
+            let envArchive = await fileutils.makeEnvTar(assignid, gradingenvfiles, 'env.tar');
+            if (!envArchive) { throw new Error(); }
+
+            // Update the autograder grading environment.
+            let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
+            await gradingEnvironment.buildImage();
         }
 
     } catch (err) {
