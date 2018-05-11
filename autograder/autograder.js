@@ -94,7 +94,7 @@ class GradingContainer {
 class GradingEnvironment {
     constructor(envArchive, assignmentId) {
         this.envArchive = envArchive;
-        this.imageId = assignmentId.toString();
+        this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
         this.buildPromise = null;
     }
 

@@ -23,6 +23,10 @@ SubmissionSchema.pre('save', async function(next) {
     if (this.isNew) {
         this.submissionpath = await fileutils.createSubmission(this.submissionpath, this._id, this.assignmentid);
     }
+    // TODO: Grade immediately upon submission here if enabled.
+    if (this.gradeonsubmission) {
+        
+    }
     return next();
 });
 
