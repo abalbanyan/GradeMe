@@ -1,5 +1,96 @@
 <%- include partials/header.ejs %>
 
-<p> Assignment Customization Page </p>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3"></div>        
+        <div class="col-md-6">
+            <h2>  Edit Assignment Page for "<%- assignment.name %>" </h2>
+        </div>
+        <div class="col-md-3">
+            <div class="row">
+                <div class="col">                    
+                    <a class="btn btn-outline-dark" href="/assignment?assignid=<%= assignment._id %>">Back to Assignment Page</a>
+                </div>
+            </div>
+            <br>
+        </div>        
+    </div>
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-9">
+            <h5>Upload Spec</h5>
+            <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
+            <% let param_url = '/edit-assignment/upload/spec' %>
+            <% let param_file = 'spec' %>
+            <%- include partials/file-upload.ejs %>
+            <br>
+            <h5>Upload Test Script</h5>
+            <% param_url = '/edit-assignment/upload/testscript' %>
+            <% param_file = 'testscript' %>
+            <%- include partials/file-upload.ejs %>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>Assignment Settings</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="assignVisible" id="assignVisible">
+                        <label class="form-check-label" for="assignVisible">
+                            Students can see assignment
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="studentPregrade" id="studentPregrade">
+                        <label class="form-check-label" for="studentPregrade">
+                            Students can pregrade assignment
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="studentViewTests" id="studentViewTests">
+                        <label class="form-check-label" for="studentViewTests">
+                            Students can view test cases
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="gradeOnSubmission" id="gradeOnSubmission">
+                        <label class="form-check-label" for="gradeOnSubmission">
+                            Assignments are graded upon submission 
+                            (otherwise, submission must be manually triggered by the instructor from the assignment page)
+                        </label>
+                    </div>
+                    <br>
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h5>
+                        <a data-toggle="collapse" href="#advanced" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            Advanced <!-- expandable, TODO: fill in action -->
+                            <i class="material-icons">keyboard_arrow_down</i>
+                        </a>
+                    </h5>
+                    
+                    <!-- This is for instructors to upload makefiles, etc. -->   
+                    <div class="collapse" id="advanced"> 
+                        <h6>Upload files for grading environment</h6><br>
+                        <h5>Upload Test Script</h5>
+                        <% param_url = '/edit-assignment/upload/dockerfile' %>
+                        <% param_file = 'dockerfile' %>
+                        <%- include partials/file-upload.ejs %>
+                        <br>
+                        <h6>Upload Makefile</h6>
+                        <% param_url = '/edit-assignment/upload/makefile' %>
+                        <% param_file = 'makefile' %>
+                        <%- include partials/file-upload.ejs %>            
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-1"></div>
+    </div>
+</div>
+<br>
+<script src="/js/file-upload.js"></script>
 
 <%- include partials/footer.ejs %>

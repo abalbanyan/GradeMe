@@ -1,56 +1,54 @@
 <%- include partials/header.ejs %>
 <head>
-    <!--Custom CSS-->
-    <link rel="stylesheet" type="text/css" href="/css/general.css">
-    <link rel="stylesheet" type="text/css" href="/css/draganddrop.css">    
+    <link rel="stylesheet" type="text/css" href="/css/assignment.css">    
 </head>
+
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-3"></div>        
         <div class="col-md-6">
-            <h2> Assignment Page for <%- assignment.name %> </h2>
+            <h2> Assignment Page for "<%- assignment.name %>" </h2>
         </div>
-        <div class="col-md-3"></div>        
-    </div>
-    <div class="row">
-        <div class="col-8 scroll-col">
-            <h3 class="text-center">Submission</h3>
-            
+        <div class="col-md-3">
             <% if (instructor) { %> 
                 <div class="row">
                     <div class="col">                    
-                        <a class="btn btn-primary" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
+                        <a class="btn btn-outline-dark" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
                     </div>
                 </div>
                 <br>
-                <div class="row">
-                    <div class="col">
-                        <h5>Bulk grade assignments</h5>
-                        <button type="click" class="btn btn-primary" onclick="">Grade All Assignments</a>   
-                        <!-- progress marker here? TODO -->                 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">                
-                        <h5>All Submissions</h5> <!-- expandable list TODO -->
-                    </div>
-                </div>
             <% } %>
-            <div class="row">
+        </div>        
+    </div>
+    <div class="row">
+        <div class="col-8 scroll-col">
+            
+            <!--
+                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
+                Let's keep it simple for now. 
+            -->
+            <!-- <div class="row">
                 <div class="col">                
                     <h5>Submit project file(s)</h5>
-                    <form class="box text-center" method="post" action="/assignment" enctype="multipart/form-data">
+                    <form class="box text-center" method="POST" action="/assignment/upload" enctype="multipart/form-data">
                         <div class="box__input">
-                          <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
-                          <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-                          <br><button class="btn btn-primary" type="submit">Upload</button>
+                            <input class="box__file" type="file" name="files" id="file" data-multiple-caption="{count} files selected" multiple />
+                            <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
+                            <br><button class="btn btn-primary" type="submit">Upload</button>
                         </div>
                         <div class="box__uploading">Uploading&hellip;</div>
                         <div class="box__success">Done!</div>
                         <div class="box__error">Error! <span></span>.</div>
                     </form>
                 </div>
-            </div>
+            </div> -->
+            <h4 class="text-center">Submission</h4>
+            <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
+            <% let param_url = 'assignment/upload/submission' %>
+            <% let param_file = 'submission' %>
+            <%- include partials/file-upload.ejs %>
+
+            <br>
 
             <div class="row">
                 <div class="col">                            
@@ -58,60 +56,30 @@
                     <!-- TODO -->
                 </div>
             </div>
-
+            
             <div class="row">
                 <div class="col">                
                     <h5>Run test script</h5>
                     <!-- TODO -->                    
                 </div>
             </div>
-
+            
             <div class="row">
                 <div class="col">                                
                     <h5>Run grading script</h5>
                     <!-- TODO -->                    
                 </div>
             </div>
+            
+            </div>
 
-            <% if (instructor) { %>
-                <div class="row">
-                    <div class="col">
-                        <h5>
-                            <a data-toggle="collapse" href="#advanced" role="button" aria-expanded="false" aria-controls="collapseExample">
-                                Advanced <!-- expandable, TODO: fill in action -->
-                                <i class="material-icons">keyboard_arrow_down</i>
-                            </a>
-                        </h5>      
-                        <!-- This is for instructors to upload makefiles, etc. -->   
-                        <div class="collapse" id="advanced">       
-                            <form class="box text-center" method="post" action="" enctype="multipart/form-data">
-                                <div class="box__input">
-                                <input class="box__file" type="file" name="files[]" id="file" data-multiple-caption="{count} files selected" multiple />
-                                <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-                                <br><button class="btn btn-primary" type="submit">Upload</button>
-                                </div>
-                                <div class="box__uploading">Uploading&hellip;</div>
-                                <div class="box__success">Done!</div>
-                                <div class="box__error">Error! <span></span>.</div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+            <% if (locals.assignment.spec && locals.assignment.spec.path) { %>
+                    <iframe class="spec col scroll-col off-white-bg" src="<%= assignment.spec.path %>" frameborder="0"></iframe>
             <% } %>
+            </div>
         </div>
 
-        <div class="col scroll-col off-white-bg">
-            <h3 class="text-center">Description</h3>
-            <p><%- assignment.desc %></p>
-    
-            <h3 class="text-center">Specification</h3>
-            <p><%- assignment.spec %></p>
-
-        </div>
-                
-    </div>
-</div>
-
-<script src="/js/draganddrop.js"></script>
-
+<script src="/js/file-upload.js"></script>        
+        
 <%- include partials/footer.ejs %>
+        

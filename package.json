@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "opn http://localhost:3200 && nodemon server.js"
+    "dev": "opn http://localhost:3200 && nodemon server.js",
+    "test": "jest --runInBand"
   },
   "author": "",
   "license": "ISC",
@@ -21,10 +22,15 @@
     "lodash": "^4.17.10",
     "mongodb": "^3.0.7",
     "mongoose": "^5.0.16",
-    "shortid": "^2.2.8"
+    "multer": "^1.3.0",
+    "shortid": "^2.2.8",
+    "tar": "^4.4.2"
   },
   "devDependencies": {
+    "jest": "^22.4.3",
+    "mongodb-memory-server": "^1.7.3",
     "nodemon": "^1.17.3",
-    "opn-cli": "^3.1.0"
+    "opn-cli": "^3.1.0",
+    "supertest": "^3.0.0"
   }
 }
