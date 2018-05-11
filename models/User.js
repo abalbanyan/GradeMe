@@ -21,7 +21,7 @@ UserSchema.pre('save', function(next) {
     if (!this.isModified('password')) {
         return next();
     }
-
+    
     try {
         let hash = bcrypt.hashSync(this.password, 6);
         this.password = hash;

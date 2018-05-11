@@ -18,62 +18,16 @@
     <div class="row">
         <div class="col-md-1"></div>
         <div class="col-md-9">
-            <div class="row">
-                <div class="col">
-                    <h5>Upload Specs</h5>
-                    <form action="/edit-assignment/specs" method="POST" enctype="multipart/form-data">                                               
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" name="specs" class="custom-file-input" id="specs" onchange="setFilename(this, false)">
-                                <label class="custom-file-label" for="specs">Choose file</label>
-                            </div>
-                            <div class="input-group-append">
-                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
-                                <button class="btn btn-outline-secondary" type="submit">Save</button>
-                            </div>
-                        </div>
-                        Selected file: <label id="specs-label"></label>     
-                    </form>                   
-                </div>
-            </div>
+            <h5>Upload Spec</h5>
+            <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
+            <% let param_url = '/edit-assignment/upload/spec' %>
+            <% let param_file = 'spec' %>
+            <%- include partials/file-upload.ejs %>
             <br>
-            <div class="row">
-                <div class="col">
-                    <h5>Upload Grading Script</h5>
-                    <form action="/edit-assignment/grading-script" method="POST" enctype="multipart/form-data">                                               
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" name="grading-script" class="custom-file-input" id="grading-script" onchange="setFilename(this, false)">
-                                <label class="custom-file-label" for="grading-script">Choose file</label>
-                            </div>
-                            <div class="input-group-append">
-                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
-                                <button class="btn btn-outline-secondary" type="submit">Save</button>
-                            </div>
-                        </div>
-                        Selected file: <label id="grading-script-label"></label>      
-                    </form>                                      
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="col">
-                    <h5>Upload Test Cases</h5>
-                    <form action="/edit-assignment/test-cases" method="POST" enctype="multipart/form-data">                                               
-                        <div class="input-group">
-                            <div class="custom-file">
-                                <input type="file" name="test-cases" class="custom-file-input" id="test-cases" onchange="setFilename(this, false)">
-                                <label class="custom-file-label" for="test-cases">Choose file</label>
-                            </div>
-                            <div class="input-group-append">
-                                <input type="hidden" name="assignid" value="<%= assignment._id %>">                            
-                                <button class="btn btn-outline-secondary" type="submit">Save</button>
-                            </div>
-                        </div>
-                        Selected file: <label id="test-cases-label"></label>    
-                    </form>                                        
-                </div>
-            </div>
+            <h5>Upload Test Script</h5>
+            <% param_url = '/edit-assignment/upload/testscript' %>
+            <% param_file = 'testscript' %>
+            <%- include partials/file-upload.ejs %>
             <br>
             <div class="row">
                 <div class="col">
@@ -120,35 +74,15 @@
                     <!-- This is for instructors to upload makefiles, etc. -->   
                     <div class="collapse" id="advanced"> 
                         <h6>Upload files for grading environment</h6><br>
-                        <h6>Upload Docker File</h6>   
-                        <form action="/edit-assignment/dockerfile" method="POST" enctype="multipart/form-data">                           
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file" name="dockerfile" class="custom-file-input" id="dockerfile" onchange="setFilename(this, false)">
-                                    <label class="custom-file-label" for="dockerfile">Choose dockerfile</label>
-                                </div>
-                                <div class="input-group-append">
-                                    <input type="hidden" name="assignid" value="<%= assignment._id %>">                                        
-                                    <button class="btn btn-outline-secondary" type="submit">Save</button>
-                                </div>
-                            </div>
-                            Selected file: <label id="makefile-label"></label>     
-                        </form>
+                        <h5>Upload Test Script</h5>
+                        <% param_url = '/edit-assignment/upload/dockerfile' %>
+                        <% param_file = 'dockerfile' %>
+                        <%- include partials/file-upload.ejs %>
                         <br>
-                        <h6>Upload Makefile</h6>                           
-                        <form action="/edit-assignment/makefile" method="POST" enctype="multipart/form-data">                           
-                            <div class="input-group">
-                                <div class="custom-file">
-                                    <input type="file" name="makefile" class="custom-file-input" id="makefile" onchange="setFilename(this, false)">
-                                    <label class="custom-file-label" for="makefile">Choose makefile</label>
-                                </div>
-                                <div class="input-group-append">
-                                    <input type="hidden" name="assignid" value="<%= assignment._id %>">                                        
-                                    <button class="btn btn-outline-secondary" type="submit">Save</button>
-                                </div>
-                            </div>
-                            Selected file: <label id="makefile-label"></label>     
-                        </form>                                                              
+                        <h6>Upload Makefile</h6>
+                        <% param_url = '/edit-assignment/upload/makefile' %>
+                        <% param_file = 'makefile' %>
+                        <%- include partials/file-upload.ejs %>            
                     </div>
                 </div>
             </div>
@@ -157,6 +91,6 @@
     </div>
 </div>
 <br>
-<script src="/js/file-ui.js"></script>
+<script src="/js/file-upload.js"></script>
 
 <%- include partials/footer.ejs %>

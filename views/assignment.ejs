@@ -22,11 +22,10 @@
     </div>
     <div class="row">
         <div class="col-8 scroll-col">
-            <h4 class="text-center">Submission</h3>
             
             <!--
-                    I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
-                    Let's keep it simple for now. 
+                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
+                Let's keep it simple for now. 
             -->
             <!-- <div class="row">
                 <div class="col">                
@@ -43,21 +42,11 @@
                     </form>
                 </div>
             </div> -->
-            <br>
-            <form action="/assignment" method="POST" enctype="multipart/form-data">
-                <div class="input-group">
-                    <div class="custom-file">
-                        <input type="file" name="submission" class="custom-file-input" id="submission" onchange="setFilename(this, false)">
-                        <label class="custom-file-label" for="submission">Choose file</label>
-                    </div>
-                    <div class="input-group-append">
-                        <input type="hidden" name="assignid" value="<%= assignment._id %>">
-                        <button class="btn btn-outline-secondary" type="submit">Save</button>
-                    </div>
-                </div>
-                Selected file: <label id="submission-label"></label> 
-            </form>
-
+            <h4 class="text-center">Submission</h4>
+            <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
+            <% let param_url = 'assignment/upload/submission' %>
+            <% let param_file = 'submission' %>
+            <%- include partials/file-upload.ejs %>
 
             <br>
 
@@ -83,14 +72,14 @@
             </div>
             
             </div>
-            
+
             <% if (locals.assignment.spec && locals.assignment.spec.path) { %>
                     <iframe class="spec col scroll-col off-white-bg" src="<%= assignment.spec.path %>" frameborder="0"></iframe>
             <% } %>
             </div>
         </div>
 
-<script src="/js/file-ui.js"></script>        
+<script src="/js/file-upload.js"></script>        
         
 <%- include partials/footer.ejs %>
         

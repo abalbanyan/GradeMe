@@ -1,6 +1,7 @@
 var express = require('express');
 var router =  express.Router();
 let db = require('../db.js');
+let fileutils = require('../fileutils.js');
 
 let multer = require('multer');
 let upload = multer({dest: 'course-data/uploads'});
@@ -11,172 +12,67 @@ router.get('/', async function(req, res, next) {
     let assignid = req.query.assignid;
     let assignment = await db.Assignment.findById(assignid).exec();
 
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
+    // Ensure this user belongs to the course and that they are an instructor.
+    let course = await db.Course.findOne({assignments : assignid}).exec();
+    if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
         return res.render('error', {message: "You do not belong to this course."});
     }
 
     res.render('edit-assignment', {
-        assignment: assignment, 
-        instructor: instructor,
+        assignment: assignment
     });
 });
 
-/**
- * Submit the user's uploaded file, provided it passes validation.
- */
-router.post('/specs', upload.array('specs'), async function(req, res, next) {
+router.post('/upload/:action', upload.single('file'), async function(req, res, next) {
     let userid = res.locals.user._id;
     let instructor = res.locals.user.instructor;
     let assignid = req.body.assignid;
-    let specsPath = req.file.path;    
+    let action = req.params.action;
     
-    if (!instructor) {
-        return res.render('error', {message: "You do not have permission to view this page."});        
+    if (!req.file || !req.file.path) {
+        res.json(JSON.stringify({ upload: false, error: 'No file was uploaded.' }));
     }
 
-    let assignment = await db.Assignment.findById(assignid);
-
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
+    // Ensure this user belongs to the course and that they are an instructor.
+    let course = await db.Course.findOne({assignments : assignid}).exec();
+    if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
+        res.json(JSON.stringify({ upload: false, error: 'You do not have access to this assignment.' }));
     }
     
-    if (!assignment) {
-        console.error(assignment);
-        return res.redirect('courses');
+    try {
+        let newassignment = null;
+        if (req.params.action === 'spec') {
+            // Save the file.
+            let newpath = await fileutils.saveSpec(assignid, req.file.path);
+            await db.Assignment.findByIdAndUpdate(assignid, {'spec.path': newpath}).exec();
+        } else if (req.params.action === 'dockerfile') {
+            let newpath = await fileutils.saveAssignmentFile(assignid, req.file.path, 'Dockerfile');
+            newassignment = await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.dockerfile': newpath}).exec();
+        } else if (req.params.action === 'testscript') {
+            let newpath = await fileutils.saveAssignmentFile(assignid, req.file.path, 'test.sh');
+            newassignment = await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.testscript': newpath}).exec();
+        } else if (req.params.action === 'makefile') {
+            let newpath = await fileutils.saveAssignmentFile(assignid, req.file.path, 'Makefile');
+            newassignment = await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.makefile': newpath}).exec();
+        } else {
+            return res.json(JSON.stringify({ upload: false, error: 'Invalid upload.' }));
+        }
+        
+        // Remake grading tar if dockerfile, testscript, or makefile were updated.
+        if (newassignment) {
+            let gradingenvfiles =  [ newassignment.gradingenv.dockerfile, newassignment.gradingenv.testscript, newassignment.gradingenv.makefile ];
+            let tarpath = await fileutils.makeEnvTar(assignid, gradingenvfiles, 'env.tar');
+            if (!tarpath) { throw new Error(); }
+            await db.Assignment.findByIdAndUpdate(assignid, {'gradingenv.archive' : tarpath});
+        }
+
+    } catch (err) {
+        console.error(err);
+        return res.json(JSON.stringify({ upload: false, error: 'Error uploading file.' }));
     }
 
-    // Update assignment with new specs.
-    // figure out file type
-    // then update assignment with new specs path and type
-});
-
-/**
- * Submit the user's uploaded file, provided it passes validation.
- */
-router.post('/test-cases', upload.array('specs'), async function(req, res, next) {
-    let userid = res.locals.user._id;
-    let instructor = res.locals.user.instructor;
-    let assignid = req.body.assignid;
-    let specsPath = req.file.path;    
-    
-    if (!instructor) {
-        return res.render('error', {message: "You do not have permission to view this page."});        
-    }
-
-    let assignment = await db.Assignment.findById(assignid);
-
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
-    }
-    
-    if (!assignment) {
-        console.error(assignment);
-        return res.redirect('courses');
-    }
-
-    // Update assignment with new test cases.
-    
-});
-
-/**
- * Submit the user's uploaded file, provided it passes validation.
- */
-router.post('/grading-script', upload.array('specs'), async function(req, res, next) {
-    let userid = res.locals.user._id;
-    let instructor = res.locals.user.instructor;
-    let assignid = req.body.assignid;
-    let specsPath = req.file.path;    
-    
-    if (!instructor) {
-        return res.render('error', {message: "You do not have permission to view this page."});        
-    }
-
-    let assignment = await db.Assignment.findById(assignid);
-
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
-    }
-    
-    if (!assignment) {
-        console.error(assignment);
-        return res.redirect('courses');
-    }
-
-    // Update assignment with new grading script.
-    
-});
-
-/**
- * Submit the user's uploaded file, provided it passes validation.
- */
-router.post('/dockerfile', upload.array('specs'), async function(req, res, next) {
-    let userid = res.locals.user._id;
-    let instructor = res.locals.user.instructor;
-    let assignid = req.body.assignid;
-    let specsPath = req.file.path;    
-    
-    if (!instructor) {
-        return res.render('error', {message: "You do not have permission to view this page."});        
-    }
-
-    let assignment = await db.Assignment.findById(assignid);
-
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
-    }
-    
-    if (!assignment) {
-        console.error(assignment);
-        return res.redirect('courses');
-    }
-
-    // Update assignment with new dockerfile.
-    
-});
-
-/**
- * Submit the user's uploaded file, provided it passes validation.
- */
-router.post('/makefile', upload.array('specs'), async function(req, res, next) {
-    let userid = res.locals.user._id;
-    let instructor = res.locals.user.instructor;
-    let assignid = req.body.assignid;
-    let specsPath = req.file.path;    
-    
-    if (!instructor) {
-        return res.render('error', {message: "You do not have permission to view this page."});        
-    }
-
-    let assignment = await db.Assignment.findById(assignid);
-
-    // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
-    if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
-    }
-    
-    if (!assignment) {
-        console.error(assignment);
-        return res.redirect('courses');
-    }
-
-    // Update assignment with new makefile.
-
+    // Return a confirmation of success.
+    res.json(JSON.stringify({ upload: true }));
 });
 
 module.exports = router;

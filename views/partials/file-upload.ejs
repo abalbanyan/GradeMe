@@ -1,0 +1,23 @@
+<% /* PARAMS: param_url, param_file, param_hidden DEPENDENCIES: file-upload.js */ %>
+<div class="row">
+    <div class="col">
+        <form id="<%= param_file %>form" method="POST" enctype="multipart/form-data">                                               
+            <div class="input-group">
+                <div class="custom-file">
+                    <input type="file" name="file" class="custom-file-input" id="<%= param_file %>" onchange="setFilename(this, false)">
+                    <label class="custom-file-label" for="<%= param_file %>">Choose file</label>
+                </div>
+                <div class="input-group-append">
+                    <% param_hidden.forEach(function(hidden) { %>
+                        <input type="hidden" name="<%= hidden.name %>" value="<%= hidden.value %>" >
+                    <% }); %>
+                    <button disabled type="button" onclick="ajaxUpload(this, '<%= param_file %>form', '<%= param_url %>', '<%= param_file %>progress')" id='<%= param_file %>-save' class="btn btn-outline-secondary">Save</button>
+                </div>
+            </div>
+            <div hidden class="progress">
+                <div hidden id="<%= param_file %>progress" class="progress-bar" role="progressbar" style="width:70%"></div>
+            </div>
+            <!-- Selected file: <label id="<%= param_file %>-label"></label>      -->
+        </form>                   
+    </div>
+</div>

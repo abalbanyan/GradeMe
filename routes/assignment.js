@@ -12,7 +12,7 @@ router.get('/', async function(req, res, next) {
     let assignment = await db.Assignment.findById(assignid).exec();
 
     // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
+    let course = await db.Course.findOne({assignments : assignid}).exec();
     if (!(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
         return res.render('error', {message: "You do not belong to this course."});
     }
@@ -26,47 +26,39 @@ router.get('/', async function(req, res, next) {
 /**
  * Submit the user's uploaded file, provided it passes validation.
  */
-router.post('/', upload.single('submission'), async function(req, res, next) {
+router.post('/upload/submission', upload.single('file'), async function(req, res, next) {
     let userid = res.locals.user._id;
-    let instructor = res.locals.user.instructor;
     let assignid = req.body.assignid;
-    let submissionpath = req.file.path;
+    let instructor = res.locals.user.instructor;
 
-    let assignment = await db.Assignment.findById(assignid);
+    let assignment = await db.Assignment.findById(assignid).exec();
 
     // Ensure this user belongs to the course.
-    let course = await db.Course.findOne({assignments : assignid});
+    let course = await db.Course.findOne({assignments : assignid}).exec();
     if (!course || !(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
-        console.log(assignid);
-        return res.render('error', {message: "You do not belong to this course."});
+        return res.json(JSON.stringify({ upload: true, error: "You do not belong to this course."}));
     }
     // Ensure that the course is visible and that the due date has not passed.
     if (!assignment || (!instructor && !assignment.visible)) {
-        console.error(instructor);
-        console.error(assignment);
-        return res.redirect('courses');
+        return res.json(JSON.stringify({ upload: true, error: "You cannot upload to this assignment."}));
     }
     if (assignment.duedate < Date.now) {
-        return res.render('assignment', {
-            assignment: assignment,
-            instructor: res.locals.user.instructor,
-            errormessage: "The due date for this assignment has passed. You are unable to make any new submissions."
-        });
+        return res.json(JSON.stringify({ upload: true, error: "The due date for this assignment has passed. You are unable to make any new submissions." }));
     }
 
     // Create a new submission.
     let submission = new db.Submission({
         assignmentid: req.body.assignid,
         userid: userid,
-        submissionpath: submissionpath
+        submissionpath: req.file.path
     });
     submission.save(err => {
-        res.render('assignment', {
-            assignment: assignment,
-            instructor: res.locals.user.instructor,
-            errormessage: (err? ("Unable to submit assignment. Please try again. Error: " + err.message) : null),
-            statusmessage: (err? null : "Your assignment has been submitted.")
-        });
+        if (err) {
+            res.json(JSON.stringify({ upload: false, error: "Please try again." }));
+        } else {
+            res.json(JSON.stringify({ upload: true }));
+        }
     });
 });
+
 module.exports = router;
