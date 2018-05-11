@@ -104,12 +104,7 @@ async function gradeSubmission(studentid, assignid) {
     if (!submissions) {
         return null;
     }
-    let mostrecent = submissions[0];
-    for (let submission of submissions) {
-        if (mostrecent.submissiondate > submission.submissiondate) {
-            mostrecent = submission;
-        }
-    }
+    let mostrecent = submissions.reduce((prev, cur) => (prev.submissiondate > cur.submissiondate)? prev : cur);
 
     let gradingEnvironment = new GradingEnvironment(assignment._id, assignment.gradingenv.archive);
     gradingEnvironment.buildImage();
@@ -117,8 +112,15 @@ async function gradeSubmission(studentid, assignid) {
     await gradingContainer.build();
     let output = await gradingContainer.test();
 
-    console.log(output);
-    Submission.findByIdAndUpdate(mostrecent._id, {grade: 100});
+    let score = 0;
+    let total = 0;
+    for (let test of output) {
+        if (test.pass) {
+            score += test.score;
+        }
+        total += test.score;
+    }
+    await Submission.findByIdAndUpdate(mostrecent._id, {grade: Math.round((score / total) * assignment.gradetotal)}).exec();
 }
 
 /**

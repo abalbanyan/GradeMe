@@ -30,7 +30,6 @@ router.get('/', async function(req, res, next) {
     if (!res.locals.user.instructor) {
         for (let i = 0; i < assignments.length; i++) {
             let submissions = await db.Submission.find({'userid': res.locals.user._id, 'assignmentid': assignments[i]._id}).exec();
-            console.log(submissions);
             if (!submissions || submissions.length == 0) {
                 assignments[i].status = 'Unsubmitted';
             } else {
