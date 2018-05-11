@@ -10,15 +10,17 @@ let AssignmentSchema = new Schema({
     name:                       { type: String, required: true },
     desc:                       { type: String }, // Short summary of what the assignment is.
     spec: {
-        path: {type: String}, // Stores a pathname to the spec file.
-        filetype: {type: String, enum: ['md', 'txt', 'pdf']} 
+        path: {type: String }, // Stores a pathname to the spec file.
+        filetype: {type: String, default: 'pdf', enum: ['md', 'txt', 'pdf']} // TODO: Remove.
     },
     visible:                    { type: Boolean, default: true},
     creation_date:              { type: Date, default: Date.now },
     gradingenv: {
+        // These are all pathnames.
         dockerfile:             { type: String },
         makefile:               { type: String },
-        testscript:             { type: String }
+        testscript:             { type: String },
+        archive:                { type: String, default: 'course-data/defaults/env.tar' }
     },
     // submissions:                { type: [String] }, // List of student submission ids.
     duedate:                    { type: Date },
@@ -26,12 +28,13 @@ let AssignmentSchema = new Schema({
 });
 // TODO: Validate input.
 
-AssignmentSchema.pre('save', async function(next) {
+AssignmentSchema.pre('save', async function(next) { 
     if (this.isNew) {
-        fileutils.createAssignment(this._id);
-    }
-    if (this.isModified('spec.path') && this.spec.path) {
-        this.spec.path = await fileutils.changeSpec(this._id, this.spec.path, this.spec.filetype);
+        await fileutils.createAssignment(this._id);
+        // Copy default grading env files.
+        this.gradingenv.makefile = 'course-data/' + this._id + '/Makefile';
+        this.gradingenv.dockerfile = 'course-data/' + this._id + '/Dockerfile';
+        this.gradingenv.testscript = 'course-data/' + this._id + '/test.sh';
     }
     return next();
 });

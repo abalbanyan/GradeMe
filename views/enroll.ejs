@@ -26,7 +26,7 @@
     async function verifyCode(el) {
         if (el.value.length > 7) {
             let response = await fetch('/api/verifycode?instructor=<%=user.instructor? 1 : 0 %>&code=' + el.value,
-                { method: 'GET', credentials: 'include'});
+                { method: 'GET', credentials: 'same-origin'});
             let json = await response.json();
             let data = JSON.parse(json);
             let message = document.getElementById('codemessage');

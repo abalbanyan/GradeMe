@@ -7,7 +7,7 @@
     <div class="row">
         <div class="col-md-3"></div>        
         <div class="col-md-6">
-            <h2> Assignment Page for <%- assignment.name %> </h2>
+            <h2> Assignment Page for "<%- assignment.name %>" </h2>
         </div>
         <div class="col-md-3">
             <% if (instructor) { %> 
@@ -22,11 +22,10 @@
     </div>
     <div class="row">
         <div class="col-8 scroll-col">
-            <h4 class="text-center">Submission</h3>
             
             <!--
-                    I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
-                    Let's keep it simple for now. 
+                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
+                Let's keep it simple for now. 
             -->
             <!-- <div class="row">
                 <div class="col">                
@@ -43,14 +42,12 @@
                     </form>
                 </div>
             </div> -->
-            <br>
-            <form action="/assignment" method="POST" enctype="multipart/form-data">
-                <label class="btn btn-default">
-                    <input type="file" name="submission">
-                </label>
-                <input type="hidden" name="assignid" value="<%= assignment._id %>">
-                <input type="submit">
-            </form>
+            <h4 class="text-center">Submission</h4>
+            <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
+            <% let param_url = 'assignment/upload/submission' %>
+            <% let param_file = 'submission' %>
+            <%- include partials/file-upload.ejs %>
+
             <br>
 
             <div class="row">
@@ -75,12 +72,14 @@
             </div>
             
             </div>
-            
+
             <% if (locals.assignment.spec && locals.assignment.spec.path) { %>
                     <iframe class="spec col scroll-col off-white-bg" src="<%= assignment.spec.path %>" frameborder="0"></iframe>
             <% } %>
             </div>
         </div>
+
+<script src="/js/file-upload.js"></script>        
         
 <%- include partials/footer.ejs %>
         
