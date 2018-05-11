@@ -8,7 +8,7 @@ router.get('/', function(req, res, next) {
     if(instructor) {
         res.render('create-course');
     } else {
-        res.redirect('error');
+        res.redirect('courses');
     }
 });
 
@@ -44,7 +44,7 @@ router.post('/', function(req, res, next) {
             }
         });
     } else {
-        res.redirect('error');
+        res.redirect('courses');
     }
 });
 
