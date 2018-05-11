@@ -2,20 +2,13 @@
 
 <div class="container">
     <div class="row">
-        <div class="col-md-3"></div>        
-        <div class="col-md-6">
+        <div class="col-md-8 col-centered">
             <h2> Course List </h2>
-        </div>
-        <div class="col-md-3"></div>        
-    </div>
-    <div class="row">
-        <div class="col-md-2"></div>
-        <div class="col-md-8">
             <ul class="list-group">
             <% courselist.forEach(function(course) { %>
                 <li class="list-group-item">
                     <a href='<%= "/course?courseid=" + course._id %>'>
-                        <b>Course Name:</b> <%= course.name %> 
+                        <%= course.name %> 
                     </a>
                     <% if (instructor) { %>
                     <a href='<%= "/edit-course?courseid=" + course._id %>'>

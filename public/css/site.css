@@ -4,8 +4,39 @@
     font-family: "Montserrat";
 }
 
-.body {
-    background-color: #dadbbb;
+/* body {
+    background-color: #0A192E;
+} */
+
+h2 {
+    margin-bottom: 1.5rem;
+    /* color: #eeeeee; */
+}
+
+/* Use this for mini titles, e.g. h4 */
+.mini-title {
+    margin-bottom: 1.1rem;
+}
+
+/* label {
+    color: #eeeeee;
+}
+
+h4 {
+    color: #eeeeee;
+} */
+/* a {
+    color: #1D8FD1;
+} */
+
+.warning-button {
+    background-color: #FF0033;
+    border-color: #FF0033;
+    color: white;
+}
+
+.button-link {
+    width: 150px;
 }
 
 .scroll-col {
@@ -35,6 +66,11 @@
     background: white;
     cursor: inherit;
     display: block;
+}
+
+.col-centered {
+    float: none;
+    margin: 0 auto;
 }
 
 /*
