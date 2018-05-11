@@ -30,6 +30,21 @@ const checkStatus = async (route, statusCode) => {
     expect(response.statusCode).toBe(statusCode);
 }
 
+// Unfortunately this code does not work inside the describe blocks
+async function checkRoute (route, userType) {
+    let name = route.name;
+    let option = route[userType];
+    if((typeof option) === 'string') {
+        test('accessing /' + name +  ' redirects to /' + option, async () => {
+            await checkRedirect('/' + name, '/' + option);
+        });
+    } else {
+        test('accessing /' + name + ' returns status: ' + option, async () => {
+            await checkStatus('/' + name, option);
+        });
+    }
+}
+
 const routes = [
     {
         name: '',
@@ -41,8 +56,8 @@ const routes = [
     {
         name: 'admin',
         admin: 200,
-        instructor: 'courses',
-        student: 'courses',
+        instructor: 403,
+        student: 403,
         loggedout: 'login'
     },
     {
@@ -59,18 +74,18 @@ const routes = [
         student: 200,
         loggedout: 200
     },
-    {
-        name: 'create-assignment',
-        admin: 200,
-        instructor: 200,
-        student: 'courses',
-        loggedout: 'login'
-    },
+    // {   // Doesn't make sense to test this as a general route since it's tied to a course
+    //     name: 'create-assignment',
+    //     admin: 200,
+    //     instructor: 200,
+    //     student: 403,
+    //     loggedout: 'login'
+    // },
     {
         name: 'create-course',
         admin: 200,
         instructor: 200,
-        student: 'courses',
+        student: 403,
         loggedout: 'login'
     },
     {
@@ -142,7 +157,7 @@ describe('while logged out', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -163,7 +178,7 @@ describe('while logged in as admin', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -184,7 +199,7 @@ describe('while logged in as instructor', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -205,12 +220,12 @@ describe('while logged in as student', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
 
     test('cannot access non-visible course', async () => {
-        await checkStatus('/course?courseid=' + invisibleCourse._id, 302);
+        await checkStatus('/course?courseid=' + invisibleCourse._id, 403);
     });
 });

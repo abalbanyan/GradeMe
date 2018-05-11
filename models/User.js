@@ -6,11 +6,11 @@ let ObjectId = Schema.ObjectId;
 
 // User model.
 let UserSchema = new Schema({
-    _id: { type: String, 'default': shortid.generate },    
+    _id: { type: String, 'default': shortid.generate },
     email:          { type: String, required: true },
     password:       { type: String, required: true },                 // Hashed.
     instructor:     { type: Boolean, required: true },                // Is this User an instructor?
-    admin:          { type: String, default: false, required: true }, // Is this User an admin?
+    admin:          { type: Boolean, default: false, required: true }, // Is this User an admin?
     name:           { first: String, last: String }
 });
 
@@ -21,7 +21,7 @@ UserSchema.pre('save', function(next) {
     if (!this.isModified('password')) {
         return next();
     }
-    
+
     try {
         let hash = bcrypt.hashSync(this.password, 6);
         this.password = hash;

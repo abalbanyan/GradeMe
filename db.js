@@ -84,7 +84,7 @@ async function belongsToCourse(courseid, userid, instructor, admin = false) {
     if (instructor) {
         course = await Course.findOne({_id: courseid, instructors: userid}).exec();
     } else {
-        course = await Course.findOne({_id: courseid, students: userid}).exec();
+        course = await Course.findOne({_id: courseid, students: userid, visible: true}).exec();
     }
     return (course != null);
 }

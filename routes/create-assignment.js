@@ -12,6 +12,7 @@ router.get('/', async function(req, res, next) {
         res.render('create-assignment', {courseid : req.query.courseid});
     } else {
         // Doesn't quite work due to format of error ejs.
+        res.status(403);
         res.render('error',JSON.parse('{ "message" : "You do not have permission to view this page." }'));
     }
 });
@@ -39,7 +40,7 @@ router.post('/', upload.single('spec'), async function(req, res, next) {
 
     newassignment.save(async (err) => {
         if (err) return res.status(500);
-    
+
         // Must save new assignment to course.
         try {
             await db.Course.findByIdAndUpdate(req.query.courseid,
