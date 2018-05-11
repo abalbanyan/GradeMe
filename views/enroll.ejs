@@ -1,21 +1,22 @@
 <%- include partials/header.ejs %>
+<head>
+    <link rel="stylesheet" href="/css/enroll.css">
+</head>
 
 <body>
-    <div class="container">
+    <div class="container col-md-8 col-centered">
         <h2>Add Course</h2>
-        <br>
         <form class="enroll-form" method="POST" action="/enroll" >
             <div class="form-group">
-                <label for="code">Enrollment Code</label>
+                <label for="code" class="enrollmentcodetitle">Enrollment Code</label>
                 <input id="code" name="code" class="form-control" onkeyup="verifyCode(this)" placeholder="">
                 <small id="codeHelp" class="form-text text-muted">
                     Enter the enrollment code provided by <%= user.instructor? "the course admin" : "a courseinstructor" %> here.
                 </small>
-                <div class="container codedialogue">
+                <div class="codedialogue">
                     <br>
                     <div id='codemessage'></div>
-                    <br>
-                    <button id='enrollbutton' style="display: none" type="submit" class="btn btn-outline-success">Enroll</button>
+                    <button id='enrollbutton' style="display: disabled" type="submit" class="btn btn-primary">Enroll</button>
                 </div>
             </div>
         </form>
@@ -35,10 +36,11 @@
                 message.style.color = 'green';
                 message.innerHTML = 'Would you like to enroll in <b>' + data.coursename + '</b>?';
                 button.style.display = 'block';
+                button.style.backgroundColor = '#57B55C';
             } else {
                 message.style.color = 'red';
                 message.innerHTML = 'This code is invalid. ' + (data.err? data.err : '');
-                button.style.display = 'none';
+                button.style.backgroundColor = '#FF0033';
             }
         }
     }

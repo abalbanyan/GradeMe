@@ -1,0 +1,52 @@
+body {
+    background-color: #163764;
+    font-family: 'Montserrat';
+}
+
+.login-container {
+    width: 600px;
+    height: 400px;
+
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+
+.website-title-box {
+    text-align: center;
+}
+
+.website-title {
+    font-size: 5rem;
+}
+
+.website-title-1 {
+    color: white;
+}
+
+.website-title-2 {
+    color: #ED9200;
+}
+
+.website-motto {
+    margin-top: -10px;
+    margin-bottom: 15px;
+    font-family: 'Source Code Pro';
+    color: #E1DEE5;
+}
+
+.form-group {
+    color: white;
+}
+
+.login-form .btn-primary {
+    background-color: #1D8FD1;
+    border-color: #1D8FD1;
+}
+
+.login-form a {
+    color: #1D8FD1;
+}
