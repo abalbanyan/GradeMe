@@ -8,7 +8,9 @@ router.get('/', function(req, res, next) {
     if(instructor) {
         res.render('create-course');
     } else {
-        res.redirect('courses');
+        res.status(403);
+        // res.redirect('courses');
+        return res.render('error', {message: "You do not have access to this page."});
     }
 });
 
@@ -33,6 +35,7 @@ router.post('/', function(req, res, next) {
         course.save(err => {
             if(err) {
                 console.error(err);
+                res.status(500);
                 res.render('create-course', {
                     error: 'Unable to create course. Database Error.'
                 });
@@ -44,7 +47,9 @@ router.post('/', function(req, res, next) {
             }
         });
     } else {
-        res.redirect('courses');
+        res.status(403);
+        // res.redirect('courses');
+        return res.render('error', {message: "You do not have access to this page."});
     }
 });
 
