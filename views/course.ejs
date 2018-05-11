@@ -4,36 +4,51 @@
 </head>
 
 <div class="container">
-
     <h2><%- course.name %> </h2>
     <p><%= course.desc %></p>
-    <div class="assignments-container">
-        <% assignments.forEach(function(assignment) { %>
-        <div class="assignment">
-            <div class="assignment-header">
-                <a href="/assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-title <%= (user.instructor)? 'instructor' : 'student' %>">
-                    <%= assignment.name %>
-                </a>
-                <% if (user.instructor) { %>
-                <a href="/edit-assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-options">
-                    <i class="material-icons">settings</i>
-                </a>
+
+    <h4 class="mini-title">Assignments</h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Due Date</th>
+                <% if (false) { %>
+                <th scope="col">Status</th>
                 <% } %>
-            </div>
-            <a class="assignment-link"  href="/assignment?assignid=<%=assignment._id%>">
-                <div class="assignment-body">
-                    <i><%= assignment.desc %></i>
-                    <br><br>
-                    <!-- TODO: Include grade. -->
-                    <b>Due Date:</b> <%= assignment.duedate%><br>
-                </div>
-            </a>
-        </div>
-        <% }); %>
-        <a class="assignment-link assignment add-assignment" href="/create-assignment?courseid=<%=course._id%>">
-            Add Assignment
+                <% if (user.instructor) { %>
+                <th scope="col"></th>
+                <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% assignments.forEach(function(assignment) { %>
+                <tr>
+                    <th scope="row">
+                        <a href="/assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-title <%= (user.instructor)? 'instructor' : 'student' %>">
+                            <%= assignment.name %>
+                        </a>
+                    </th>
+                    <td><%= assignment.duedate%></td>
+                    <% if (false) { %>
+                    <td>
+                        Status
+                    </td>
+                    <% } %>
+                    <% if (user.instructor) { %>
+                    <td>
+                        <a href="/edit-assignment?assignid=<%=assignment._id%>" class="assignment-link assignment-options">
+                            <i class="material-icons">settings</i>
+                        </a>
+                    </td>
+                    <% } %>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+        <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
+            <i class="material-icons">add_circle</i>
         </a>
-    </div>
 </div>
 
 <%- include partials/footer.ejs %>

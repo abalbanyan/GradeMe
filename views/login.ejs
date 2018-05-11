@@ -1,7 +1,25 @@
-<%- include partials/header.ejs %>
+<head>
+    <!--Bootstrap -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <!-- Login CSS -->
+    <link rel="stylesheet" href="/css/login.css">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat|Source+Code+Pro" rel="stylesheet">
+</head>
 
 <body class="login">
-    <div class="container">
+    <div class="login-container">
+        <div class="website-title-box">
+            <div class="website-title">
+                <span class="website-title-1">Grade</span><span class="website-title-2">Me</span>
+            </div>
+            <div class="website-motto">
+                Grading for Coders by Coders
+            </div>
+        </div>
         <!-- Display an error if one occured. -->
         <% if (locals.error) { %>
             <div class="alert alert-danger">
@@ -20,6 +38,7 @@
             </div>
             <button type="submit" class="btn btn-primary login-btn">Login</button>
         </form>
+        <a href="/create-account">Create Account</a>
     </div>
 </body>
 
