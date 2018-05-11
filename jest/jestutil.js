@@ -37,7 +37,7 @@ const assignment = new Assignment({
     desc: "this lmao",
     duedate: new Date(2020, 1, 1),
     spec: {
-        path: 'course-data/uploads/loremipsum.pdf',
+        path: 'specs/loremipsum.pdf',
         filetype: 'pdf'
     },
 });
