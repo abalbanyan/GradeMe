@@ -41,8 +41,8 @@ const routes = [
     {
         name: 'admin',
         admin: 200,
-        instructor: 'courses',
-        student: 'courses',
+        instructor: 403,
+        student: 403,
         loggedout: 'login'
     },
     {
@@ -142,7 +142,7 @@ describe('while logged out', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -163,7 +163,7 @@ describe('while logged in as admin', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -184,7 +184,7 @@ describe('while logged in as instructor', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
@@ -205,7 +205,7 @@ describe('while logged in as student', async () => {
             });
         } else {
             test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, 200);
+                await checkStatus('/' + name, option);
             });
         }
     }
