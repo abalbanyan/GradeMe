@@ -29,10 +29,17 @@
                 <li class="nav-item <%= (path == '/enroll')? 'active' : '' %> ">
                     <a class="nav-link" href="/enroll">Join a Course</a>
                 </li>
+
+                <% if (locals.user.admin) { %>
+                  <li class="nav-item <%= (path == '/admin')? 'active' : '' %> ">
+                      <a class="nav-link" href="/admin">Admin Page</a>
+                  </li>
+                <% } %>
+
             </ul>
         </div>
         <% } %>
-        
+
 
         <!-- Right -->
         <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
