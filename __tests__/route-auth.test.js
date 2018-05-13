@@ -30,110 +30,117 @@ const checkStatus = async (route, statusCode) => {
     expect(response.statusCode).toBe(statusCode);
 }
 
-// Unfortunately this code does not work inside the describe blocks
-async function checkRoute (route, userType) {
-    let name = route.name;
+const checkRoute = (route, userType, enrolled) => {
+    let location = '/' + route.location;
+    let name = route.name ? route.name : location;
     let option = route[userType];
+    if(enrolled !== undefined) {
+        if(enrolled) option = option.in;
+        else option = option.out;
+    }
     if((typeof option) === 'string') {
-        test('accessing /' + name +  ' redirects to /' + option, async () => {
-            await checkRedirect('/' + name, '/' + option);
+        test('accessing ' + name +  ' redirects to /' + option, (done) => {
+            checkRedirect(location, '/' + option).then(() => {done();});
         });
     } else {
-        test('accessing /' + name + ' returns status: ' + option, async () => {
-            await checkStatus('/' + name, option);
+        test('accessing ' + name + ' returns status: ' + option, (done) => {
+            checkStatus(location, option).then(() => {done();});
         });
     }
 }
 
+const createRouteTest = (location, adminResult, instructorResult, studentResult, loggedoutResult) => {
+    if((typeof instructorResult) === 'number' || (typeof instructorResult) === 'string')
+        instructorResult = {in: instructorResult, out: instructorResult};
+    if((typeof studentResult) === 'number' || (typeof studentResult) === 'string')
+        studentResult = {in: studentResult, out: studentResult};
+
+    return {
+        location: location,
+        admin: adminResult,
+        instructor: instructorResult,
+        student: studentResult,
+        loggedout: loggedoutResult
+    };
+}
+
+const createDynamicRouteTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
+    let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
+    route.name = name;
+    return route;
+};
+
 const routes = [
-    {
-        name: '',
-        admin: 'courses',
-        instructor: 'courses',
-        student: 'courses',
-        loggedout: 'login'
-    },
-    {
-        name: 'admin',
-        admin: 200,
-        instructor: 403,
-        student: 403,
-        loggedout: 'login'
-    },
-    {
-        name: 'courses',
-        admin: 200,
-        instructor: 200,
-        student: 200,
-        loggedout: 'login'
-    },
-    {
-        name: 'create-account',
-        admin: 200,
-        instructor: 200,
-        student: 200,
-        loggedout: 200
-    },
-    // {   // Doesn't make sense to test this as a general route since it's tied to a course
-    //     name: 'create-assignment',
-    //     admin: 200,
-    //     instructor: 200,
-    //     student: 403,
-    //     loggedout: 'login'
-    // },
-    {
-        name: 'create-course',
-        admin: 200,
-        instructor: 200,
-        student: 403,
-        loggedout: 'login'
-    },
-    {
-        name: 'enroll',
-        admin: 200,
-        instructor: 200,
-        student: 200,
-        loggedout: 'login'
-    },
-    {
-        name: 'login',
-        admin: 'courses',
-        instructor: 'courses',
-        student: 'courses',
-        loggedout: 200
-    }
+    createRouteTest('', 'courses', 'courses', 'courses', 'login'),
+    createRouteTest('admin', 200, 403, 403, 'login'),
+    createRouteTest('courses', 200, 200, 200, 'login'),
+    createRouteTest('create-account', 200, 200, 200, 200),
+    createRouteTest('create-course', 200, 200, 403, 'login'),
+    createRouteTest('enroll', 200, 200, 200, 'login'),
+    createRouteTest('login', 'courses', 'courses', 'courses', 200)
 ];
 
+
+const dynamicRoutes = [];
+
 let mongoServer;
-let visibleCourse;
-let invisibleCourse;
+let users = {};
+let assignments = {};
+let courses = {};
+
+users.admin = util.createTestUser('admin', '0');
+users.instructor_in = util.createTestUser('instructor', 'in');
+users.student_in = util.createTestUser('student', 'in');
+users.instructor_out = util.createTestUser('instructor', 'instructor_notenrolled');
+users.student_out = util.createTestUser('student', 'student_notenrolled');
+
+assignments.visible = util.createTestAssignment('visible', true);
+assignments.invisible = util.createTestAssignment('notvisible', false);
+
+courses.visible = new Course({
+    name: 'Visible',
+    desc: 'idk',
+    assignments: [
+        assignments.visible._id,
+        assignments.invisible._id
+    ],
+    students: [users.student_in._id],
+    instructors: [users.instructor_in._id],
+    main_instructor: [users.instructor_in._id],
+    visible: true
+});
+courses.invisible = new Course({
+    name: 'Invisible',
+    desc: 'idk',
+    assignments: [
+        assignments.visible._id,
+        assignments.invisible._id
+    ],
+    students: [users.student_in._id],
+    instructors: [users.instructor_in._id],
+    main_instructor: [users.instructor_in._id],
+    visible: false
+});
+
+// Add route test cases
+dynamicRoutes.push(createDynamicRouteTest('visible course', '/course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
+dynamicRoutes.push(createDynamicRouteTest('non-visible course', '/course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
-    await util.example.admin.save();
-    await util.example.student.save();
-    await util.example.instructor.save();
-    await util.example.assignment.save();
-    visibleCourse = new Course({
-        name: 'Visible',
-        desc: 'idk',
-        assignments: [util.example.assignment._id],
-        students: [util.example.student._id],
-        instructors: [util.example.instructor._id],
-        main_instructor: [util.example.instructor._id],
-        visible: true
-    });
-    invisibleCourse = new Course({
-        name: 'Invisible',
-        desc: 'idk',
-        assignments: [util.example.assignment._id],
-        students: [util.example.student._id],
-        instructors: [util.example.instructor._id],
-        main_instructor: [util.example.instructor._id],
-        visible: false
-    });
-    await visibleCourse.save();
-    await invisibleCourse.save();
+
+    // Populate DB with default values
+    for(let prop in users) {
+        await users[prop].save();
+    }
+
+    for(let prop in assignments) {
+        await assignments[prop].save();
+    }
+
+    for(let prop in courses) {
+        await courses[prop].save();
+    }
 });
 
 afterAll(() => {
@@ -141,91 +148,96 @@ afterAll(() => {
 });
 
 describe('while logged out', async () => {
-    beforeAll(() => {
+    beforeAll(async () => {
         // Duplicate behavior of being logged out
         isAuthenticated.mockImplementation(async () => { return false });
     });
 
     for (let route of routes) {
-        // Unfortunately we need to repeat this code chunk
-        // When refactored out to a function the tests don't function properly
-        let name = route.name;
-        let option = route.loggedout;
-        if((typeof option) === 'string') {
-            test('accessing /' + name +  ' redirects to /' + option, async () => {
-                await checkRedirect('/' + name, '/' + option);
-            });
-        } else {
-            test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, option);
-            });
-        }
+        checkRoute(route, 'loggedout');
+    }
+
+    for(let route of dynamicRoutes) {
+        checkRoute(route, 'loggedout');
     }
 });
 
 describe('while logged in as admin', async () => {
     beforeAll(() => {
         // Duplicate behavior of being logged in as admin
-        isAuthenticated.mockImplementation(async () => { return util.example.admin; });
+        isAuthenticated.mockImplementation(async () => { return users.admin; });
     });
 
     for (let route of routes) {
-        let name = route.name;
-        let option = route.admin;
-        if((typeof option) === 'string') {
-            test('accessing /' + name +  ' redirects to /' + option, async () => {
-                await checkRedirect('/' + name, '/' + option);
-            });
-        } else {
-            test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, option);
-            });
-        }
+        checkRoute(route, 'admin');
+    }
+
+    for(let route of dynamicRoutes) {
+        checkRoute(route, 'admin');
     }
 });
 
 describe('while logged in as instructor', async () => {
     beforeAll(() => {
-        // Duplicate behavior of being logged in as instructor
-        isAuthenticated.mockImplementation(async () => { return util.example.instructor; });
+        isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
     });
 
     for (let route of routes) {
-        let name = route.name;
-        let option = route.instructor;
-        if((typeof option) === 'string') {
-            test('accessing /' + name +  ' redirects to /' + option, async () => {
-                await checkRedirect('/' + name, '/' + option);
-            });
-        } else {
-            test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, option);
-            });
-        }
+        checkRoute(route, 'instructor', true);
     }
+
+    describe('enrolled in course', async () => {
+        beforeAll(() => {
+            // Duplicate behavior of being logged in as instructor
+            isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
+        });
+
+        for(let route of dynamicRoutes) {
+            checkRoute(route, 'instructor', true);
+        }
+    });
+
+    describe('not enrolled in course', async () => {
+        beforeAll(() => {
+            // Duplicate behavior of being logged in as instructor
+            isAuthenticated.mockImplementation(async () => { return users.instructor_out; });
+        });
+
+        for(let route of dynamicRoutes) {
+            checkRoute(route, 'instructor', false);
+        }
+    });
 });
 
 describe('while logged in as student', async () => {
     beforeAll(() => {
         // Duplicate behavior of being logged in as student
-        isAuthenticated.mockImplementation(async () => { return util.example.student; });
+        isAuthenticated.mockImplementation(async () => { return users.student_in; });
     });
 
     for (let route of routes) {
-        let name = route.name;
-        let option = route.student;
-        if((typeof option) === 'string') {
-            test('accessing /' + name +  ' redirects to /' + option, async () => {
-                await checkRedirect('/' + name, '/' + option);
-            });
-        } else {
-            test('accessing /' + name + ' returns status: ' + option, async () => {
-                await checkStatus('/' + name, option);
-            });
-        }
+        checkRoute(route, 'student', true);
     }
 
-    test('cannot access non-visible course', async () => {
-        await checkStatus('/course?courseid=' + invisibleCourse._id, 403);
+    describe('enrolled in course', async () => {
+        beforeAll(() => {
+            // Duplicate behavior of being logged in as student
+            isAuthenticated.mockImplementation(async () => { return users.student_in; });
+        });
+
+        for(let route of dynamicRoutes) {
+            checkRoute(route, 'student', true);
+        }
+    });
+
+    describe('not enrolled in course', async () => {
+        beforeAll(() => {
+            // Duplicate behavior of being logged in as student
+            isAuthenticated.mockImplementation(async () => { return users.student_in; });
+        });
+
+        for(let route of dynamicRoutes) {
+            checkRoute(route, 'student', false);
+        }
     });
 });
