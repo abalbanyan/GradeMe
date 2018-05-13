@@ -8,6 +8,7 @@ let admin = new db.User({
     email: 'admin@grademe.edu',
     name: {first: "Joe", last: "Bruin"},
     password: 'admin',
+    admin: true,
     instructor: true,
 });
 
@@ -57,7 +58,7 @@ let course2 = new db.Course({
     students: [danny._id],
     instructors: [willy._id],
     main_instructor: [willy._id],
-    visible: true 
+    visible: true
 });
 
 course.save(err => {if(err) console.error(err)});
