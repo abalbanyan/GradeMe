@@ -64,13 +64,14 @@ const createRouteTest = (location, adminResult, instructorResult, studentResult,
     };
 }
 
-const createDynamicRouteTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
+const createNamedRouteTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
     let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
     route.name = name;
     return route;
 };
 
-const routes = [
+// These routes retain same behavior whether user is enrolled or not
+const staticRoutes = [
     createRouteTest('', 'courses', 'courses', 'courses', 'login'),
     createRouteTest('admin', 200, 403, 403, 'login'),
     createRouteTest('courses', 200, 200, 200, 'login'),
@@ -78,7 +79,10 @@ const routes = [
     createRouteTest('create-course', 200, 200, 403, 'login'),
     createRouteTest('enroll', 200, 200, 200, 'login'),
     createRouteTest('login', 'courses', 'courses', 'courses', 200),
-    createRouteTest('course', 404, 404, 404, 'login')
+    createRouteTest('course', 404, 404, 404, 'login'),
+    createNamedRouteTest('non-existent course', 'course?courseid=AAAAAAAAAA', 404, 404, 404, 'login'),
+    createRouteTest('assignment', 404, 404, 404, 'login'),
+    createNamedRouteTest('non-existent assignment', 'assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login')
 ];
 
 
@@ -123,9 +127,11 @@ courses.invisible = new Course({
     visible: false
 });
 
-// Add route test cases
-dynamicRoutes.push(createDynamicRouteTest('visible course', 'course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
-dynamicRoutes.push(createDynamicRouteTest('non-visible course', 'course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
+// These routes change behavior based on whether user is enrolled or not
+dynamicRoutes.push(createNamedRouteTest('visible course', 'course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
+dynamicRoutes.push(createNamedRouteTest('non-visible course', 'course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
+dynamicRoutes.push(createNamedRouteTest('visible assignment', 'assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'));
+dynamicRoutes.push(createNamedRouteTest('non-visible assignment', 'assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
@@ -148,28 +154,13 @@ afterAll(() => {
     util.mongo.stop(mongoServer);
 });
 
-describe('while logged out', async () => {
-    beforeAll(async () => {
-        // Duplicate behavior of being logged out
-        isAuthenticated.mockImplementation(async () => { return false });
-    });
-
-    for (let route of routes) {
-        checkRoute(route, 'loggedout');
-    }
-
-    for(let route of dynamicRoutes) {
-        checkRoute(route, 'loggedout');
-    }
-});
-
 describe('while logged in as admin', async () => {
     beforeAll(() => {
         // Duplicate behavior of being logged in as admin
         isAuthenticated.mockImplementation(async () => { return users.admin; });
     });
 
-    for (let route of routes) {
+    for (let route of staticRoutes) {
         checkRoute(route, 'admin');
     }
 
@@ -183,7 +174,7 @@ describe('while logged in as instructor', async () => {
         isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
     });
 
-    for (let route of routes) {
+    for (let route of staticRoutes) {
         checkRoute(route, 'instructor', true);
     }
 
@@ -216,7 +207,7 @@ describe('while logged in as student', async () => {
         isAuthenticated.mockImplementation(async () => { return users.student_in; });
     });
 
-    for (let route of routes) {
+    for (let route of staticRoutes) {
         checkRoute(route, 'student', true);
     }
 
@@ -241,4 +232,19 @@ describe('while logged in as student', async () => {
             checkRoute(route, 'student', false);
         }
     });
+});
+
+describe('while logged out', async () => {
+    beforeAll(async () => {
+        // Duplicate behavior of being logged out
+        isAuthenticated.mockImplementation(async () => { return false });
+    });
+
+    for (let route of staticRoutes) {
+        checkRoute(route, 'loggedout');
+    }
+
+    for(let route of dynamicRoutes) {
+        checkRoute(route, 'loggedout');
+    }
 });
