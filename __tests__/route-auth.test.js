@@ -123,8 +123,8 @@ courses.invisible = new Course({
 });
 
 // Add route test cases
-dynamicRoutes.push(createDynamicRouteTest('visible course', '/course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
-dynamicRoutes.push(createDynamicRouteTest('non-visible course', '/course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
+dynamicRoutes.push(createDynamicRouteTest('visible course', 'course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
+dynamicRoutes.push(createDynamicRouteTest('non-visible course', 'course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
@@ -233,7 +233,7 @@ describe('while logged in as student', async () => {
     describe('not enrolled in course', async () => {
         beforeAll(() => {
             // Duplicate behavior of being logged in as student
-            isAuthenticated.mockImplementation(async () => { return users.student_in; });
+            isAuthenticated.mockImplementation(async () => { return users.student_out; });
         });
 
         for(let route of dynamicRoutes) {
