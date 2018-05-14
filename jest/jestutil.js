@@ -66,6 +66,7 @@ const createTestAssignment = (name, isVisible = true, isLate = false) => {
             path: 'specs/loremipsum.pdf',
             filetype: 'pdf'
         },
+        visible: isVisible
     });
     return assignment;
 };

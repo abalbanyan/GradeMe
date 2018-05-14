@@ -15,12 +15,21 @@ router.get('/', async function(req, res, next) {
     let instructor = res.locals.user.instructor;
     let assignid = req.query.assignid;
     let assignment = await db.Assignment.findById(assignid).exec();
+    if(!assignment) {
+        res.status(404);
+        return res.render('error', {message: "Assignment not found."});
+    }
 
     // Ensure this user belongs to the course.
     let course = await db.Course.findOne({assignments : assignid}).exec();
-    if (!(await db.utils.belongsToCourse(course._id, userid, instructor, res.locals.user.admin))) {
+    if(!course) {
+        res.status(500);
+        return res.render('error', {message: "Assignment not associated with course."});
+    }
+
+    if (!(await db.utils.canViewAssignment(assignment._id, course._id, userid, instructor, res.locals.user.admin))) {
         res.status(403);
-        return res.render('error', {message: "You do not belong to this course."});
+        return res.render('error', {message: "You do not have access to this assignment."});
     }
 
     res.render('assignment', {

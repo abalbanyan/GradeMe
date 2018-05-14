@@ -80,14 +80,36 @@ async function getAssignments(courseid, showhidden, admin = false) {
 async function belongsToCourse(courseid, userid, instructor, admin = false) {
     let course = null;
     if (admin) {
-        return true;
-    }
-    if (instructor) {
+        course = await Course.findById(courseid);
+    } else if (instructor) {
         course = await Course.findOne({_id: courseid, instructors: userid}).exec();
     } else {
         course = await Course.findOne({_id: courseid, students: userid, visible: true}).exec();
     }
     return (course != null);
+}
+
+/**
+ * Determines whether a user can view an assignment
+ *
+ * @param {String} assignid
+ * @param {String} courseid
+ * @param {String} userid
+ * @param {Boolean} instructor - Is this user an instructor?
+ * @param {Boolean} admin - Is this user an admin?
+ */
+async function canViewAssignment(assignid, courseid, userid, instructor, admin = false) {
+    const isInCourse = await belongsToCourse(courseid, userid, instructor, admin);
+    if(!isInCourse)
+        return false;
+
+    let assignment = null;
+    if(admin || instructor) {
+        assignment = await Assignment.findById(assignid);
+    } else {
+        assignment = await Assignment.findOne({_id: assignid, visible: true});
+    }
+    return (assignment !== null);
 }
 
 /**
@@ -147,6 +169,7 @@ module.exports = {
         isCourseInstructor: isCourseInstructor,
         getAssignments: getAssignments,
         belongsToCourse: belongsToCourse,
+        canViewAssignment: canViewAssignment,
         gradeSubmission: gradeSubmission
     }
 }
