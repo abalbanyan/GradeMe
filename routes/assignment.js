@@ -18,8 +18,9 @@ router.get('/', async function(req, res, next) {
     }
 
     res.render('assignment', {
-        assignment: assignment, 
+        assignment: assignment,
         instructor: instructor,
+        course: course
     });
 });
 
