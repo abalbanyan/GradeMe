@@ -77,7 +77,8 @@ const routes = [
     createRouteTest('create-account', 200, 200, 200, 200),
     createRouteTest('create-course', 200, 200, 403, 'login'),
     createRouteTest('enroll', 200, 200, 200, 'login'),
-    createRouteTest('login', 'courses', 'courses', 'courses', 200)
+    createRouteTest('login', 'courses', 'courses', 'courses', 200),
+    createRouteTest('course', 404, 404, 404, 'login')
 ];
 
 

@@ -5,7 +5,7 @@ let db = require('../db.js');
 router.get('/', async function(req, res, next) {
     if (!req.query.courseid) {
         res.status(404);
-        res.render('error', {message: "Missing course id."});
+        return res.render('error', {message: "Missing course id."});
     }
     // Does this course exist?
     let course = await db.Course.findById(req.query.courseid).exec();
