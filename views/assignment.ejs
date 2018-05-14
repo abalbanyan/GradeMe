@@ -1,26 +1,28 @@
 <%- include partials/header.ejs %>
 <head>
-    <link rel="stylesheet" type="text/css" href="/css/assignment.css">    
+    <link rel="stylesheet" type="text/css" href="/css/assignment.css">
 </head>
 
 <div class="container-fluid">
     <div class="row">
         <div class="col assignment-details">
             <h2> Assignment Page for "<%- assignment.name %>" </h2>
-            <% if (instructor) { %> 
+            <% if (instructor) { %>
                 <div class="row">
                     <div class="col">
                         <a class="btn btn-outline-dark" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
+                        <a class="btn btn-outline-dark" href="/course?courseid=<%= course._id %>">Return to Course</a>
                     </div>
+
                 </div>
                 <br>
             <% } %>
             <!--
-                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically. 
-                Let's keep it simple for now. 
+                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically.
+                Let's keep it simple for now.
             -->
             <!-- <div class="row">
-                <div class="col">                
+                <div class="col">
                     <h5>Submit project file(s)</h5>
                     <form class="box text-center" method="POST" action="/assignment/upload" enctype="multipart/form-data">
                         <div class="box__input">
@@ -43,14 +45,14 @@
 
             <h5>View test cases</h5>
             <!-- TODO -->
-    
+
             <h5>Run test script</h5>
-            <!-- TODO -->                    
-    
+            <!-- TODO -->
+
             <h5>Run grading script</h5>
             <!-- TODO -->
             <br>
-            
+
 
         </div>
         <div class="col">
@@ -61,7 +63,6 @@
     </div>
 </div>
 
-<script src="/js/file-upload.js"></script>        
-        
+<script src="/js/file-upload.js"></script>
+
 <%- include partials/footer.ejs %>
-        
