@@ -1,5 +1,35 @@
 <%- include partials/header.ejs %>
 
-<p> Admin Page </p>
+
+<div class="container">
+  <h4> Admin Page </h4>
+  <br> </br>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Permissions</th>
+    </tr>
+  </thead>
+
+  <tbody>
+      <% myUsers.forEach(function(user) { %>
+          <tr>
+              <td><%= user.name.first + " " +user.name.last%></td>
+              <td><%= user.email%></td>
+              <% if (user.instructor) { %>
+                <td>Instructor</td>
+              <% } else { %>
+                <td>Student</td>
+              <% } %>
+          </tr>
+      <% }); %>
+  </tbody>
+
+</table>
+
+</div>
 
 <%- include partials/footer.ejs %>
