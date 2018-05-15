@@ -46,9 +46,9 @@
             <% if (locals.user) { %>
             <ul class="navbar-nav ml-auto">
                 <li>
-                    <a class="nav-link active" > <%= user.name.first + " " + user.name.last %> </a>
+                    <a class="nav-link" href="/edit-user" > <%= user.name.first + " " + user.name.last %> </a>
                 </li>
-                -
+
                 <li>
                     <a class="nav-link" href="/login?logout=1">Log Out</a>
                 </li>
