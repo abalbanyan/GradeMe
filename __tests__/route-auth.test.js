@@ -12,6 +12,7 @@ const util = require('../jest/jestutil.js');
 const User = require('../models/User.js');
 const Course = require('../models/Course.js');
 
+// Check whether trying to access route redirects to location
 const checkRedirect = async (route, location) => {
     const response = await request(app).get(route);
 
@@ -25,11 +26,13 @@ const checkRedirect = async (route, location) => {
     expect(resLocation).toBe(location);
 };
 
+// Check whether trying to access route gives statusCode
 const checkStatus = async (route, statusCode) => {
     const response = await request(app).get(route);
     expect(response.statusCode).toBe(statusCode);
 }
 
+// Call checkRedirect or checkStatus depending on whether it is a string or a number
 const checkRoute = (route, userType, enrolled) => {
     let location = '/' + route.location;
     let name = route.name ? route.name : location;
@@ -49,6 +52,10 @@ const checkRoute = (route, userType, enrolled) => {
     }
 }
 
+// Creates an object representing a route test
+// For each result there are two options
+//   1. A number: accessing location should return that number as the status code
+//   2. A string: accessing location should redirect to the string specified
 const createRouteTest = (location, adminResult, instructorResult, studentResult, loggedoutResult) => {
     if((typeof instructorResult) === 'number' || (typeof instructorResult) === 'string')
         instructorResult = {in: instructorResult, out: instructorResult};
@@ -64,6 +71,7 @@ const createRouteTest = (location, adminResult, instructorResult, studentResult,
     };
 }
 
+// Create route test, with a specified name for the test title
 const createNamedRouteTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
     let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
     route.name = name;
@@ -180,7 +188,7 @@ describe('while logged in as instructor', async () => {
 
     describe('enrolled in course', async () => {
         beforeAll(() => {
-            // Duplicate behavior of being logged in as instructor
+            // Duplicate behavior of being logged in as enrolled instructor
             isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
         });
 
@@ -191,7 +199,7 @@ describe('while logged in as instructor', async () => {
 
     describe('not enrolled in course', async () => {
         beforeAll(() => {
-            // Duplicate behavior of being logged in as instructor
+            // Duplicate behavior of being logged in as instructor but not enrolled
             isAuthenticated.mockImplementation(async () => { return users.instructor_out; });
         });
 
@@ -213,7 +221,7 @@ describe('while logged in as student', async () => {
 
     describe('enrolled in course', async () => {
         beforeAll(() => {
-            // Duplicate behavior of being logged in as student
+            // Duplicate behavior of being logged in as enrolled student
             isAuthenticated.mockImplementation(async () => { return users.student_in; });
         });
 
@@ -224,7 +232,7 @@ describe('while logged in as student', async () => {
 
     describe('not enrolled in course', async () => {
         beforeAll(() => {
-            // Duplicate behavior of being logged in as student
+            // Duplicate behavior of being logged in as student but not enrolled
             isAuthenticated.mockImplementation(async () => { return users.student_out; });
         });
 
