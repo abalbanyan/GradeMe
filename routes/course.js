@@ -5,10 +5,14 @@ let db = require('../db.js');
 router.get('/', async function(req, res, next) {
     if (!req.query.courseid) {
         res.status(404);
-        res.render('error', {message: "Missing course id."});
+        return res.render('error', {message: "Missing course id."});
     }
     // Does this course exist?
     let course = await db.Course.findById(req.query.courseid).exec();
+    if(!course) {
+        res.status(404);
+        return res.render('error', {message: "Course not found."});
+    }
 
     // Does this user have access to this course?
     let belongs = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, res.locals.user.instructor, res.locals.user.admin);

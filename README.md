@@ -1,5 +1,7 @@
 # GradeMe
 
+[![Build Status](https://travis-ci.org/abalbanyan/GradeMe.svg?branch=master)](https://travis-ci.org/abalbanyan/GradeMe)
+
 GradeMe is a desktop web application designed to be a grade portal for computer science classes. It has the standard features one might expect like the ability to: create courses, create assignments, upload assignment specifications, accept student submissions, etc, but also the novel feature of automating the testing and grading of assignments. In addition, we offer the ability for instructors to allow students to pregrade assignments using the test scripts uploaded by the instructor. This allows students to get immediate feedback and fix their program should anything be wrong.
 
 ### Development Instructions
