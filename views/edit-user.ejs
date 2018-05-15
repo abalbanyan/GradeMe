@@ -1,0 +1,83 @@
+<%- include partials/header.ejs %>
+
+<script type="text/javascript">
+    function addVerificationCodeField() {
+        var container = document.getElementById('vcodes');
+        var textBox = document.createElement('input');
+        textBox.className = 'form-control';
+        textBox.name = 'codes';
+        textBox.placeholder = 'Enter code (Optional)';
+        textBox.type = 'text';
+        container.appendChild(document.createElement('br'));
+        container.appendChild(textBox);
+    }
+
+    function passwordCheck() {
+        if (document.getElementById('password').value == document.getElementById('confirmpassword').value
+                || document.getElementById('confirmpassword').value == '') {
+            document.getElementById('confirmpassword').style.color = 'green';
+            document.getElementById('passwordmessage').innerHTML = '';
+        } else {
+            document.getElementById('confirmpassword').style.color = 'red';
+            document.getElementById('passwordmessage').style.color = 'red';
+            document.getElementById('passwordmessage').innerHTML = 'Passwords do not match.';
+        }
+    }
+</script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <h2> Edit Account </h2>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-6">
+            <form method="POST">
+
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="firstname">First Name</label>
+                            <input type="text" class="form-control" name="firstname" value=<%= user.name.first %>>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="lastname">Last Name</label>
+                            <input type="text" class="form-control" name="lastname" value=<%= user.name.last %>>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" name="email" aria-describedby="emailHelp" value=<%= user.email %>>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input onkeyup='passwordCheck()' type="password" class="form-control" id="password" name="password" placeholder="Password">
+                </div>
+                <div class="form-group"> <!-- TODO: add logic here -->
+                    <label for="confirmpassword">Confirm Password</label>
+                    <input onkeyup='passwordCheck()' type="password" class="form-control" id="confirmpassword" name="confirmpassword" placeholder="Re-enter Password">
+                    <span id='passwordmessage'></span>
+                </div>
+
+
+
+                <br>
+
+
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+        <div class="col-md-3"></div>
+    </div>
+</div>
+
+<%- include partials/footer.ejs %>
