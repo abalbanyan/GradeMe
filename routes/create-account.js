@@ -9,7 +9,7 @@ router.get('/', function(req, res, next) {
 
 router.post('/', async function(req, res, next) {
     // TODO: Validate input.
-    let email = req.body.email;
+    let email = req.body.email;  // Bootstrap form already validates FORM of email.
     let password = req.body.password;
     let firstname = req.body.firstname;
     let lastname = req.body.lastname;
