@@ -1,11 +1,5 @@
 <%- include partials/header.ejs %>
 
-<!-- TODO:
-    can you put (Optional) after verification/enrollment code and allow the user to add additional codes?
-    you can do this using js to add a new input box if they press a button
-    http queries allow you to send arrays
--->
-
 <script type="text/javascript">
     function addVerificationCodeField() {
         var container = document.getElementById('vcodes');
@@ -95,11 +89,6 @@
                     </label>
                 </div>
                 <br>
-                <!--
-                    TODO: So I'm thinking maybe make this a multi-page process, and use radio button values to determine what
-                    kind of code we ask for, since Profs only need one, and TAs and Students can have multiple.
-                    OR we can just ask for one code, and let students/TAs add more later once they're logged in.
-                -->
                 <div class="form-group" id="vcodes">
                     <label for="enrollCode">Verification/Enrollment Code</label>
                     <input type="text" class="form-control" name="codes" aria-describedby="codeHelp" placeholder="Enter code">

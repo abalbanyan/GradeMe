@@ -34,12 +34,15 @@ router.post('/', async function(req, res, next) {
                     // Only one code was submitted. Convert to an array.
                     req.body.codes = [req.body.codes];
                 }
-                let usertype1 = instructor? 'instructor_enrollment_code' : 'student_enrollment_code';
-                let usertype2 = instructor? 'instructors' : 'students';
                 // Add user to each course they provided.
-                await db.Course.findOneAndUpdate({ usertype1: {$in : req.body.codes}, $addToSet : { usertype2 : res.locals.user._id } }).exec();
+                if (instructor) {
+                    await db.Course.updateMany({ instructor_enrollment_code: {$in : req.body.codes} }, { $addToSet : { instructors : user._id } }).exec();
+                } else {
+                    await db.Course.updateMany({ student_enrollment_code: {$in : req.body.codes} }, { $addToSet : { students : user._id } }).exec();
+                }
             }
         } catch (err) {
+            console.log("error: " + err);
             res.render('error', {message:"Unable to add user to specified courses."});
         }
         res.redirect('/courses');
