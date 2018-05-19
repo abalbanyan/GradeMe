@@ -13,6 +13,7 @@ router.post('/', async function(req, res, next) {
     let email = req.body.email;
     let firstname = req.body.firstname;
     let lastname = req.body.lastname;
+    let uid = req.body.uid;
 
     let updateduser = req.body.password?
       { email: req.body.email,

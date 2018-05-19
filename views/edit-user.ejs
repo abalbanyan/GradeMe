@@ -58,6 +58,13 @@
                     <input type="email" class="form-control" name="email" aria-describedby="emailHelp" value=<%= user.email %>>
                 </div>
 
+                <fieldset disabled>
+                  <div class="form-group">
+                      <label for="uid">University ID</label>
+                      <input type="email" class="form-control" name="uid" aria-describedby="emailHelp" value=<%= user.uid %>>
+                  </div>
+                </fieldset>
+
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input onkeyup='passwordCheck()' type="password" class="form-control" id="password" name="password" placeholder="Password">

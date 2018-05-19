@@ -11,7 +11,8 @@ let UserSchema = new Schema({
     password:       { type: String, required: true },                 // Hashed.
     instructor:     { type: Boolean, required: true },                // Is this User an instructor?
     admin:          { type: Boolean, default: false, required: true }, // Is this User an admin?
-    name:           { first: String, last: String }
+    name:           { first: String, last: String },
+    uid:            { type: Number, required: true }
 });
 
 /**

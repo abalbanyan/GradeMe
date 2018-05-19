@@ -10,6 +10,7 @@ let admin = new db.User({
     password: 'admin',
     admin: true,
     instructor: true,
+    uid: 0
 });
 
 let danny = new db.User({
@@ -17,14 +18,16 @@ let danny = new db.User({
     password: 'monkey',
     instructor: false,
     admin: false,
-    name: {first: "Danny", last: "Jung"}
+    name: {first: "Danny", last: "Jung"},
+    uid: 100
 });
 
 let willy = new db.User({
     email: 'willy@gmail.com',
     password: 'mindi',
     instructor: true,
-    name: {first: 'William', last: 'Hsiao'}
+    name: {first: 'William', last: 'Hsiao'},
+    uid: 1337
 });
 admin.save(err => {if(err) console.error(err)});
 willy.save(err => {if(err) console.error(err)});

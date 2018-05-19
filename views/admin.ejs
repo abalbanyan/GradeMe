@@ -11,6 +11,8 @@
       <th scope="col">Name</th>
       <th scope="col">Email</th>
       <th scope="col">Permissions</th>
+      <th scope="col">UID</th>
+
     </tr>
   </thead>
 
@@ -24,6 +26,7 @@
               <% } else { %>
                 <td>Student</td>
               <% } %>
+              <td><%= user.uid%></td>
           </tr>
       <% }); %>
   </tbody>
