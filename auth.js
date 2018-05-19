@@ -19,7 +19,10 @@ let getUserID = require('./auth/getUserID.js');
  */
 async function authChecker(req, res, next) {
     res.locals.path = req.path;
-    if (req.path == '/login' || req.path == '/create-account') {
+    let pathRegex = new RegExp(req.path);
+    let emailRegex = /\/email-verification/g;
+    
+    if (req.path == '/login' || req.path == '/create-account' || emailRegex.exec(pathRegex) != null) {
         // Some pages don't require authentication.
         next();
     } else {
