@@ -14,12 +14,14 @@ router.post('/', async function(req, res, next) {
     let firstname = req.body.firstname;
     let lastname = req.body.lastname;
     let instructor = (req.body.userradios === 'instructor');
+    let uid = req.body.uid;
 
     db.User.create({
         email: email,
         password: password,
         name: {first: firstname, last: lastname},
-        instructor: instructor
+        instructor: instructor,
+        uid: uid
     }, async (err, user) => {
         if (err) {
             return res.status(500);
