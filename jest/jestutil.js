@@ -36,12 +36,14 @@ const createTestUser = (type, tag) => {
     const instructor = (type === 'instructor') || (type === 'admin');
     const admin = type === 'admin';
     const name = type + tag;
+    const uid = Math.floor(Math.random() * 1000000000);
     const user = new User({
         email: name + '@grademe.edu',
         name: {first: name, last: name},
         password: name,
         instructor: instructor,
-        admin: admin
+        admin: admin,
+        uid: uid
     });
     return user;
 };

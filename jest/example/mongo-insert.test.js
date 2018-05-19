@@ -12,12 +12,15 @@ afterAll(() => {
 });
 
 it('should insert a user into the database', async () => {
-    let willy = new User({
-        email: 'willy@gmail.com',
-        password: 'mindi',
-        instructor: true,
-        name: {first: 'William', last: 'Hsiao'}
-    });
+    let willy = jestutil.createTestUser("instructor", "Will Hsiao");
+
+
+    // new User({
+    //     email: 'willy@gmail.com',
+    //     password: 'mindi',
+    //     instructor: true,
+    //     name: {first: 'William', last: 'Hsiao'}
+    // });
     await willy.save();
 
     let user = await User.findById(willy._id).exec();
