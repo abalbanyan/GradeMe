@@ -1,5 +1,6 @@
 let mongoose = require('mongoose');
 let shortid = require('shortid');
+let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('./autograder/autograder.js');
@@ -15,7 +16,7 @@ if(process.env.NODE_ENV !== 'test') {
 }
 
 // DB Models.
-let User = require('./models/User.js');
+let User = require('./models/User.js').User;
 let Course = require('./models/Course.js');
 let Assignment = require('./models/Assignment.js');
 let Submission = require('./models/Submission.js');
@@ -156,6 +157,33 @@ async function isCourseInstructor(courseid, instructorid) {
     return courses.length >= 1;
 }
 
+/**
+ * Configuration for email verification.
+ */
+nev.configure({
+    persistentUserModel: User,
+    expirationTime: 86400, // in secs = 24 hours
+
+    verificationURL: 'http://localhost:3200/email-verification/${URL}',
+    transportOptions: {
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true, // use SSL
+        auth: {
+            user: 'grademeverifier@gmail.com',
+            pass: 'sa5nchiPoK?89!'
+        },
+    },
+
+}, function(err, options) {
+    if (err) {
+        console.log(err);
+        return;
+    }
+
+    console.log('configured: ' + (typeof options === 'object'));
+});
+
 // TODO: How are we storing user submissions? Might need a "Submission" model.
 
 module.exports = {
@@ -163,6 +191,7 @@ module.exports = {
     Course: Course,
     Assignment: Assignment,
     Submission: Submission,
+    EmailVerification: nev,
     utils: {
         getUser: getUser,
         getCourses: getCourses,
