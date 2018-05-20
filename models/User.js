@@ -25,7 +25,12 @@ let TempUserSchema = new Schema({
     admin:          { type: Boolean, default: false, required: true }, 
     name:           { first: String, last: String },
     GENERATED_VERIFYING_URL: {type: String, required: true},
-    enroll_codes: {type: [String], required: false}
+    enroll_codes: {type: [String], required: false},
+    createdAt: {  // TTL of tempuser
+        type: Date,
+        expireAfterSeconds : 86400,
+        default: Date.now
+    },
 });
 
 /**

@@ -163,7 +163,6 @@ async function isCourseInstructor(courseid, instructorid) {
  */
 nev.configure({
     persistentUserModel: User,
-    expirationTime: 86400, // in secs = 24 hours
 
     verificationURL: 'http://localhost:3200/email-verification/${URL}',
     transportOptions: {
