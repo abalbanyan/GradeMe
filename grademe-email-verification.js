@@ -70,7 +70,7 @@ module.exports = function(mongoose) {
         verifyMailOptions: {
             from: 'Do Not Reply <user@gmail.com>',
             subject: 'Confirm your account',
-            html: '<p>Please verify your account by clicking <a href="${URL}">this link</a>. If you are unable to do so, copy and ' +
+            html: '<p>Please verify your account by clicking <a href="${URL}">this link</a> within 24 hours. If you are unable to do so, copy and ' +
                 'paste the following link into your browser:</p><p>${URL}</p>',
             text: 'Please verify your account by clicking the following link, or by copying and pasting it into your browser: ${URL}'
         },
