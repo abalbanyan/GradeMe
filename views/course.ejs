@@ -4,7 +4,26 @@
 </head>
 
 <div class="container">
-    <h2><%- course.name %> </h2>
+    <h2><%= course.name %> </h2>
+    <b>Instructors:</b>
+
+    <% instructors.forEach(function(instructor) { %>
+          <a href="mailto:<%=instructor.email%>">
+            <% if (instructor.id == course.main_instructor) { %>
+              <span style="font-weight:bold"><%= instructor.name.first + " " + instructor.name.last + ","%></span>
+              <% } %>
+          </a>
+    <% }); %>
+
+    <% instructors.forEach(function(instructor) { %>
+          <a href="mailto:<%=instructor.email%>">
+            <% if (instructor.id != course.main_instructor) { %>
+              <span><%= instructor.name.first + " " + instructor.name.last %></span>
+            <% } %>
+          </a>
+    <% }); %>
+
+    <br><br>
     <p><%= course.desc %></p>
 
     <h4 class="mini-title">Assignments</h4>

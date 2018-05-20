@@ -47,7 +47,10 @@ router.get('/', async function(req, res, next) {
         }
     }
 
-    return res.render('course', {course: course, assignments: assignments } );
+    // Fetch all instructors.
+    course.instructors.push("B1l1jum00G")
+    let instructors = await db.User.find({_id: {$in : course.instructors}}).exec();
+    return res.render('course', {course: course, assignments: assignments, instructors: instructors } );
 });
 
 module.exports = router;
