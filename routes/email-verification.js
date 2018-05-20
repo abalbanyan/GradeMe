@@ -22,18 +22,12 @@ router.post('/resend', function(req, res, next) {
     let email = req.body.email;
     db.EmailVerification.resendVerificationEmail(email, function(err, userFound) {
         if (err) {
-            return res.status(404).send('ERROR: resending verification email FAILED');
+            res.render('error', {message: 'Resending verification email FAILED! :C'});            
         }
         if (userFound) {
-            res.locals.statusmessagee = 'An email has been sent to you again. Please check it to verify your account.';            
-            res.json({
-                msg: 'An email has been sent to you, yet again. Please check it to verify your account.'
-            });
+            res.render('email-verification', {statusmessage: 'An email has been sent to you again. Please check it to verify your account.'});            
         } else {
-            res.locals.statusmessagee = 'Your verification code has expired. Please sign up again.';                        
-            res.json({
-                msg: 'Your verification code has expired. Please sign up again.'
-            });
+            res.render('email-verification', {errormessage: 'Your verification code has expired. Please sign up again.'});                        
         }
     });
 });
@@ -41,13 +35,11 @@ router.post('/resend', function(req, res, next) {
 // user accesses the link that is sent
 router.get('/:URL', function(req, res) {
     let url = req.params.URL;
-    console.log("in confirm");
 
     db.EmailVerification.confirmTempUser(url, async function(err, user, codes) {
         if (user) {
-            // Authenticate and enroll in courses. TODO: AFTER VERIFICATION move to other route
+            // Authenticate and enroll in courses.
             auth.sendCookie(res, user._id);
-            // TODO FIX once basic thing works
             try {
                 if (codes) {
                     // Add user to each course they provided.
@@ -61,14 +53,9 @@ router.get('/:URL', function(req, res) {
                 console.log("error: " + err);
                 res.render('error', {message:"Unable to add user to specified courses."});
             }
-            // res.locals.statusmessage = 
-            res.json({
-                statusmessage: 'You have been confirmed!',  // TODO: Make sure this works. not sure if i need res.locals stuff
-                // info: info
-            });
-            // res.redirect('/courses');  
+            res.render('email-verification', {statusmessage: 'You have been confirmed!'});                        
         } else {
-            return res.status(404).send('ERROR: confirming temp user FAILED');
+            res.render('error', {message: 'Confirming temp user FAILED! :C'});
         }
     });
 });
