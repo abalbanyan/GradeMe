@@ -70,11 +70,16 @@ router.post('/upload/submission', upload.single('file'), async function(req, res
     });
     submission.save(async (err) => {
         if (err) {
-            res.json(JSON.stringify({ upload: false, error: "Please try again." }));
+            res.json(JSON.stringify({ upload: false, error: "Error saving submission. Please try again." }));
         } else {
-            let output = await db.utils.gradeSubmission(userid, assignid);
-            console.log(output);
-            res.json(JSON.stringify({ upload: true }));
+            try {
+                // Immediately grade the assignment if the option is enabled.
+                let grade = assignment.gradeonsubmission? (await db.utils.gradeSubmission(userid, assignid)) : false;
+                return res.json(JSON.stringify({ upload: true, grade: grade }));
+            } catch (err) {
+                console.error(err);
+                return res.json(JSON.stringify({ upload: false, error: "Error grading assignment. Please try again."}));
+            }
         }
     });
 });

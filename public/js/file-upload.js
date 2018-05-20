@@ -23,7 +23,8 @@ function setFilename(thisVar, multipleAllowed) {
 
 async function ajaxUpload(el, formid, url, progressbar = false) {
     el.disabled = true;
-    
+    let gradeonsubmission = (document.getElementById('gradeonsubmission').value === "true")? true : false;
+
     $.ajax(url, {
         xhr: function() {
             var xhr = new window.XMLHttpRequest();
@@ -37,10 +38,14 @@ async function ajaxUpload(el, formid, url, progressbar = false) {
                         var percentComplete = evt.loaded / evt.total;
                         percentComplete = parseInt(percentComplete * 100);
                         progressbar.style.width = percentComplete + '%';
+                        if (percentComplete == 100) {
+                            progressbar.innerHTML = "Submission uploaded. " + (gradeonsubmission? 'Grading...' : '');
+                            document.getElementById('grade-spinner').hidden = !gradeonsubmission;
+                        }
                     }
-                }, false);  
+                }, false);
                 progressbar.hidden = false;
-                progressbar.parentElement.hidden = false;    
+                progressbar.parentElement.hidden = false;
             }
 
             return xhr;
@@ -58,14 +63,19 @@ async function ajaxUpload(el, formid, url, progressbar = false) {
             if (result.upload) {
                 if(progressbar) {
                     progressbar.classList.add('progress-bar-success');
-                    progressbar.innerHTML = "File uploaded.";
+                    progressbar.innerHTML = gradeonsubmission? "Submission uploaded." : "Submission graded.";
                     progressbar.style.width = '100%';
+                }
+                if (result.grade) {
+                    document.getElementById('grade-info').innerHTML = "Your submission has been graded. Your score: <b>" + result.grade + '</b>';
+                    document.getElementById('grade-info-container').hidden = false;
+                    document.getElementById('grade-spinner').hidden = true;
                 }
             } else {
                 // Server did not accept upload.
                 if(progressbar) {
                     progressbar.parentElement.classList.add('progress-bar-danger');
-                    progressbar.innerHTML = "Error uploading file. ";
+                    progressbar.innerHTML = "";
                     if (result.error) {
                         progressbar.innerHTML += result.error;
                     }

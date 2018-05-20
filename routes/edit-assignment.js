@@ -11,6 +11,7 @@ router.get('/', async function(req, res, next) {
     let userid = res.locals.user._id;
     let instructor = res.locals.user.instructor;
     let assignid = req.query.assignid;
+
     let assignment = await db.Assignment.findById(assignid).exec();
 
     // Ensure this user belongs to the course and that they are an instructor.
@@ -22,6 +23,31 @@ router.get('/', async function(req, res, next) {
     res.render('edit-assignment', {
         assignment: assignment
     });
+});
+
+router.post('/', async function(req, res, next) {
+    let userid = res.locals.user._id;
+    let instructor = res.locals.user.instructor;
+    let assignid = req.body.assignid;
+
+    try {
+        let assignment = await db.Assignment.findById(assignid).exec();
+
+        // Ensure this user belongs to the course and that they are an instructor.
+        let course = await db.Course.findOne({assignments : assignid}).exec();
+        if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
+            return res.render('error', {message: "You do not belong to this course."});
+        }
+    
+        // Update settings.
+        let updated = await db.Assignment.findByIdAndUpdate(assignid, {
+            'gradeonsubmission': (req.body.gradeonsubmission)? true : false,
+            'visible': (req.body.visible)? true: false
+        }).exec();
+    } catch (err) {
+        return res.render('error', {error: err, message: "Error saving assignment settings."});
+    }
+    return res.redirect('assignment?assignid=' + assignid);
 });
 
 router.post('/upload/:action', upload.single('file'), async function(req, res, next) {

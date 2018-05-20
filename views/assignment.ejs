@@ -1,8 +1,10 @@
 <%- include partials/header.ejs %>
 <head>
     <link rel="stylesheet" type="text/css" href="/css/assignment.css">
+    <link rel="stylesheet" type="text/css" href="/css/spinner.css">    
 </head>
 
+<input id="gradeonsubmission" type="hidden" value="<%= assignment.gradeonsubmission %>">
 <div class="container-fluid">
     <div class="row">
         <div class="col assignment-details">
@@ -10,50 +12,28 @@
             <div class="row">
                 <div class="col">
                     <a class="btn btn-outline-dark" href="/course?courseid=<%= course._id %>">Return to Course</a>
-            <% if (instructor) { %>
+                        <% if (instructor) { %>
                         <a class="btn btn-outline-dark" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
-            <% } %>
+                        <% } %>
                 </div>
             </div>
-            <br>
 
-            <!--
-                I don't really like this drag and drop library. Its css doesn't seem to play well with bootstrap either. I also dislike how it uploads automatically.
-                Let's keep it simple for now.
-            -->
-            <!-- <div class="row">
-                <div class="col">
-                    <h5>Submit project file(s)</h5>
-                    <form class="box text-center" method="POST" action="/assignment/upload" enctype="multipart/form-data">
-                        <div class="box__input">
-                            <input class="box__file" type="file" name="files" id="file" data-multiple-caption="{count} files selected" multiple />
-                            <label for="file"><strong>Choose a file</strong><span class="box__dragndrop"> or drag it here</span>.</label>
-                            <br><button class="btn btn-primary" type="submit">Upload</button>
-                        </div>
-                        <div class="box__uploading">Uploading&hellip;</div>
-                        <div class="box__success">Done!</div>
-                        <div class="box__error">Error! <span></span>.</div>
-                    </form>
-                </div>
-            </div> -->
+            <br><br>
+            
             <h4>Submission</h4>
             <% let param_hidden = [{name: 'assignid', value: assignment._id}] %>
             <% let param_url = 'assignment/upload/submission' %>
             <% let param_file = 'submission' %>
             <%- include partials/file-upload.ejs %>
 
-
-            <h5>View test cases</h5>
-            <!-- TODO -->
-
-            <h5>Run test script</h5>
-            <!-- TODO -->
-
-            <h5>Run grading script</h5>
-            <!-- TODO -->
             <br>
-
-
+            <div hidden id="grade-spinner" class="spinner">Grading...</div>
+            <div hidden id="grade-info-container" class="alert alert-info alert-dismissible fade show" role="alert">
+                <span id='grade-info'></span><b> / <%= assignment.gradetotal %></b>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         </div>
         <div class="col">
             <% if (locals.assignment.spec && locals.assignment.spec.path) { %>

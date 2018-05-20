@@ -120,7 +120,7 @@ async function gradeSubmission(studentid, assignid) {
         userid: studentid,
         assignmentid: assignid}
     ).exec();
-    let assignment = await Assignment.findById(assignid);
+    let assignment = await Assignment.findById(assignid).exec();
 
     // Look for the most recent submission.
     if (!submissions) {
@@ -142,7 +142,9 @@ async function gradeSubmission(studentid, assignid) {
         }
         total += test.score;
     }
-    await Submission.findByIdAndUpdate(mostrecent._id, {grade: Math.round((score / total) * assignment.gradetotal)}).exec();
+    let grade = Math.round((score / total) * assignment.gradetotal);
+    await Submission.findByIdAndUpdate(mostrecent._id, {grade: grade}).exec();
+    return grade;
 }
 
 /**

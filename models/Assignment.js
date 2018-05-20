@@ -26,7 +26,7 @@ let AssignmentSchema = new Schema({
     // submissions:                { type: [String] }, // List of student submission ids.
     duedate:                    { type: Date },
     gradetotal:                 { type: Number, required: true, default: 100 },
-    gradeonsubmission:          { type: Boolean }
+    gradeonsubmission:          { type: Boolean, required: true, default: true }
 });
 // TODO: Validate input.
 
