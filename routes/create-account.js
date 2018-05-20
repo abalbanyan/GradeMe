@@ -8,7 +8,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/', async function(req, res, next) {
-    // TODO: Validate input.
     let email = req.body.email;  // Bootstrap form already validates FORM of email.
     let password = req.body.password;
     let firstname = req.body.firstname;
@@ -23,16 +22,6 @@ router.post('/', async function(req, res, next) {
             instructor: instructor
         });
     console.log('newUser: ' + newUser);
-    
-    // db.User.create({
-    //     email: email,
-    //     password: password,
-    //     name: {first: firstname, last: lastname},
-    //     instructor: instructor
-    // }, async (err, user) => {
-    //     if (err) {
-    //         return res.status(500);
-    //     }
     console.log('before temp user creation');   
     
     if (req.body.codes) {
@@ -46,17 +35,13 @@ router.post('/', async function(req, res, next) {
     db.EmailVerification.createTempUser(newUser, req.body.codes, function(err, existingPersistentUser, newTempUser) {
         if (err) {
             console.log('error: ' + err);
-            return res.status(404).send('ERROR: creating temp user FAILED');
-        }
-        console.log('existing:' + existingPersistentUser);
-        console.log('temp:' + newTempUser);        
+            res.render('error', {message: 'Creating temp user FAILED! :C'});
+        }  
 
         // user already exists in persistent collection
         if (existingPersistentUser) {
-            res.locals.errormessage = 'You have already signed up and confirmed your account. Did you forget your password?';            
-            return res.json({
-                msg: 'You have already signed up and confirmed your account. Did you forget your password?'
-            });
+            res.render('email-verification', 
+                       {errormessage: 'You have already signed up and confirmed your account. Did you forget your password?'});
         }
 
         // new user created
@@ -66,23 +51,17 @@ router.post('/', async function(req, res, next) {
             db.EmailVerification.sendVerificationEmail(email, URL, function(err, info) {
                 if (err) {
                     console.log('send email error: ' + err);
-                    return res.status(404).send('ERROR: sending verification email FAILED');  // TODO: make this go to our error page or do error status
+                    res.render('error', {message: 'Sending verification email FAILED! :C'});
+                    
                 }
-                res.json({
-                    msg: 'An email has been sent to you. Please check it to verify your account.',
-                    info: info
-                });
-                res.render('email-verification');           
+                res.render('email-verification', {statusmessage: 'An email has been sent to you. Please check it to verify your account.'});           
             });
 
             // user already exists in temporary collection!
         } else {
-            res.json({
-                msg: 'You have already signed up. Please check your email to verify your account.'
-            });
+            res.render('email-verification', {statusmessage: 'You have already signed up. Please check your email to verify your account.'});           
         }
     });
-    // }); 
 });
 
 module.exports = router;
