@@ -21,8 +21,6 @@ router.post('/', async function(req, res, next) {
             name: {first: firstname, last: lastname},
             instructor: instructor
         });
-    console.log('newUser: ' + newUser);
-    console.log('before temp user creation');   
     
     if (req.body.codes) {
         if (!(req.body.codes instanceof Array)) {
@@ -41,7 +39,7 @@ router.post('/', async function(req, res, next) {
         // user already exists in persistent collection
         if (existingPersistentUser) {
             res.render('email-verification', 
-                       {errormessage: 'You have already signed up and confirmed your account. Did you forget your password?'});
+                       {errormessage: 'You have already signed up and confirmed your account with the email ' + email + '. Did you forget your password?'});
         }
 
         // new user created
@@ -54,7 +52,7 @@ router.post('/', async function(req, res, next) {
                     res.render('error', {message: 'Sending verification email FAILED! :C'});
                     
                 }
-                res.render('email-verification', {statusmessage: 'An email has been sent to you. Please check it to verify your account.'});           
+                res.render('email-verification', {statusmessage: 'An email has been sent to ' + email + '. Please check it to verify your account.'});           
             });
 
             // user already exists in temporary collection!

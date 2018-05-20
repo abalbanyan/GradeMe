@@ -333,7 +333,7 @@ module.exports = function(mongoose) {
 
                 // temp user is not found (i.e. user accessed URL after data expired, or something else...)
             } else {
-                return callback(null, null), null;
+                return callback(null, null, null);
             }
         });
     };

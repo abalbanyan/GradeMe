@@ -2,16 +2,7 @@ let express = require('express');
 let router =  express.Router();
 let db = require('../db.js');
 let auth = require('../auth.js');
-
-/**
- * TODO:
- * take lib code and re-engineer for our purposes, with specific schema and all - DONE
- * get it to not redirect to login; get verification link to actually work - DONE
- * get enroll codes to work, after verification - DONE
- * put link to verification page on login page, so user can resend link - DONE, and resending works!
- * replace res.json thingies to render status message, not text page - DO THIS NEXT!!!!
- * redirect to courses after verification, make sure user is logged in - TODO
- */
+let url = require('url');
 
 router.get('/', function(req, res, next) {
     res.render('email-verification');
@@ -25,7 +16,7 @@ router.post('/resend', function(req, res, next) {
             res.render('error', {message: 'Resending verification email FAILED! :C'});            
         }
         if (userFound) {
-            res.render('email-verification', {statusmessage: 'An email has been sent to you again. Please check it to verify your account.'});            
+            res.render('email-verification', {statusmessage: 'An email has been sent to you again at ' + email + '. Please check it to verify your account.'});            
         } else {
             res.render('email-verification', {errormessage: 'Your verification code has expired. Please sign up again.'});                        
         }
@@ -53,9 +44,9 @@ router.get('/:URL', function(req, res) {
                 console.log("error: " + err);
                 res.render('error', {message:"Unable to add user to specified courses."});
             }
-            res.render('email-verification', {statusmessage: 'You have been confirmed!'});                        
+            res.redirect("/courses?confirmNewUser=1");
         } else {
-            res.render('error', {message: 'Confirming temp user FAILED! :C'});
+            res.render('error', {message: 'Confirming temp user FAILED! Maybe you confirmed your email already? \nCheck your email for a confirmation email.'});
         }
     });
 });
