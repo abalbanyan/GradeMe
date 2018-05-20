@@ -63,7 +63,7 @@ async function ajaxUpload(el, formid, url, progressbar = false) {
             if (result.upload) {
                 if(progressbar) {
                     progressbar.classList.add('progress-bar-success');
-                    progressbar.innerHTML = gradeonsubmission? "Submission uploaded." : "Submission graded.";
+                    progressbar.innerHTML = gradeonsubmission? "Submission graded." : "Submission uploaded.";
                     progressbar.style.width = '100%';
                 }
                 if (result.grade) {
