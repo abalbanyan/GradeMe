@@ -1,6 +1,7 @@
 let mongoose = require('mongoose');
 let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
+let secrets = require('./secrets.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('./autograder/autograder.js');
@@ -170,8 +171,8 @@ nev.configure({
         port: 465,
         secure: true, // use SSL
         auth: {
-            user: 'grademeverifier@gmail.com',
-            pass: 'sa5nchiPoK?89!'
+            user: secrets.verifierEmail,
+            pass: secrets.verifierPassword
         },
     },
 
