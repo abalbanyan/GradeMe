@@ -14,7 +14,7 @@ async function getUserID(req) {
         let decodedtoken = await jwt.verify(token, secret);
         return decodedtoken.id;
     } catch (err) {
-        console.log(err);
+        // Token invalid (may have expired).
         return null;
     }
 }
