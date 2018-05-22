@@ -38,6 +38,11 @@ AssignmentSchema.pre('save', async function(next) {
         this.gradingenv.dockerfile = 'course-data/assign-' + this._id + '/Dockerfile';
         this.gradingenv.testscript = 'course-data/assign-' + this._id + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
+
+        // Create and build docker environment, uniquely identified by the assignment id.
+        let gradingEnvironment = new GradingEnvironment(this._id, this.gradingenv.archive);
+        await gradingEnvironment.init();
+        console.log("Building image.");
     }
     return next();
 });

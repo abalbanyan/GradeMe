@@ -97,9 +97,10 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
             let envArchive = await fileutils.makeEnvTar(assignid, gradingenvfiles, 'env.tar');
             if (!envArchive) { throw new Error(); }
 
-            // Update the autograder grading environment.
+            // Rebuild the autograder's grading environment using the new archive.
             let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
-            await gradingEnvironment.buildImage();
+            await gradingEnvironment.init();
+            console.log("Rebuilding image.");
         }
 
     } catch (err) {
