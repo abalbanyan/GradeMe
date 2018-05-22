@@ -51,6 +51,16 @@ function actuallyGrade(arr) {
     return [current, total_score];
 }
 
+/**
+ * Does this docker image exist?
+ * @param {String} imageId
+ * @returns {Boolean}
+ */
+async function imageExists(imageId) {
+    const images = await docker.listImages({ filters: { reference: [imageId] } });
+    return (images.length > 0);
+}
+
 class GradingContainer {
     constructor(dockerContainer) {
         this.container = dockerContainer;
@@ -152,19 +162,33 @@ class GradingContainer {
  */
 class GradingEnvironment {
     constructor(assignmentId, envArchive) {
-        let existingEnv = envMap.get(assignmentId);
-        if (existingEnv) {
-            return existingEnv;
+        this.envArchive = envArchive;
+        this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
+        this.buildPromise = null;
+        this.imageBuilt = false;
+    }
+
+    /**
+     * Initialize this grading environment. 
+     * Checks whether an image already exists, and uses that image, otherwise creates a new one.
+     * @param {Boolean} rebuild Rebuild the docker image with a new envArchive (optional).
+     * @param {Function} onProgress Called with progress descriptions (optional). 
+     */
+    async init(rebuild = false, onProgress = false) {
+        if (!this.imageId) throw new Error('No image id provided.');
+        if (this.buildPromise) return;
+
+        if (rebuild || !(await imageExists(this.imageId))) {
+            this.buildPromise = this.buildImage(this.envArchive); // Build new image.
         } else {
-            envMap.set(assignmentId, this);
-            this.envArchive = envArchive;
-            this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
-            this.buildPromise = null;
+            this.imageBuilt = true;
+            // this.buildPromise = docker.getImage(this.imageId).get(); // Retrieve old image.
         }
     }
 
     /**
-     * Creates an image encapsulating the grading environment
+     * Creates an image encapsulating the grading environment.
+     * @private
      * @param {String}   envArchive Rebuild with a new environment
      * @param {Function} onProgress Called with progress descriptions (optional)
      */
@@ -198,34 +222,35 @@ class GradingEnvironment {
      * @param {String} srcArchive Tarball containing student source code
      * @returns {Promise} Resolves to a GradingContainer
      */
-    containerize(userId, srcArchive) {
-        if (!this.buildPromise) {
+    async containerize(userId, srcArchive) {
+        if (!this.imageBuilt && !this.buildPromise) {
             return Promise.reject(new Error('Call buildImage() first'));
         }
 
-        return this.buildPromise.then(() =>
-            docker.createContainer({
-                name: this.imageId + '-' + userId,
-                Image: this.imageId,
-                AttachStdin: false,
-                AttachStdout: false,
-                AttachStderr: true,
-                Tty: true,
-                OpenStdin: false,
-                StdinOnce: false,
-                AutoRemove: true,
-                Entrypoint: ['/bin/bash']
-            })
-        ).then((container) =>
-            // XXX: potential to overwrite TA files with student files?
-            // TODO: archive upload not working
-            container.putArchive(srcArchive, {
-                path: '/usr/src/app', // not relative to WORKDIR :<
-                noOverwriteDirNonDir: false
-            }).then((_) =>
-                new GradingContainer(container)
-            )
-        );
+        if (!this.imageBuilt) {
+            await this.buildPromise;
+            this.imageBuilt = true;
+        }
+
+        let container = await docker.createContainer({
+            name: this.imageId + '-' + userId,
+            Image: this.imageId,
+            AttachStdin: false,
+            AttachStdout: false,
+            AttachStderr: true,
+            Tty: true,
+            OpenStdin: false,
+            StdinOnce: false,
+            AutoRemove: true,
+            Entrypoint: ['/bin/bash']
+        });
+        // XXX: potential to overwrite TA files with student files?
+        // TODO: archive upload not working
+        await container.putArchive(srcArchive, {
+            path: '/usr/src/app', // not relative to WORKDIR :<
+            noOverwriteDirNonDir: false
+        });
+        return new GradingContainer(container);
     }
 }
 
