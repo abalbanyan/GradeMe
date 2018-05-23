@@ -7,8 +7,8 @@
 
 let randtoken = require('rand-token');
 let nodemailer = require('nodemailer');
-let User = require('./models/User.js').User;
-let TempUser = require('./models/User.js').TempUser;
+let User = require('./models/User.js');
+let TempUser = require('./models/TempUser.js');
 
 module.exports = function(mongoose) {
 
@@ -47,7 +47,7 @@ module.exports = function(mongoose) {
 
     // default options
     var options = {
-        verificationURL: 'http://localhost:3200/email-verification/${URL}',
+        verificationURL: 'http://localhost:3200/email-verification?verify=${URL}',
         URLLength: 48,
 
         // mongo-stuff

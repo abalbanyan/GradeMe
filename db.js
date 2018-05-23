@@ -16,8 +16,8 @@ if(process.env.NODE_ENV !== 'test') {
 }
 
 // DB Models.
-let User = require('./models/User.js').User;
-let TempUser = require('./models/User.js').TempUser;
+let User = require('./models/User.js');
+let TempUser = require('./models/TempUser.js');
 let Course = require('./models/Course.js');
 let Assignment = require('./models/Assignment.js');
 let Submission = require('./models/Submission.js');
@@ -167,7 +167,7 @@ nev.configure({
     persistentUserModel: User,
     tempUserModel: TempUser,
 
-    verificationURL: 'http://localhost:3200/email-verification/${URL}',
+    verificationURL: 'http://localhost:3200/email-verification?verify=${URL}',
     transportOptions: {
         host: 'smtp.gmail.com',
         port: 465,

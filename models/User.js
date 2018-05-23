@@ -4,8 +4,6 @@ let bcrypt = require('bcryptjs');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
-let expireTimeInSeconds = 60*60*24;  // 24 hours.
-
 // User model.
 let UserSchema = new Schema({
     _id: { type: String, 'default': shortid.generate },
@@ -43,23 +41,4 @@ UserSchema.pre('save', function(next) {
     }
 });
 
-let UserModel = mongoose.model('User', UserSchema);
-
-// Temp User model for email verification derived from UserSchema. 
-let TempUserModel = UserModel.discriminator('TempUser', new Schema({
-    GENERATED_VERIFYING_URL: {type: String, required: true},
-    enroll_codes: {type: [String], required: false},
-    createdAt: {  // TTL of tempuser
-        type: Date,
-        expireAfterSeconds : expireTimeInSeconds,
-        default: Date.now
-    },
-}));
-
-TempUserModel.collection.dropIndex({"createdAt": 1});
-TempUserModel.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: expireTimeInSeconds });
-
-module.exports = { 
-    User: UserModel,
-    TempUser: TempUserModel
- }
+module.exports = mongoose.model('User', UserSchema);
