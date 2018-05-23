@@ -174,8 +174,8 @@ nev.configure({
         port: 465,
         secure: true, // use SSL
         auth: {
-            user: secrets.verifierEmail,
-            pass: secrets.verifierPassword
+            user: process.env.VERIFIER_EMAIL || "default",
+            pass: process.env.VERIFIER_PASSWORD || "default"
         },
     },
 
