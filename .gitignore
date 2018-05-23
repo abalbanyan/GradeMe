@@ -40,4 +40,4 @@ tags
 
 course-data/*
 public/specs/*
-secrets.js
+setEnvVarAndStart.ps1

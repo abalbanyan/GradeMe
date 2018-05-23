@@ -1,7 +1,6 @@
 let mongoose = require('mongoose');
 let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
-let secrets = require('./secrets.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('./autograder/autograder.js');
