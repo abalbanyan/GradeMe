@@ -4,6 +4,8 @@ let bcrypt = require('bcryptjs');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
+let expireTimeInSeconds = 60*60*24;  // 24 hours.
+
 // User model.
 let UserSchema = new Schema({
     _id: { type: String, 'default': shortid.generate },
@@ -48,10 +50,13 @@ let TempUserModel = UserModel.discriminator('TempUser', new Schema({
     enroll_codes: {type: [String], required: false},
     createdAt: {  // TTL of tempuser
         type: Date,
-        expireAfterSeconds : 86400,
+        expireAfterSeconds : expireTimeInSeconds,
         default: Date.now
     },
 }));
+
+TempUserModel.collection.dropIndex({"createdAt": 1});
+TempUserModel.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: expireTimeInSeconds });
 
 module.exports = { 
     User: UserModel,

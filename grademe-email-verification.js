@@ -56,7 +56,6 @@ module.exports = function(mongoose) {
         emailFieldName: 'email',
         passwordFieldName: 'password',
         URLFieldName: 'GENERATED_VERIFYING_URL',
-        expirationTime: 86400,
 
         // emailing options
         transportOptions: {
@@ -138,12 +137,6 @@ module.exports = function(mongoose) {
 
         if (typeof options.URLFieldName !== 'string') {
             err = err || createOptionError('URLFieldName', options.URLFieldName, 'string');
-        }
-
-        if (typeof options.expirationTime !== 'number') {
-            err = err || createOptionError('expirationTime', options.expirationTime, 'number');
-        } else if (!isPositiveInteger(options.expirationTime)) {
-            err = err || new Error('expirationTime must be a positive integer');
         }
 
         if (err) {
