@@ -40,3 +40,4 @@ tags
 
 course-data/*
 public/specs/*
+setEnvVarAndStart.ps1
