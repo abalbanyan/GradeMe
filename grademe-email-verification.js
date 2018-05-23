@@ -322,6 +322,7 @@ module.exports = function(mongoose) {
 
         options.tempUserModel.findOne(query, function(err, tempUser) {
             if (err) {
+                console.log('error: ' + err);
                 return callback(err, null);
             }
 
@@ -336,6 +337,7 @@ module.exports = function(mongoose) {
 
                     sendVerificationEmail(getNestedValue(tempUser, options.emailFieldName), tempUser[options.URLFieldName], function(err) {
                         if (err) {
+                        console.log('error: ' + err);                            
                             return callback(err, null);
                         }
                         return callback(null, true);
