@@ -15,14 +15,14 @@ router.post('/', async function(req, res, next) {
     let instructor = (req.body.userradios === 'instructor');
     let uid = req.body.uid;
 
-    // Create new User.
-    let newUser = new db.User({
+    // Package data of new user to pass to createTempUser.
+    let newUser = {
             email: email,
             password: password,
             name: {first: firstname, last: lastname},
             instructor: instructor,
             uid: uid
-        });
+        };
     
     if (req.body.codes) {
         if (!(req.body.codes instanceof Array)) {
