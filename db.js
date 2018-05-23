@@ -18,6 +18,7 @@ if(process.env.NODE_ENV !== 'test') {
 
 // DB Models.
 let User = require('./models/User.js').User;
+let TempUser = require('./models/User.js').TempUser;
 let Course = require('./models/Course.js');
 let Assignment = require('./models/Assignment.js');
 let Submission = require('./models/Submission.js');
@@ -163,6 +164,7 @@ async function isCourseInstructor(courseid, instructorid) {
  */
 nev.configure({
     persistentUserModel: User,
+    tempUserModel: TempUser,
 
     verificationURL: 'http://localhost:3200/email-verification/${URL}',
     transportOptions: {

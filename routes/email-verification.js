@@ -28,6 +28,10 @@ router.get('/:URL', function(req, res) {
     let url = req.params.URL;
 
     db.EmailVerification.confirmTempUser(url, async function(err, user, codes) {
+        if (err) {
+            console.log('error: ' + err);
+            res.render('error', {message: 'Confirming temp user FAILED!'});            
+        }
         if (user) {
             // Authenticate and enroll in courses.
             auth.sendCookie(res, user._id);

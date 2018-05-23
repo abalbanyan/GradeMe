@@ -53,7 +53,6 @@ module.exports = function(mongoose) {
         // mongo-stuff
         persistentUserModel: User,
         tempUserModel: TempUser,
-        tempUserCollection: 'temporary_users',
         emailFieldName: 'email',
         passwordFieldName: 'password',
         URLFieldName: 'GENERATED_VERIFYING_URL',
@@ -129,10 +128,6 @@ module.exports = function(mongoose) {
             err = err || new Error('URLLength must be a positive integer');
         }
 
-        if (typeof options.tempUserCollection !== 'string') {
-            err = err || createOptionError('tempUserCollection', options.tempUserCollection, 'string');
-        }
-
         if (typeof options.emailFieldName !== 'string') {
             err = err || createOptionError('emailFieldName', options.emailFieldName, 'string');
         }
@@ -185,7 +180,7 @@ module.exports = function(mongoose) {
      * randomly generated URL associated to it.
      *
      * @func createTempUser
-     * @param {object} user - an instance of the persistent User model
+     * @param {object} user - a JSON object representing data in persistent User model
      * @param {[String]} codes - an array of enroll codes
      * @param {function} callback - a callback function that takes an error (if one exists),
      *   a persistent user (if it exists) and the new temporary user as arguments; if the
@@ -219,18 +214,11 @@ module.exports = function(mongoose) {
                 // user has already signed up but not yet confirmed their account
                 if (existingTempUser) {
                     return callback(null, null, null);
-                } else {
-                    // copy the credentials for the user TODO: edit this
-                    let tempUser = new TempUser({
-                        _id: user._id,
-                        email: user.email,
-                        password: user.password,
-                        name: {first: user.name.first, last: user.name.last},
-                        instructor: user.instructor,
-                        admin: user.admin,
-                        enroll_codes: codes,
-                        GENERATED_VERIFYING_URL: randtoken.generate(options.URLLength)
-                    });
+                } else {  // No existing tempuser, so insert new tempuser.
+                    user.enroll_codes = codes;
+                    user.GENERATED_VERIFYING_URL = randtoken.generate(options.URLLength);
+                    
+                    let tempUser = new TempUser(user);
 
                     // PRE-SAVE IN User.js HANDLES HASHING PASSWORD ALREADY.
                     return insertTempUser(tempUser[options.passwordFieldName], tempUser, callback);
@@ -290,46 +278,29 @@ module.exports = function(mongoose) {
      * @param {string} url - the randomly generated URL assigned to a unique email
      */
     var confirmTempUser = function(url, callback) {
-        var TempUser = options.tempUserModel,
-            query = {};
+        let TempUser = options.tempUserModel;
+        let query = {};
         query[options.URLFieldName] = url;
-
+        
         TempUser.findOne(query, function(err, tempUserData, codes) {
             if (err) {
                 return callback(err, null, null);
             }
-
+            
             // temp user is found (i.e. user accessed URL before their data expired)
             if (tempUserData) {
-                // var userData = JSON.parse(JSON.stringify(tempUserData)), 
-                let userData = {
-                    _id: tempUserData._id,
-                    email: tempUserData.email,
-                    password: tempUserData.password,
-                    name: {first: tempUserData.name.first, last: tempUserData.name.last},
-                    instructor: tempUserData.instructor,
-                    admin: tempUserData.admin
-                };
-                let user = new User(userData);
-
-                // save the temporary user to the persistent user collection
-                user.save(function(err, savedUser) {
+                let User = options.persistentUserModel;
+                User.switchKind(tempUserData._id, {kind: "User"}, (err, user) => {
                     if (err) {
                         return callback(err, null, null);
                     }
 
-                    TempUser.remove(query, function(err) {
-                        if (err) {
-                            return callback(err, null, null);
-                        }
+                    if (options.shouldSendConfirmation) {
+                        sendConfirmationEmail(user[options.emailFieldName], null);
+                    }
+                    return callback(null, user, tempUserData.enroll_codes);
 
-                        if (options.shouldSendConfirmation) {
-                            sendConfirmationEmail(savedUser[options.emailFieldName], null);
-                        }
-                        return callback(null, user, tempUserData.enroll_codes);
-                    });
                 });
-
 
                 // temp user is not found (i.e. user accessed URL after data expired, or something else...)
             } else {
