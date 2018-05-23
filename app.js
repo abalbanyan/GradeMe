@@ -29,6 +29,7 @@ app.use('/create-assignment', require('./routes/create-assignment'));
 app.use('/assignment', require('./routes/assignment'));
 app.use('/edit-assignment', require('./routes/edit-assignment'));
 app.use('/edit-user', require('./routes/edit-user'));
+app.use('/email-verification', require('./routes/email-verification'));
 app.use('/api', require('./api'));
 
 /* GET home page. */

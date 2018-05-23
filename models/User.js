@@ -13,7 +13,16 @@ let UserSchema = new Schema({
     admin:          { type: Boolean, default: false, required: true }, // Is this User an admin?
     name:           { first: String, last: String },
     uid:            { type: Number, required: true }
-});
+}, {discriminatorKey: "kind"});
+
+UserSchema.statics.switchKind = function (id, changes, callBack) {
+    const unset = {
+        GENERATED_VERIFYING_URL: undefined,
+        enroll_codes: undefined,
+        createdAt: undefined
+    };
+    return this.findOneAndUpdate({_id: id}, {$set: changes, $unset: unset}, {new: true, strict: false}, callBack);
+};
 
 /**
  * Define middleware for hashing the password before saving.
