@@ -4,6 +4,8 @@ let bcrypt = require('bcryptjs');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 
+let expireTimeInSeconds = 60*60*24;  // 24 hours.
+
 // User model.
 let UserSchema = new Schema({
     _id: { type: String, 'default': shortid.generate },
@@ -13,7 +15,16 @@ let UserSchema = new Schema({
     admin:          { type: Boolean, default: false, required: true }, // Is this User an admin?
     name:           { first: String, last: String },
     uid:            { type: Number, required: true }
-});
+}, {discriminatorKey: "kind"});
+
+UserSchema.statics.switchKind = function (id, changes, callBack) {
+    const unset = {
+        GENERATED_VERIFYING_URL: undefined,
+        enroll_codes: undefined,
+        createdAt: undefined
+    };
+    return this.findOneAndUpdate({_id: id}, {$set: changes, $unset: unset}, {new: true, strict: false}, callBack);
+};
 
 /**
  * Define middleware for hashing the password before saving.
@@ -32,4 +43,23 @@ UserSchema.pre('save', function(next) {
     }
 });
 
-module.exports = mongoose.model('User', UserSchema);
+let UserModel = mongoose.model('User', UserSchema);
+
+// Temp User model for email verification derived from UserSchema. 
+let TempUserModel = UserModel.discriminator('TempUser', new Schema({
+    GENERATED_VERIFYING_URL: {type: String, required: true},
+    enroll_codes: {type: [String], required: false},
+    createdAt: {  // TTL of tempuser
+        type: Date,
+        expireAfterSeconds : expireTimeInSeconds,
+        default: Date.now
+    },
+}));
+
+TempUserModel.collection.dropIndex({"createdAt": 1});
+TempUserModel.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: expireTimeInSeconds });
+
+module.exports = { 
+    User: UserModel,
+    TempUser: TempUserModel
+ }
