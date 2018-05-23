@@ -21,7 +21,7 @@ router.post('/', async function(req, res, next) {
             password: password,
             name: {first: firstname, last: lastname},
             instructor: instructor,
-            uid: uid
+            uid: parseInt(uid)
         };
     
     if (req.body.codes) {
