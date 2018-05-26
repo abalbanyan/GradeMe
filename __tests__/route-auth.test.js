@@ -33,10 +33,10 @@ const checkStatus = async (route, statusCode) => {
 }
 
 // Call checkRedirect or checkStatus depending on whether it is a string or a number
-const checkGet = (route, userType, enrolled) => {
-    let location = '/' + route.location;
-    let name = route.name ? route.name : location;
-    let option = route[userType];
+const checkGet = (routeTest, userType, enrolled) => {
+    let location = '/' + routeTest.location;
+    let name = routeTest.name ? routeTest.name : location;
+    let option = routeTest[userType];
     if(enrolled !== undefined) {
         if(enrolled) option = option.in;
         else option = option.out;
@@ -51,6 +51,10 @@ const checkGet = (route, userType, enrolled) => {
         });
     }
 }
+
+const checkPost = (formData, routeTest, userType, enrolled) => {
+    return true;
+};
 
 // Creates an object representing a route test
 // For each result there are two options
@@ -71,40 +75,35 @@ const createRouteTest = (location, adminResult, instructorResult, studentResult,
     };
 }
 
+const createGetTest = createRouteTest;
+
 // Create route test, with a specified name for the test title
-const createNamedGetTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
-    let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
-    route.name = name;
-    return route;
+const createNamedTest = (name, test) => {
+    // let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
+    test.name = name;
+    return test;
 };
 
-const createPostTest = (location, formData, adminResult, instructorResult, studentResult, loggedoutResult) => {
+const createPostTest = (formData, routeTest) => {
     let test = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
     test.formData = formData;
     return test;
 };
 
-const createNamedPostTest = () => {
-
-};
-
 // These routes retain same behavior whether user is enrolled or not
-const staticGets = [
-    createRouteTest('', 'courses', 'courses', 'courses', 'login'),
-    createRouteTest('admin', 200, 403, 403, 'login'),
-    createRouteTest('courses', 200, 200, 200, 'login'),
-    createRouteTest('create-account', 200, 200, 200, 200),
-    createRouteTest('create-course', 200, 200, 403, 'login'),
-    createRouteTest('enroll', 200, 200, 200, 'login'),
-    createRouteTest('login', 'courses', 'courses', 'courses', 200),
-    createRouteTest('course', 404, 404, 404, 'login'),
-    createNamedGetTest('non-existent course', 'course?courseid=AAAAAAAAAA', 404, 404, 404, 'login'),
-    createRouteTest('assignment', 404, 404, 404, 'login'),
-    createNamedGetTest('non-existent assignment', 'assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login')
+const staticGetTests = [
+    createGetTest('', 'courses', 'courses', 'courses', 'login'),
+    createGetTest('admin', 200, 403, 403, 'login'),
+    createGetTest('courses', 200, 200, 200, 'login'),
+    createGetTest('create-account', 200, 200, 200, 200),
+    createGetTest('create-course', 200, 200, 403, 'login'),
+    createGetTest('enroll', 200, 200, 200, 'login'),
+    createGetTest('login', 'courses', 'courses', 'courses', 200),
+    createGetTest('course', 404, 404, 404, 'login'),
+    createNamedTest('non-existent course', createRouteTest('course?courseid=AAAAAAAAAA', 404, 404, 404, 'login')),
+    createGetTest('assignment', 404, 404, 404, 'login'),
+    createNamedTest('non-existent assignment', createRouteTest('assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login'))
 ];
-
-
-const dynamicGets = [];
 
 let mongoServer;
 let users = {};
@@ -146,10 +145,22 @@ courses.invisible = new Course({
 });
 
 // These routes change behavior based on whether user is enrolled or not
-dynamicGets.push(createNamedGetTest('visible course', 'course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
-dynamicGets.push(createNamedGetTest('non-visible course', 'course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
-dynamicGets.push(createNamedGetTest('visible assignment', 'assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'));
-dynamicGets.push(createNamedGetTest('non-visible assignment', 'assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
+const dynamicGetTests = [];
+dynamicGetTests.push(createNamedTest('visible course', createGetTest('course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login')));
+dynamicGetTests.push(createNamedTest('non-visible course', createGetTest('course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')));
+dynamicGetTests.push(createNamedTest('visible assignment', createGetTest('assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login')));
+dynamicGetTests.push(createNamedTest('non-visible assignment', createGetTest('assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')));
+
+const validUserForm = new FormData();
+const validAssignmentForm = new FormData();
+const validCourseForm = new FormData();
+validCourseForm.append('course_name', 'Valid Course Name');
+validCourseForm.append('course_desc', 'Valid Course Description');
+validCourseForm.append('course_visible', true);
+
+const staticPostTests = {
+
+};
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
@@ -178,11 +189,11 @@ describe('while logged in as admin', async () => {
         isAuthenticated.mockImplementation(async () => { return users.admin; });
     });
 
-    for (let route of staticGets) {
+    for (let route of staticGetTests) {
         checkGet(route, 'admin');
     }
 
-    for(let route of dynamicGets) {
+    for(let route of dynamicGetTests) {
         checkGet(route, 'admin');
     }
 });
@@ -192,7 +203,7 @@ describe('while logged in as instructor', async () => {
         isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
     });
 
-    for (let route of staticGets) {
+    for (let route of staticGetTests) {
         checkGet(route, 'instructor', true);
     }
 
@@ -202,7 +213,7 @@ describe('while logged in as instructor', async () => {
             isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
         });
 
-        for(let route of dynamicGets) {
+        for(let route of dynamicGetTests) {
             checkGet(route, 'instructor', true);
         }
     });
@@ -213,7 +224,7 @@ describe('while logged in as instructor', async () => {
             isAuthenticated.mockImplementation(async () => { return users.instructor_out; });
         });
 
-        for(let route of dynamicGets) {
+        for(let route of dynamicGetTests) {
             checkGet(route, 'instructor', false);
         }
     });
@@ -225,7 +236,7 @@ describe('while logged in as student', async () => {
         isAuthenticated.mockImplementation(async () => { return users.student_in; });
     });
 
-    for (let route of staticGets) {
+    for (let route of staticGetTests) {
         checkGet(route, 'student', true);
     }
 
@@ -235,7 +246,7 @@ describe('while logged in as student', async () => {
             isAuthenticated.mockImplementation(async () => { return users.student_in; });
         });
 
-        for(let route of dynamicGets) {
+        for(let route of dynamicGetTests) {
             checkGet(route, 'student', true);
         }
     });
@@ -246,7 +257,7 @@ describe('while logged in as student', async () => {
             isAuthenticated.mockImplementation(async () => { return users.student_out; });
         });
 
-        for(let route of dynamicGets) {
+        for(let route of dynamicGetTests) {
             checkGet(route, 'student', false);
         }
     });
@@ -258,11 +269,11 @@ describe('while logged out', async () => {
         isAuthenticated.mockImplementation(async () => { return false });
     });
 
-    for (let route of staticGets) {
+    for (let route of staticGetTests) {
         checkGet(route, 'loggedout');
     }
 
-    for(let route of dynamicGets) {
+    for(let route of dynamicGetTests) {
         checkGet(route, 'loggedout');
     }
 });
