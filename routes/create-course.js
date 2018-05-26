@@ -9,13 +9,14 @@ router.get('/', function(req, res, next) {
         res.render('create-course');
     } else {
         res.status(403);
-        return res.render('error', {message: "You do not have access to this page."});
+        res.render('error', {message: "You do not have access to this page."});
     }
 });
 
 router.post('/', function(req, res, next) {
     // Validate and sanitize data here
 
+    let admin = res.locals.user.admin;
     let instructor = res.locals.user.instructor;
     let instructor_id = res.locals.user._id;
 
@@ -24,20 +25,18 @@ router.post('/', function(req, res, next) {
         desc: req.body.course_desc,
         assignments: [],
         students: [],
-        instructors: [instructor_id], // Change this to include current user
+        instructors: [instructor_id],
         main_instructor: instructor_id,
         visible: req.body.course_visible ? true : false
     };
 
-    if(instructor) {
+    if(admin || instructor) {
         let course = new db.Course(course_data);
         course.save(err => {
             if(err) {
                 console.error(err);
                 res.status(500);
-                res.render('create-course', {
-                    error: 'Unable to create course. Database Error.'
-                });
+                res.render('error', { message: 'Unable to create course. Database Error.' });
             }
             else {
                 res.render('create-course', {
@@ -47,7 +46,7 @@ router.post('/', function(req, res, next) {
         });
     } else {
         res.status(403);
-        return res.render('error', {message: "You do not have access to this page."});
+        res.render('error', { message: "You do not have access to this page." });
     }
 });
 

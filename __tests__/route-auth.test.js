@@ -32,6 +32,19 @@ const checkGetStatus = async (location, statusCode) => {
     expect(response.statusCode).toBe(statusCode);
 }
 
+const checkPostRedirect = async (location, formData, redirectLocation) => {
+    const response = await request(app).post(location).type('form').send(formData);
+
+    let resLocation = response.headers.location;
+    if(redirectLocation.length > 0 && redirectLocation[0] !== '/')
+        redirectLocation = '/' + redirectLocation;
+    if(response.statusCode === 302 && resLocation.length > 0 && resLocation[0] !== '/')
+        resLocation = '/' + resLocation;
+
+    expect(response.statusCode).toBe(302);
+    expect(resLocation).toBe(redirectLocation);
+};
+
 const checkPostStatus = async (location, formData, statusCode) => {
     const response = await request(app).post(location).type('form').send(formData);
     expect(response.statusCode).toBe(statusCode);
@@ -67,7 +80,7 @@ const checkPost = (postTest, userType, enrolled) => {
     }
     if((typeof option) === 'string') {
         test('sending form to ' + name +  ' redirects to /' + option, (done) => {
-            checkGetRedirect(location, '/' + option).then(() => {done();});
+            checkPostRedirect(location, postTest.formData, '/' + option).then(() => {done();});
         });
     } else {
         test('sending form to ' + name + ' returns status: ' + option, (done) => {
@@ -120,7 +133,9 @@ const staticGetTests = [
     createGetTest('course', 404, 404, 404, 'login'),
     createNamedTest('non-existent course', createRouteTest('course?courseid=AAAAAAAAAA', 404, 404, 404, 'login')),
     createGetTest('assignment', 404, 404, 404, 'login'),
-    createNamedTest('non-existent assignment', createRouteTest('assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login'))
+    createNamedTest('non-existent assignment', createRouteTest('assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login')),
+    createGetTest('edit-course', 404, 404, 404, 'login'),
+    createGetTest('edit-assignment', 404, 404, 404, 'login')
 ];
 
 let mongoServer;
@@ -163,14 +178,26 @@ courses.invisible = new Course({
 });
 
 // These routes change behavior based on whether user is enrolled or not
-const dynamicGetTests = [];
-dynamicGetTests.push(createNamedTest('visible course', createGetTest('course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login')));
-dynamicGetTests.push(createNamedTest('non-visible course', createGetTest('course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')));
-dynamicGetTests.push(createNamedTest('visible assignment', createGetTest('assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login')));
-dynamicGetTests.push(createNamedTest('non-visible assignment', createGetTest('assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')));
+const dynamicGetTests = [
+    createNamedTest('visible course', createGetTest('course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login')),
+    createNamedTest('non-visible course', createGetTest('course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit visible course', createGetTest('edit-course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit non-visible course', createGetTest('edit-course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('visible assignment', createGetTest('assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login')),
+    createNamedTest('non-visible assignment', createGetTest('assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit visible assignment', createGetTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit non-visible assignment', createGetTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login'))
+];
 
+// Create valid forms to be used with POST testing
+// Want them to be valid because invalid forms will be tested in another suite
 const validUserForm = {};
-const validAssignmentForm = {};
+const validAssignmentForm = {
+    'name': 'Example Assignment Name',
+    'desc': 'Example Assignment Description',
+    'dueDate': 'Valid Date Object',
+    'pointValue': 100
+};
 const validCourseForm = {
     'course_name': 'Example Course Name',
     'course_desc': 'Example Course Description',
@@ -179,6 +206,13 @@ const validCourseForm = {
 
 const staticPostTests = [
     createPostTest(validCourseForm, createRouteTest('create-course', 200, 200, 403, 'login'))
+];
+
+const dynamicPostTests = [
+    createNamedTest('edit visible course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
+    createNamedTest('edit non-visible course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.invisible._id, 'courses', {in: 'courses', out: 403}, 403, 'login')))
+    // dynamicGetTests.push(createNamedTest('visible assignment', createPostTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'))),
+    // dynamicGetTests.push(createNamedTest('non-visible assignment', createPostTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')))
 ];
 
 beforeAll(async () => {
@@ -219,6 +253,10 @@ describe('while logged in as admin', async () => {
     for(let route of staticPostTests) {
         checkPost(route, 'admin');
     }
+
+    for (let route of dynamicPostTests) {
+        checkPost(route, 'admin');
+    }
 });
 
 describe('while logged in as instructor', async () => {
@@ -243,6 +281,10 @@ describe('while logged in as instructor', async () => {
         for(let route of dynamicGetTests) {
             checkGet(route, 'instructor', true);
         }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'instructor', true);
+        }
     });
 
     describe('not enrolled in course', async () => {
@@ -253,6 +295,10 @@ describe('while logged in as instructor', async () => {
 
         for(let route of dynamicGetTests) {
             checkGet(route, 'instructor', false);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'instructor', false);
         }
     });
 });
@@ -280,6 +326,10 @@ describe('while logged in as student', async () => {
         for(let route of dynamicGetTests) {
             checkGet(route, 'student', true);
         }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'student', true);
+        }
     });
 
     describe('not enrolled in course', async () => {
@@ -290,6 +340,10 @@ describe('while logged in as student', async () => {
 
         for(let route of dynamicGetTests) {
             checkGet(route, 'student', false);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'student', false);
         }
     });
 });
@@ -309,6 +363,10 @@ describe('while logged out', async () => {
     }
 
     for(let route of staticPostTests) {
+        checkPost(route, 'loggedout');
+    }
+
+    for(let route of dynamicPostTests) {
         checkPost(route, 'loggedout');
     }
 });
