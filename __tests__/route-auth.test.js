@@ -13,7 +13,7 @@ const User = require('../models/User.js');
 const Course = require('../models/Course.js');
 
 // Check whether trying to access route redirects to location
-const checkRedirect = async (route, location) => {
+const checkGetRedirect = async (route, location) => {
     const response = await request(app).get(route);
 
     let resLocation = response.headers.location;
@@ -27,33 +27,53 @@ const checkRedirect = async (route, location) => {
 };
 
 // Check whether trying to access route gives statusCode
-const checkStatus = async (route, statusCode) => {
-    const response = await request(app).get(route);
+const checkGetStatus = async (location, statusCode) => {
+    const response = await request(app).get(location);
     expect(response.statusCode).toBe(statusCode);
 }
 
+const checkPostStatus = async (location, formData, statusCode) => {
+    const response = await request(app).post(location).type('form').send(formData);
+    expect(response.statusCode).toBe(statusCode);
+};
+
 // Call checkRedirect or checkStatus depending on whether it is a string or a number
-const checkGet = (routeTest, userType, enrolled) => {
-    let location = '/' + routeTest.location;
-    let name = routeTest.name ? routeTest.name : location;
-    let option = routeTest[userType];
+const checkGet = (getTest, userType, enrolled) => {
+    let location = '/' + getTest.location;
+    let name = getTest.name ? getTest.name : location;
+    let option = getTest[userType];
     if(enrolled !== undefined) {
         if(enrolled) option = option.in;
         else option = option.out;
     }
     if((typeof option) === 'string') {
         test('accessing ' + name +  ' redirects to /' + option, (done) => {
-            checkRedirect(location, '/' + option).then(() => {done();});
+            checkGetRedirect(location, '/' + option).then(() => {done();});
         });
     } else {
         test('accessing ' + name + ' returns status: ' + option, (done) => {
-            checkStatus(location, option).then(() => {done();});
+            checkGetStatus(location, option).then(() => {done();});
         });
     }
 }
 
-const checkPost = (formData, routeTest, userType, enrolled) => {
-    return true;
+const checkPost = (postTest, userType, enrolled) => {
+    let location = '/' + postTest.location;
+    let name = postTest.name ? postTest.name : location;
+    let option = postTest[userType];
+    if(enrolled !== undefined) {
+        if(enrolled) option = option.in;
+        else option = option.out;
+    }
+    if((typeof option) === 'string') {
+        test('sending form to ' + name +  ' redirects to /' + option, (done) => {
+            checkGetRedirect(location, '/' + option).then(() => {done();});
+        });
+    } else {
+        test('sending form to ' + name + ' returns status: ' + option, (done) => {
+            checkPostStatus(location, postTest.formData, option).then(() => {done();});
+        });
+    }
 };
 
 // Creates an object representing a route test
@@ -79,15 +99,13 @@ const createGetTest = createRouteTest;
 
 // Create route test, with a specified name for the test title
 const createNamedTest = (name, test) => {
-    // let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
     test.name = name;
     return test;
 };
 
 const createPostTest = (formData, routeTest) => {
-    let test = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
-    test.formData = formData;
-    return test;
+    routeTest.formData = formData;
+    return routeTest;
 };
 
 // These routes retain same behavior whether user is enrolled or not
@@ -151,16 +169,17 @@ dynamicGetTests.push(createNamedTest('non-visible course', createGetTest('course
 dynamicGetTests.push(createNamedTest('visible assignment', createGetTest('assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login')));
 dynamicGetTests.push(createNamedTest('non-visible assignment', createGetTest('assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')));
 
-const validUserForm = new FormData();
-const validAssignmentForm = new FormData();
-const validCourseForm = new FormData();
-validCourseForm.append('course_name', 'Valid Course Name');
-validCourseForm.append('course_desc', 'Valid Course Description');
-validCourseForm.append('course_visible', true);
-
-const staticPostTests = {
-
+const validUserForm = {};
+const validAssignmentForm = {};
+const validCourseForm = {
+    'course_name': 'Example Course Name',
+    'course_desc': 'Example Course Description',
+    'course_visible': true
 };
+
+const staticPostTests = [
+    createPostTest(validCourseForm, createRouteTest('create-course', 200, 200, 403, 'login'))
+];
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
@@ -196,6 +215,10 @@ describe('while logged in as admin', async () => {
     for(let route of dynamicGetTests) {
         checkGet(route, 'admin');
     }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'admin');
+    }
 });
 
 describe('while logged in as instructor', async () => {
@@ -205,6 +228,10 @@ describe('while logged in as instructor', async () => {
 
     for (let route of staticGetTests) {
         checkGet(route, 'instructor', true);
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'instructor', true);
     }
 
     describe('enrolled in course', async () => {
@@ -238,6 +265,10 @@ describe('while logged in as student', async () => {
 
     for (let route of staticGetTests) {
         checkGet(route, 'student', true);
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'student', true);
     }
 
     describe('enrolled in course', async () => {
@@ -275,5 +306,9 @@ describe('while logged out', async () => {
 
     for(let route of dynamicGetTests) {
         checkGet(route, 'loggedout');
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'loggedout');
     }
 });
