@@ -201,7 +201,7 @@ const validAssignmentForm = {
 const validCourseForm = {
     'course_name': 'Example Course Name',
     'course_desc': 'Example Course Description',
-    'course_visible': true
+    'course_visible': true // Leave this key out if you want it to be invisible
 };
 
 const staticPostTests = [
@@ -209,8 +209,7 @@ const staticPostTests = [
 ];
 
 const dynamicPostTests = [
-    createNamedTest('edit visible course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
-    createNamedTest('edit non-visible course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.invisible._id, 'courses', {in: 'courses', out: 403}, 403, 'login')))
+    createNamedTest('edit course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
     // dynamicGetTests.push(createNamedTest('visible assignment', createPostTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'))),
     // dynamicGetTests.push(createNamedTest('non-visible assignment', createPostTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')))
 ];
