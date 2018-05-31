@@ -6,9 +6,18 @@ let multer = require('multer');
 let upload = multer({dest: 'course-data/uploads'});
 
 router.get('/', async function(req, res, next) {
-    // TODO: Test validation more.
-    let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, true);
-    if (res.locals.user.instructor && isCourseInstructor) {
+    const _id = res.locals.user._id;
+    const instructor = res.locals.user.instructor;
+    const admin = res.locals.user.admin;
+    let course = await db.Course.findById(req.query.courseid).exec();
+
+    if(!req.query.courseid || !course) {
+        res.status(404);
+        return res.render('error',JSON.parse('{ "message" : "Course not found." }'));
+    }
+
+    let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, _id, instructor, admin);
+    if (instructor && isCourseInstructor) {
         res.render('create-assignment', {courseid : req.query.courseid});
     } else {
         // Doesn't quite work due to format of error ejs.
@@ -18,9 +27,18 @@ router.get('/', async function(req, res, next) {
 });
 
 router.post('/', upload.single('spec'), async function(req, res, next) {
+    const _id = res.locals.user._id;
+    const instructor = res.locals.user.instructor;
+    const admin = res.locals.user.admin;
+    let course = await db.Course.findById(req.query.courseid).exec();
+
+    if(!req.query.courseid || !course) {
+        return res.status(404);
+    }
+
     // Verify that this user is allowed to make this request.
-    let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, res.locals.user._id, true);
-    if (!res.locals.user.instructor || !isCourseInstructor) {
+    let isCourseInstructor = await db.utils.belongsToCourse(req.query.courseid, _id, instructor, admin);
+    if (!instructor || !isCourseInstructor) {
         return res.status(500);
     }
 
