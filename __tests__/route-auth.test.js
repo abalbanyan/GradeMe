@@ -178,6 +178,7 @@ const staticGetTests = [
     createNamedTest('non-existent assignment', createRouteTest('assignment?assignid=' + fakeId, 404, 404, 404, 'login')),
     createGetTest('edit-course', 404, 404, 404, 'login'),
     createGetTest('edit-assignment', 404, 404, 404, 'login'),
+    createGetTest('email-verification', 200, 200, 200, 200)
 ];
 
 // These routes change behavior based on whether user is enrolled or not
