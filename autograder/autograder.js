@@ -137,6 +137,7 @@ async function findGradingEnvironment(assignmentId, forceSync=false) {
         _.forEach(
             await docker.listImages({ filters: { label: ['com.grademe'] }}),
             (image) => {
+                // indicate that new GE's image has already been built and cache
                 let env = new GradingEnvironment(image.Id);
                 env.buildPromise = Promise.resolve();
                 environmentMap.set(image.Id, env);
@@ -175,7 +176,7 @@ class GradingEnvironment {
             t: this.imageId,
             labels: { 'com.grademe': '' }
         })
-        
+
         if (onProgress) {
             progressStream.on('data', (buf) => onProgress(buf.toString()));
         } else {
@@ -186,6 +187,7 @@ class GradingEnvironment {
             progressStream.on('end', resolve);
             progressStream.on('error', reject);
         }).then(() => {
+            // once built, add to the findGradingEnvironment() lookup cache
             environmentMap.set(this.assignmentId, this);
         });
         return this.buildPromise;
