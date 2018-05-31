@@ -30,7 +30,7 @@ let AssignmentSchema = new Schema({
 });
 // TODO: Validate input.
 
-AssignmentSchema.pre('save', async function(next) { 
+AssignmentSchema.pre('save', async function(next) {
     if (this.isNew) {
         await fileutils.createAssignment(this._id);
         // Copy default grading env files.
