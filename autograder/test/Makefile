@@ -5,7 +5,9 @@ sample sample-bad: clean-submission
 	tar -czvf submission.tar.gz -C $@ .
 
 clean-docker:
-	docker stop $(shell docker ps -aq) || docker rm $(shell docker ps -aq) || true
+	docker stop $(shell docker ps -aq) 2> /dev/null || \
+	docker rm $(shell docker ps -aq) 2> /dev/null || \
+	true
 
 clean-%:
 	rm $*.tar.gz 2> /dev/null || true
