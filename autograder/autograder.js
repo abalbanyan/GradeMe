@@ -32,10 +32,15 @@ const docker = new Docker({
 }); // change if docker is running on a different server
 var _ = require('lodash/core');
 
-class GradingContainer {
+/**
+ * Encapsulate a remote docker container.
+ *
+ * @private
+ */
+class _GradingContainer {
     constructor(dockerContainer) {
         this.container = dockerContainer;
-        this.testRe = /^\[(?<score>\d*)\]\s*\((?<pass>pass|fail)\)\s*(?<name>.*)\s*(?:\#(?<comment>.*))?/gm;
+        this.testRe = /^\[(?<score>\d*)\]\s*\((?<pass>pass|fail)\)\s*(?<name>.*?)\s*(?:\#\s*(?<comment>.*?)\s*)?$/gm;
         this.exec = null;
     }
 
@@ -98,21 +103,20 @@ class GradingContainer {
         let _this = this;
 
         let testStdErr = new Transform({ transform(chunk, encoding, callback) {} });
-        let testStdOut = new Transform({readableObjectMode: true});
+        let testStdOut = new Transform({ readableObjectMode: true });
         testStdOut._transform = function(chunk, encoding, done) {
             let parse;
-            let testInfo = {};
-            do {
-                parse = _this.testRe.exec(chunk.toString());
-                if (parse) {
-                    parse = parse.groups;
-                    testInfo.score = parseInt(parse.score);
-                    testInfo.pass = parse.pass == 'pass';
-                    testInfo.name = parse.name;
-                    testInfo.comment = parse.comment ? parse.comment : '';
-                    this.push(_.clone(testInfo));
-                }
-            } while(parse);
+            let testInfo;
+            while (parse = _this.testRe.exec(chunk.toString())) {
+                parse = parse.groups;
+                testInfo = {
+                    score: parseInt(parse.score),
+                    pass: parse.pass == 'pass',
+                    name: parse.name,
+                    comment: parse.comment ? parse.comment : ''
+                };
+                this.push(_.clone(testInfo));
+            }
             done();
         };
         // XXX: end this transform stream when we run out of things to read?
@@ -225,7 +229,7 @@ class GradingEnvironment {
             path: '/usr/src/app', // not relative to WORKDIR :<
             noOverwriteDirNonDir: false
         });
-        return new GradingContainer(container);
+        return new _GradingContainer(container);
     }
 }
 
