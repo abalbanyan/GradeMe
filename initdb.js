@@ -3,8 +3,22 @@
  */
 
 let db = require('./db.js');
+let MongoClient = require('mongodb').MongoClient;
 
-async function initdb() {
+async function cleardb() {
+    let mongo = await MongoClient.connect("mongodb://localhost:27017");
+    let grademe = await mongo.db("grademe");
+
+    for (let collection of await grademe.collections()) {
+        console.log("dropping: "  + collection.collectionName);
+        await collection.drop();
+    }
+}
+
+// main function
+(async function initdb() {
+    cleardb();
+
     let admin = new db.User({
         email: 'admin@grademe.edu',
         name: {first: "Joe", last: "Bruin"},
@@ -58,7 +72,7 @@ async function initdb() {
     let course2 = new db.Course({
         name: 'CS136 Computer Security',
         desc: 'hewwo OwO',
-        assignments: [assignment._id],
+        assignments: [],
         students: [danny._id],
         instructors: [willy._id],
         main_instructor: [willy._id],
@@ -67,13 +81,7 @@ async function initdb() {
     
     await course.save();
     await course2.save();
-}
 
-initdb().then(err => {
-    if (err)
-        console.error(err);
-    else
-        console.log("Database initialized with data.");
+    console.log("Database initialized with data.");
     process.exit();
-})
-    
+})();
