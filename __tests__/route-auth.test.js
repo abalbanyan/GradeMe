@@ -213,11 +213,13 @@ const validCourseForm = {
 };
 
 const staticPostTests = [
-    createPostTest(validCourseForm, createRouteTest('create-course', 200, 200, 403, 'login'))
+    createPostTest(validCourseForm, createRouteTest('create-course', 200, 200, 403, 'login')),
+    createNamedTest('edit course with no course ID', createPostTest(validCourseForm, createRouteTest('edit-course' + courses.visible._id, 404, 404, 404, 'login'))),
+    createNamedTest('edit-course for non-existent course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + fakeId + courses.visible._id, 404, 404, 404, 'login')))
 ];
 
 const dynamicPostTests = [
-    createNamedTest('edit course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
+    createNamedTest('edit course for valid course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
     // createNamedTest('create valid assignment', createPostTest(validAssignmentForm, createRouteTest('create-assignment?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login')))
     // dynamicGetTests.push(createNamedTest('visible assignment', createPostTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'))),
     // dynamicGetTests.push(createNamedTest('non-visible assignment', createPostTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')))
