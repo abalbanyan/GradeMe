@@ -3,7 +3,7 @@ let shortid = require('shortid');
 let fileutils = require('../fileutils.js');
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
-const { GradingEnvironment } = require('../autograder/autograder.js');
+const { GradingEnvironment } = require('autograder');
 
 // Assignment model.
 let AssignmentSchema = new Schema({
@@ -40,9 +40,9 @@ AssignmentSchema.pre('save', async function(next) {
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
 
         // Create and build docker environment, uniquely identified by the assignment id.
-        let gradingEnvironment = new GradingEnvironment(this._id, this.gradingenv.archive);
-        await gradingEnvironment.init();
-        console.log("Building image.");
+        let gradingEnvironment = new GradingEnvironment(this._id);
+        await gradingEnvironment.buildImage(this.gradingenv.archive);
+        console.log('built: ' + this._id);
     }
     return next();
 });

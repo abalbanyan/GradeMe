@@ -5,8 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "postinstall": "[ -L node_modules/autograder ] || ln -s ../autograder node_modules/autograder",
     "dev": "opn http://localhost:3200 && nodemon server.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "clean": "rm -rf course-data/assign-* course-data/course-*"
   },
   "author": "",
   "license": "ISC",

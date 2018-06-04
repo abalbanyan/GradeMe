@@ -1,0 +1,10 @@
+{
+  "name": "autograder",
+  "version": "1.0.0",
+  "description": "Grade homework submissions using Docker.",
+  "main": "autograder.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "cd test && node grade.js"
+  }
+}
