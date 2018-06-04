@@ -4,7 +4,7 @@ let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
-const { GradingEnvironment } = require('./autograder/autograder.js');
+const { findGradingEnvironment, GradingEnvironment } = require('autograder');
 const EXPIRE_TIME_IN_SECONDS = 24*60*60;  // 24 hours.
 const UI_TEST = process.env.NODE_ENV === 'test-ui';
 const JEST_TEST = process.env.NODE_ENV === 'test';
@@ -143,8 +143,12 @@ async function gradeSubmission(studentid, assignid) {
     }
     let mostrecent = submissions.reduce((prev, cur) => (prev.submissiondate > cur.submissiondate)? prev : cur);
 
-    let gradingEnvironment = new GradingEnvironment(assignment._id, assignment.gradingenv.archive);
-    await gradingEnvironment.init();
+    // assignment.gradingenv.archive;
+    let gradingEnvironment = await findGradingEnvironment(assignment._id);
+    if (!gradingEnvironment) {
+        throw new Error("Couldn't find a docker image corresponding to a " +
+                        "submission's assignment: " + assignment._id);
+    }
     let gradingContainer = await gradingEnvironment.containerize(studentid, mostrecent.submissionpath);
     await gradingContainer.build();
     let output = await gradingContainer.test();

@@ -41,7 +41,6 @@ class _GradingContainer {
     constructor(dockerContainer) {
         this.container = dockerContainer;
         this.testRe = /^\[(?<score>\d*)\]\s*\((?<pass>pass|fail)\)\s*(?<name>.*?)\s*(?:\#\s*(?<comment>.*?)\s*)?$/gm;
-        this.exec = null;
     }
 
     /**
@@ -137,14 +136,26 @@ var syncedEnvironments = false;
  * @return {GradingEnvironment}
  */
 async function findGradingEnvironment(assignmentId, forceSync=false) {
+    // TODO: toLowerCase() is a quick hack. remove later.
+    assignmentId = assignmentId.toString().toLowerCase();
+
     if (!syncedEnvironments || forceSync) {
         _.forEach(
-            await docker.listImages({ filters: { label: ['com.grademe'] }}),
+            await docker.listImages({
+                filters: {
+                    // commented because we want all images, not just one
+                    // reference: [assignmentId],
+                    label: ['com.grademe']
+                }
+            }),
             (image) => {
+                // extract image name, which is the same as assignmentId
+                let id = image.RepoTags[0].split(':')[0];
+
                 // indicate that new GE's image has already been built and cache
-                let env = new GradingEnvironment(image.Id);
+                let env = new GradingEnvironment(id);
                 env.buildPromise = Promise.resolve();
-                environmentMap.set(image.Id, env);
+                environmentMap.set(id, env);
             }
         )
         syncedEnvironments = true;
