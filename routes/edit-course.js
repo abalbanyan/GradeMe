@@ -40,6 +40,12 @@ router.post('/', async function(req, res, next) {
         return res.render('error', {message: "No course ID provided."});
     }
 
+    let course = await db.Course.findById(req.query.courseid).exec();
+    if(!course) {
+        res.status(404);
+        return res.render('error', {message: "Course not found."});
+    }
+
     if((instructor || admin) && await db.utils.belongsToCourse(courseid, userid, instructor, admin)) {
         db.Course.findByIdAndUpdate(courseid, courseupdate, (err, course) => {
             if(err) {
