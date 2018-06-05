@@ -1,0 +1,151 @@
+<%- include partials/header.ejs %>
+<head>
+    <link rel="stylesheet" href="/css/gradebook.css">
+</head>
+
+<body>
+<div class="container">
+    <h2><%- course.name %> </h2>
+
+    <h4><%= assignment.name %></h4>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <% for(var i = 0; i < headers.length; i++) { %>
+                    <th scope="col"><%= headers[i] %></th>
+                <% } %>
+            </tr>
+        </thead>
+        <tbody>
+        <% if (assignment) { %>
+            <% for(var i = 0; i < tablerows.length; i++) { %>
+                <tr>
+                    <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
+                    <th>
+                        <%= tablerows[i].name %>
+                    </th>
+
+                    <td>
+                        <span class="original-grade"><%= tablerows[i].grade %></span>
+                        <span>
+                            <input type="number" min="0" class="grade-editor">
+                        </span>
+
+                        <i class="material-icons edit-grade">edit</i>
+                        <i class="material-icons undo-grade">undo</i>
+                        <i class="material-icons done-grade">done</i>
+                    </td>
+
+                    <td>
+                        <%= tablerows[i].submissiondate %>
+                    </td>
+
+                    <td class="submission-path">
+                        <% if (tablerows[i].submissionpath != "n/a") { %>
+                            <a href="<%= tablerows[i].submissionpath %>" download>download</a>
+                        <% } else { %>
+                            <%= tablerows[i].submissionpath %>
+                        <% } %>
+                    </td>
+                </tr>
+            <% } %>
+        <% } else { %>
+
+        <% } %>
+        </tbody>
+    </table>
+</div>
+</body>
+
+<%- include partials/footer.ejs %>
+
+<script>
+    $(document).ready(function(){
+        $(".edit-grade").click(function(){
+            editGrade($(this).closest("td"));
+        });
+
+        $(".original-grade").dblclick(function(){
+            editGrade($(this).closest("td"));
+        });
+
+        $(".undo-grade").click(function(){
+            $(this).hide();
+            var parenttd = $(this).closest("td");
+            parenttd.find(".done-grade").hide();
+            parenttd.find(".grade-editor").hide();
+            parenttd.find(".original-grade").show();
+            parenttd.find(".edit-grade").show();
+        });
+
+        $(".done-grade").click(function(){
+            var assignment = <%- JSON.stringify(assignment) %>;
+            if (assignment) {
+                var parenttd = $(this).closest("td");
+                parenttd.find(".grade-editor").change();
+                changeGrade(parenttd, assignment._id);
+            }
+        });
+
+        $(".grade-editor").on('keyup', function (e) {
+            var assignment = <%- JSON.stringify(assignment) %>;
+            if (e.keyCode == 13) { // if user presses enter
+                if (assignment) {
+                    $(this).change();
+                    changeGrade($(this).closest("td"), assignment._id);
+                }
+            }
+        });
+
+        function editGrade(el) {
+            el.find(".edit-grade").hide();
+            el.find(".undo-grade").show();
+            el.find(".done-grade").show();
+            el.find(".original-grade").hide();
+            el.find(".grade-editor").show();
+        }
+
+        async function changeGrade(el, assignmentid) {
+            let user_id = el.closest("tr").find(".user-id").text();
+            let new_grade = el.closest("tr").find(".grade-editor").val();
+            if ($.isNumeric(new_grade) && new_grade >= 0) {
+                let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade,
+                    { method: 'GET', credentials: 'same-origin'});
+                let json = await response.json();
+                let data = JSON.parse(json);
+
+                if (data.valid) {
+                    alert("success");
+                } else {
+                    alert("fail");
+                }
+            } else {
+                alert("oh no");
+            }
+            // else { todo: add error text
+
+            // }
+        }
+    });
+
+    // async function verifyCode(el) {
+    //     if (el.value.length > 7) {
+    //         let response = await fetch('/api/verifycode?instructor=<%=user.instructor? 1 : 0 %>&code=' + el.value,
+    //             { method: 'GET', credentials: 'same-origin'});
+    //         let json = await response.json();
+    //         let data = JSON.parse(json);
+    //         let message = document.getElementById('codemessage');
+    //         let button = document.getElementById('enrollbutton');
+    //         if (data.valid) {
+    //             message.style.color = 'green';
+    //             message.innerHTML = 'Would you like to enroll in <b>' + data.coursename + '</b>?';
+    //             button.style.display = 'block';
+    //             button.style.backgroundColor = '#57B55C';
+    //         } else {
+    //             message.style.color = 'red';
+    //             message.innerHTML = 'This code is invalid. ' + (data.err? data.err : '');
+    //             button.style.backgroundColor = '#FF0033';
+    //         }
+    //     }
+    // }
+</script>

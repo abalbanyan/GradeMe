@@ -41,4 +41,52 @@ router.use('/verifycode', async function(req, res, next) {
     res.json(JSON.stringify(data));
 });
 
+/**
+ * Used to adjust grades in gradbook.
+ */
+router.use('/changeGrade', async function(req, res, next) {
+    let data = {};
+    // Add check to ensure that this is the instructor for the course, may have to have course sent too.
+    try {
+        if (req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined ||
+                !res.locals.user.instructor) {
+            data.valid = false;
+            data.err = "Invalid request.";
+        } else {
+            // Look for a submission matching this code.
+            let latestSubmission = (await db.Submission.find({ 'userid': req.query.user,
+                                                            'assignmentid': req.query.assign_id})
+                                                            .sort({ submissiondate: -1 }).limit(1))[0];
+
+            // If instructor is changing grade for student who hasn't submitted assignment.
+           if (latestSubmission == null) {
+                let submission = new db.Submission({
+                    assignmentid: req.query.assign_id,
+                    userid: req.query.user,
+                    grade: req.query.new_grade
+                });
+                submission.save(async (err) => {
+                    if (err) {
+                        data.err = "Failed request.";
+                    } else {
+                        data.valid = true;
+                    }
+                });
+            } else { // Editing assignment grade.
+                let submission = await latestSubmission.update({ grade: req.query.new_grade }, function (err) {
+                    if (err) {
+                        data.err = "Failed request.";
+                    } else {
+                        data.valid = true;
+                    }
+                });
+            }
+        }
+    } catch (err) {
+        console.log(err);
+        data.valid = false;
+        data.err = err;
+    }
+    res.json(JSON.stringify(data));
+});
 module.exports = router;
