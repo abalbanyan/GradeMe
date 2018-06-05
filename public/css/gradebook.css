@@ -1,0 +1,12 @@
+.grade-editor {
+    display: none;
+}
+
+.undo-grade {
+    display: none
+}
+
+.done-grade {
+    display: none;
+    color: #57B55C;
+}
