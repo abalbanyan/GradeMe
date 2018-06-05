@@ -23,7 +23,8 @@ function setFilename(thisVar, multipleAllowed) {
 
 async function ajaxUpload(el, formid, url, progressbar = false) {
     el.disabled = true;
-    let gradeonsubmission = (document.getElementById('gradeonsubmission').value === "true")? true : false;
+    let gradeonsubmissionElement = document.getElementById('gradeonsubmission');
+    let gradeonsubmission = (gradeonsubmissionElement && gradeonsubmissionElement.value === "true")? true : false;
 
     $.ajax(url, {
         xhr: function() {
@@ -40,7 +41,10 @@ async function ajaxUpload(el, formid, url, progressbar = false) {
                         progressbar.style.width = percentComplete + '%';
                         if (percentComplete == 100) {
                             progressbar.innerHTML = "Submission uploaded. " + (gradeonsubmission? 'Grading...' : '');
-                            document.getElementById('grade-spinner').hidden = !gradeonsubmission;
+                            let gradeSpinnerElement =  document.getElementById('grade-spinner');
+                            if (gradeSpinnerElement) {
+                                gradeSpinnerElement.hidden = !gradeonsubmission;
+                            }
                         }
                     }
                 }, false);
