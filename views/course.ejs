@@ -7,11 +7,13 @@
     <h2><%= course.name %> </h2>
     <b>Instructors:</b>
 
-    <% instructors.forEach(function(instructor) { %>
+    <% instructors.forEach(function(instructor, index, array) { %>
           <a href="mailto:<%=instructor.email%>">
             <% if (instructor.id == course.main_instructor) { %>
-              <span style="font-weight:bold"><%= instructor.name.first + " " + instructor.name.last + ","%></span>
-              <% } %>
+              <span style="font-weight:bold">
+                <%= instructor.name.first + " " + instructor.name.last %> <%= (array.length - 1 > index) ? ", " : "" %>
+              </span>
+            <% } %>
           </a>
     <% }); %>
 
@@ -63,9 +65,12 @@
             <% }); %>
         </tbody>
     </table>
+      <% if (user.instructor) { %>    
         <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
+            Create New Assignment
             <i class="material-icons">add_circle</i>
         </a>
+      <% } %>        
 </div>
 
 <%- include partials/footer.ejs %>
