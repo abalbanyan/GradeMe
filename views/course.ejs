@@ -67,8 +67,14 @@
     </table>
       <% if (user.instructor) { %>    
         <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
-            Create New Assignment
-            <i class="material-icons">add_circle</i>
+            <div class="row create-assignment-btn">
+                <div class="col-sm-10 create-assignment-text">
+                    Create New Assignment
+                </div>
+                <div class="col-sm-2">
+                    <i class="material-icons">add_circle</i>
+                </div>
+            </div>
         </a>
       <% } %>        
 </div>
