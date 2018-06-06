@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const app = require('../app.js');
 const MongodbMemoryServer = require('mongodb-memory-server');
 const User = require('../models/User.js');
 const Assignment = require('../models/Assignment.js');

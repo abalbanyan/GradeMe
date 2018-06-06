@@ -31,7 +31,7 @@ let Submission = require('./models/Submission.js');
  * @return {User}
  */
 async function getUser(userid) {
-    let user = User.findById(userid);
+    let user = await User.findById(userid).exec();
     return user;
 }
 
@@ -40,7 +40,7 @@ async function getUser(userid) {
  *
  * @param {String} userid
  * @param {Boolean} instructor - Is the user an instructor?
- * @param {Boolean} admin - Is the user an admin?
+ * @param {Boolean} admin - Is the user an admin? If so, ignore user ID and return all courses
  */
 async function getCourses(userid, instructor = false, admin = false) {
     let courses = null;
@@ -49,7 +49,7 @@ async function getCourses(userid, instructor = false, admin = false) {
     } else if (instructor) {
         courses = await Course.find({instructors : userid}).exec();
     } else {
-        courses = await Course.find({students : userid}).exec();
+        courses = await Course.find({students : userid, visible: true}).exec();
     }
     return courses;
 }
@@ -64,10 +64,12 @@ async function getCourses(userid, instructor = false, admin = false) {
 async function getAssignments(courseid, showhidden, admin = false) {
     let course = await Course.findById(courseid);
     let assignments = [];
-    if (showhidden || admin) {
-        assignments = await Assignment.find({'_id' : {$in : course.assignments} }).exec();
-    } else {
-        assignments = await Assignment.find({'_id' : {$in : course.assignments}, 'visible' : true}).exec();
+    if(course) {
+        if (showhidden || admin) {
+            assignments = await Assignment.find({'_id' : {$in : course.assignments} }).exec();
+        } else {
+            assignments = await Assignment.find({'_id' : {$in : course.assignments}, 'visible' : true}).exec();
+        }
     }
     return assignments;
 }
@@ -104,6 +106,10 @@ async function belongsToCourse(courseid, userid, instructor, admin = false) {
 async function canViewAssignment(assignid, courseid, userid, instructor, admin = false) {
     const isInCourse = await belongsToCourse(courseid, userid, instructor, admin);
     if(!isInCourse)
+        return false;
+
+    const assignmentCourse = await Course.findOne({_id: courseid, assignments: assignid});
+    if(!assignmentCourse)
         return false;
 
     let assignment = null;
