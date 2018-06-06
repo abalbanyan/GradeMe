@@ -1,5 +1,3 @@
-jest.mock('../../grademe-email-verification');
-
 const app = require('../../app.js'); // This is required for certain dependencies
 const util = require('../../jest/jestutil.js');
 const Course = require('../../models/Course.js');
@@ -20,6 +18,7 @@ users.student_out = util.createTestUser('student', 'student_notenrolled');
 
 assignments.visible = util.createTestAssignment('visible', true);
 assignments.invisible = util.createTestAssignment('notvisible', false);
+assignments.none = util.createTestAssignment('none', true);
 
 courses.visible = new Course({
     name: 'Visible',
@@ -98,7 +97,7 @@ describe('getUser', () => {
     });
 });
 
-describe('getCourses', async () => {
+describe('getCourses', () => {
     test('admin gets all courses', async () => {
         let value = await db.utils.getCourses(users.admin._id, true, true);
         expect(value).toHaveLength(Object.keys(courses).length);
@@ -136,7 +135,7 @@ describe('getCourses', async () => {
     });
 });
 
-describe('getAssignments', async () => {
+describe('getAssignments', () => {
     test('admin sees all assignments', async () => {
         let visibleValue = await db.utils.getAssignments(courses.visible, true, true);
         let hiddenValue = await db.utils.getAssignments(courses.visible, false, true);
@@ -161,11 +160,101 @@ describe('getAssignments', async () => {
     });
 });
 
-describe('belongsToCourse', async () => {
+describe('belongsToCourse', () => {
     test('admin belongs to any course', async () => {
         let outValue = await db.utils.belongsToCourse(courses.visible._id, users.admin._id, true, true);
         let inValue = await db.utils.belongsToCourse(courses.none._id, users.admin._id, true, true);
         expect(outValue).toBe(true);
         expect(inValue).toBe(true);
+    });
+
+    test('instructor belongs to their own course', async () => {
+        let value = await db.utils.belongsToCourse(courses.visible._id, users.instructor_in._id, true, false);
+        expect(value).toBe(true);
+    });
+
+    test('instructor not enrolled in another course', async () => {
+        let value = await db.utils.belongsToCourse(courses.visible._id, users.instructor_out._id, true, false);
+        expect(value).toBe(false);
+    });
+
+    test('student belongs to their own course', async () => {
+        let value = await db.utils.belongsToCourse(courses.visible._id, users.student_in._id, false, false);
+        expect(value).toBe(true);
+    });
+
+    test('student not enrolled in another course', async () => {
+        let value = await db.utils.belongsToCourse(courses.visible._id, users.student_out._id, false, false);
+        expect(value).toBe(false);
+    });
+
+    test('non-existent student not enrolled in course', async () => {
+        let value = await db.utils.belongsToCourse(courses.visible._id, INVALID_ID, false, false);
+        expect(value).toBe(false);
+    });
+
+    test('non-existent course returns false', async () => {
+        let value = await db.utils.belongsToCourse(INVALID_ID, users.admin._id, false, false);
+        expect(value).toBe(false);
+    });
+});
+
+describe('canViewAssignment', () => {
+    test('admin can view any assignment', async () => {
+        let visibleValue = await db.utils.canViewAssignment(assignments.visible, courses.visible, users.admin._id, true, true);
+        let invisibleValue = await db.utils.canViewAssignment(assignments.invisible, courses.visible, users.admin._id, true, true);
+        expect(visibleValue).toBe(true);
+        expect(invisibleValue).toBe(true);
+    });
+
+    test('instructor can view all assignments of own course', async () => {
+        let visibleValue = await db.utils.canViewAssignment(assignments.visible, courses.visible, users.instructor_in._id, true, false);
+        let invisibleValue = await db.utils.canViewAssignment(assignments.invisible, courses.visible, users.instructor_in._id, true, false);
+        expect(visibleValue).toBe(true);
+        expect(invisibleValue).toBe(true);
+    });
+
+    test('instructor cannot view assignments of another course', async () => {
+        let value = await db.utils.canViewAssignment(assignments.visible, courses.visible, users.instructor_out._id, true, false);
+        expect(value).toBe(false);
+    });
+
+    test('student can only view visible assignments', async () => {
+        let visibleValue = await db.utils.canViewAssignment(assignments.visible, courses.visible, users.student_in._id, false, false);
+        let invisibleValue = await db.utils.canViewAssignment(assignments.invisible, courses.visible, users.student_in._id, false, false);
+        expect(visibleValue).toBe(true);
+        expect(invisibleValue).toBe(false);
+    });
+
+    test('student cannot view assignments unless enrolled', async () => {
+        let visibleValue = await db.utils.canViewAssignment(assignments.visible, courses.visible, users.student_out._id, false, false);
+        let invisibleValue = await db.utils.canViewAssignment(assignments.invisible, courses.visible, users.student_out._id, false, false);
+        expect(visibleValue).toBe(false);
+        expect(invisibleValue).toBe(false);
+    });
+
+    test('invalid instructor ID cannot view assignments', async () => {
+        let value = await db.utils.canViewAssignment(assignments.visible, courses.visible, INVALID_ID, true, false);
+        expect(value).toBe(false);
+    });
+
+    test('invalid student ID cannot view assignments', async () => {
+        let value = await db.utils.canViewAssignment(assignments.visible, courses.visible, INVALID_ID, false, false);
+        expect(value).toBe(false);
+    });
+
+    test('cannot view if assignment is not part of course', async () => {
+        let value = await db.utils.canViewAssignment(assignments.none, courses.visible, users.student_in, false, false);
+        expect(value).toBe(false);
+    });
+
+    test('cannot view if invalid course ID', async () => {
+        let value = await db.utils.canViewAssignment(assignments.visible, INVALID_ID, users.student_in, false, false);
+        expect(value).toBe(false);
+    });
+
+    test('cannot view if invalid assignment ID', async () => {
+        let value = await db.utils.canViewAssignment(INVALID_ID, courses.visible, users.student_in, false, false);
+        expect(value).toBe(false);
     });
 });
