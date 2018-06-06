@@ -31,7 +31,7 @@ let Submission = require('./models/Submission.js');
  * @return {User}
  */
 async function getUser(userid) {
-    let user = User.findById(userid);
+    let user = await User.findById(userid).exec();
     return user;
 }
 
