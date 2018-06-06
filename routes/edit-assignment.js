@@ -12,11 +12,17 @@ router.get('/', async function(req, res, next) {
     let instructor = res.locals.user.instructor;
     let assignid = req.query.assignid;
 
+    if(!assignid) {
+        res.status(404);
+        return res.render('error', {message: "Missing assignment ID."});
+    }
+
     let assignment = await db.Assignment.findById(assignid).exec();
 
     // Ensure this user belongs to the course and that they are an instructor.
     let course = await db.Course.findOne({assignments : assignid}).exec();
     if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
+        res.status(403);
         return res.render('error', {message: "You do not belong to this course."});
     }
 
@@ -38,7 +44,7 @@ router.post('/', async function(req, res, next) {
         if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
             return res.render('error', {message: "You do not belong to this course."});
         }
-    
+
         // Update settings.
         let updated = await db.Assignment.findByIdAndUpdate(assignid, {
             'gradeonsubmission': (req.body.gradeonsubmission)? true : false,
@@ -55,7 +61,7 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
     let instructor = res.locals.user.instructor;
     let assignid = req.body.assignid;
     let action = req.params.action;
-    
+
     if (!req.file || !req.file.path) {
         res.json(JSON.stringify({ upload: false, error: 'No file was uploaded.' }));
     }
@@ -65,7 +71,7 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
     if (!instructor || !(await db.utils.belongsToCourse(course._id, userid, true, res.locals.user.admin))) {
         res.json(JSON.stringify({ upload: false, error: 'You do not have access to this assignment.' }));
     }
-    
+
     try {
         let newassignment = null;
         if (req.params.action === 'spec') {
@@ -84,7 +90,7 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
         } else {
             return res.json(JSON.stringify({ upload: false, error: 'Invalid upload.' }));
         }
-        
+
         // Remake grading tar if dockerfile, testscript, or makefile were updated.
         if (newassignment) {
             let gradingenvfiles =  [ newassignment.gradingenv.dockerfile, newassignment.gradingenv.testscript, newassignment.gradingenv.makefile ];

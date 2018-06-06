@@ -13,7 +13,7 @@ const User = require('../models/User.js');
 const Course = require('../models/Course.js');
 
 // Check whether trying to access route redirects to location
-const checkRedirect = async (route, location) => {
+const checkGetRedirect = async (route, location) => {
     const response = await request(app).get(route);
 
     let resLocation = response.headers.location;
@@ -27,30 +27,67 @@ const checkRedirect = async (route, location) => {
 };
 
 // Check whether trying to access route gives statusCode
-const checkStatus = async (route, statusCode) => {
-    const response = await request(app).get(route);
+const checkGetStatus = async (location, statusCode) => {
+    const response = await request(app).get(location);
     expect(response.statusCode).toBe(statusCode);
 }
 
+const checkPostRedirect = async (location, formData, redirectLocation) => {
+    const response = await request(app).post(location).type('form').send(formData);
+
+    let resLocation = response.headers.location;
+    if(redirectLocation.length > 0 && redirectLocation[0] !== '/')
+        redirectLocation = '/' + redirectLocation;
+    if(response.statusCode === 302 && resLocation.length > 0 && resLocation[0] !== '/')
+        resLocation = '/' + resLocation;
+
+    expect(response.statusCode).toBe(302);
+    expect(resLocation).toBe(redirectLocation);
+};
+
+const checkPostStatus = async (location, formData, statusCode) => {
+    const response = await request(app).post(location).type('form').send(formData);
+    expect(response.statusCode).toBe(statusCode);
+};
+
 // Call checkRedirect or checkStatus depending on whether it is a string or a number
-const checkRoute = (route, userType, enrolled) => {
-    let location = '/' + route.location;
-    let name = route.name ? route.name : location;
-    let option = route[userType];
+const checkGet = (getTest, userType, enrolled) => {
+    let location = '/' + getTest.location;
+    let name = getTest.name ? getTest.name : location;
+    let option = getTest[userType];
     if(enrolled !== undefined) {
         if(enrolled) option = option.in;
         else option = option.out;
     }
     if((typeof option) === 'string') {
         test('accessing ' + name +  ' redirects to /' + option, (done) => {
-            checkRedirect(location, '/' + option).then(() => {done();});
+            checkGetRedirect(location, '/' + option).then(() => {done();});
         });
     } else {
         test('accessing ' + name + ' returns status: ' + option, (done) => {
-            checkStatus(location, option).then(() => {done();});
+            checkGetStatus(location, option).then(() => {done();});
         });
     }
 }
+
+const checkPost = (postTest, userType, enrolled) => {
+    let location = '/' + postTest.location;
+    let name = postTest.name ? postTest.name : location;
+    let option = postTest[userType];
+    if(enrolled !== undefined) {
+        if(enrolled) option = option.in;
+        else option = option.out;
+    }
+    if((typeof option) === 'string') {
+        test('sending form to ' + name +  ' redirects to /' + option, (done) => {
+            checkPostRedirect(location, postTest.formData, '/' + option).then(() => {done();});
+        });
+    } else {
+        test('sending form to ' + name + ' returns status: ' + option, (done) => {
+            checkPostStatus(location, postTest.formData, option).then(() => {done();});
+        });
+    }
+};
 
 // Creates an object representing a route test
 // For each result there are two options
@@ -71,30 +108,18 @@ const createRouteTest = (location, adminResult, instructorResult, studentResult,
     };
 }
 
+const createGetTest = createRouteTest;
+
 // Create route test, with a specified name for the test title
-const createNamedRouteTest = (name, location, adminResult, instructorResult, studentResult, loggedoutResult) => {
-    let route = createRouteTest(location, adminResult, instructorResult, studentResult, loggedoutResult);
-    route.name = name;
-    return route;
+const createNamedTest = (name, test) => {
+    test.name = name;
+    return test;
 };
 
-// These routes retain same behavior whether user is enrolled or not
-const staticRoutes = [
-    createRouteTest('', 'courses', 'courses', 'courses', 'login'),
-    createRouteTest('admin', 200, 403, 403, 'login'),
-    createRouteTest('courses', 200, 200, 200, 'login'),
-    createRouteTest('create-account', 200, 200, 200, 200),
-    createRouteTest('create-course', 200, 200, 403, 'login'),
-    createRouteTest('enroll', 200, 200, 200, 'login'),
-    createRouteTest('login', 'courses', 'courses', 'courses', 200),
-    createRouteTest('course', 404, 404, 404, 'login'),
-    createNamedRouteTest('non-existent course', 'course?courseid=AAAAAAAAAA', 404, 404, 404, 'login'),
-    createRouteTest('assignment', 404, 404, 404, 'login'),
-    createNamedRouteTest('non-existent assignment', 'assignment?assignid=AAAAAAAAAA', 404, 404, 404, 'login')
-];
-
-
-const dynamicRoutes = [];
+const createPostTest = (formData, routeTest) => {
+    routeTest.formData = formData;
+    return routeTest;
+};
 
 let mongoServer;
 let users = {};
@@ -134,12 +159,71 @@ courses.invisible = new Course({
     main_instructor: [users.instructor_in._id],
     visible: false
 });
+const fakeId = 'AAAAAAAAAA';
+
+// These routes retain same behavior whether user is enrolled or not
+const staticGetTests = [
+    createGetTest('', 'courses', 'courses', 'courses', 'login'),
+    createGetTest('admin', 200, 403, 403, 'login'),
+    createGetTest('courses', 200, 200, 200, 'login'),
+    createGetTest('create-account', 200, 200, 200, 200),
+    createGetTest('create-course', 200, 200, 403, 'login'),
+    createGetTest('create-assignment', 404, 404, 404, 'login'),
+    createNamedTest('create-assignment for non-existent course', createGetTest('create-assignment?courseid=' + fakeId, 404, 404, 404, 'login')),
+    createGetTest('enroll', 200, 200, 200, 'login'),
+    createGetTest('login', 'courses', 'courses', 'courses', 200),
+    createGetTest('course', 404, 404, 404, 'login'),
+    createNamedTest('non-existent course', createRouteTest('course?courseid=' + fakeId, 404, 404, 404, 'login')),
+    createGetTest('assignment', 404, 404, 404, 'login'),
+    createNamedTest('non-existent assignment', createRouteTest('assignment?assignid=' + fakeId, 404, 404, 404, 'login')),
+    createGetTest('edit-course', 404, 404, 404, 'login'),
+    createGetTest('edit-assignment', 404, 404, 404, 'login'),
+    createGetTest('email-verification', 200, 200, 200, 200)
+];
 
 // These routes change behavior based on whether user is enrolled or not
-dynamicRoutes.push(createNamedRouteTest('visible course', 'course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login'));
-dynamicRoutes.push(createNamedRouteTest('non-visible course', 'course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
-dynamicRoutes.push(createNamedRouteTest('visible assignment', 'assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'));
-dynamicRoutes.push(createNamedRouteTest('non-visible assignment', 'assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login'));
+const dynamicGetTests = [
+    createNamedTest('visible course', createGetTest('course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, {in: 200, out: 403}, 'login')),
+    createNamedTest('non-visible course', createGetTest('course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit visible course', createGetTest('edit-course?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit non-visible course', createGetTest('edit-course?courseid=' + courses.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('visible assignment', createGetTest('assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login')),
+    createNamedTest('non-visible assignment', createGetTest('assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit visible assignment', createGetTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('edit non-visible assignment', createGetTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')),
+    createNamedTest('create assignment for valid course', createGetTest('create-assignment?courseid=' + courses.visible._id, 200, {in: 200, out: 403}, 403, 'login')),
+];
+
+// Create valid forms to be used with POST testing
+// Want them to be valid because invalid forms will be tested in another suite
+const validUserForm = {};
+const validAssignmentForm = {
+    'name': 'Example Assignment Name',
+    'desc': 'Example Assignment Description',
+    'duedate': new Date(2020, 1, 1),
+    'spec': {
+        'path': '../public/specs/loremipsum.pdf',
+        'filetype': 'pdf'
+    }
+};
+const validCourseForm = {
+    'course_name': 'Example Course Name',
+    'course_desc': 'Example Course Description',
+    'course_visible': true // Leave this key out if you want it to be invisible
+};
+
+const staticPostTests = [
+    createPostTest(validCourseForm, createRouteTest('create-course', 200, 200, 403, 'login')),
+    createNamedTest('edit course with no course ID', createPostTest(validCourseForm, createRouteTest('edit-course' + courses.visible._id, 404, 404, 404, 'login'))),
+    createNamedTest('edit-course for non-existent course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + fakeId + courses.visible._id, 404, 404, 404, 'login')))
+];
+
+const dynamicPostTests = [
+    createNamedTest('edit course for valid course', createPostTest(validCourseForm, createRouteTest('edit-course?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login'))),
+    // createNamedTest('create valid assignment', createPostTest(validAssignmentForm, createRouteTest('create-assignment?courseid=' + courses.visible._id, 'courses', {in: 'courses', out: 403}, 403, 'login')))
+    // dynamicGetTests.push(createNamedTest('visible assignment', createPostTest('edit-assignment?assignid=' + assignments.visible._id, 200, {in: 200, out: 403}, {in: 200, out:403}, 'login'))),
+    // dynamicGetTests.push(createNamedTest('non-visible assignment', createPostTest('edit-assignment?assignid=' + assignments.invisible._id, 200, {in: 200, out: 403}, 403, 'login')))
+];
 
 beforeAll(async () => {
     mongoServer = await util.mongo.start();
@@ -168,12 +252,20 @@ describe('while logged in as admin', async () => {
         isAuthenticated.mockImplementation(async () => { return users.admin; });
     });
 
-    for (let route of staticRoutes) {
-        checkRoute(route, 'admin');
+    for (let route of staticGetTests) {
+        checkGet(route, 'admin');
     }
 
-    for(let route of dynamicRoutes) {
-        checkRoute(route, 'admin');
+    for(let route of dynamicGetTests) {
+        checkGet(route, 'admin');
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'admin');
+    }
+
+    for (let route of dynamicPostTests) {
+        checkPost(route, 'admin');
     }
 });
 
@@ -182,8 +274,12 @@ describe('while logged in as instructor', async () => {
         isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
     });
 
-    for (let route of staticRoutes) {
-        checkRoute(route, 'instructor', true);
+    for (let route of staticGetTests) {
+        checkGet(route, 'instructor', true);
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'instructor', true);
     }
 
     describe('enrolled in course', async () => {
@@ -192,8 +288,12 @@ describe('while logged in as instructor', async () => {
             isAuthenticated.mockImplementation(async () => { return users.instructor_in; });
         });
 
-        for(let route of dynamicRoutes) {
-            checkRoute(route, 'instructor', true);
+        for(let route of dynamicGetTests) {
+            checkGet(route, 'instructor', true);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'instructor', true);
         }
     });
 
@@ -203,8 +303,12 @@ describe('while logged in as instructor', async () => {
             isAuthenticated.mockImplementation(async () => { return users.instructor_out; });
         });
 
-        for(let route of dynamicRoutes) {
-            checkRoute(route, 'instructor', false);
+        for(let route of dynamicGetTests) {
+            checkGet(route, 'instructor', false);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'instructor', false);
         }
     });
 });
@@ -215,8 +319,12 @@ describe('while logged in as student', async () => {
         isAuthenticated.mockImplementation(async () => { return users.student_in; });
     });
 
-    for (let route of staticRoutes) {
-        checkRoute(route, 'student', true);
+    for (let route of staticGetTests) {
+        checkGet(route, 'student', true);
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'student', true);
     }
 
     describe('enrolled in course', async () => {
@@ -225,8 +333,12 @@ describe('while logged in as student', async () => {
             isAuthenticated.mockImplementation(async () => { return users.student_in; });
         });
 
-        for(let route of dynamicRoutes) {
-            checkRoute(route, 'student', true);
+        for(let route of dynamicGetTests) {
+            checkGet(route, 'student', true);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'student', true);
         }
     });
 
@@ -236,8 +348,12 @@ describe('while logged in as student', async () => {
             isAuthenticated.mockImplementation(async () => { return users.student_out; });
         });
 
-        for(let route of dynamicRoutes) {
-            checkRoute(route, 'student', false);
+        for(let route of dynamicGetTests) {
+            checkGet(route, 'student', false);
+        }
+
+        for(let route of dynamicPostTests) {
+            checkPost(route, 'student', false);
         }
     });
 });
@@ -248,11 +364,19 @@ describe('while logged out', async () => {
         isAuthenticated.mockImplementation(async () => { return false });
     });
 
-    for (let route of staticRoutes) {
-        checkRoute(route, 'loggedout');
+    for (let route of staticGetTests) {
+        checkGet(route, 'loggedout');
     }
 
-    for(let route of dynamicRoutes) {
-        checkRoute(route, 'loggedout');
+    for(let route of dynamicGetTests) {
+        checkGet(route, 'loggedout');
+    }
+
+    for(let route of staticPostTests) {
+        checkPost(route, 'loggedout');
+    }
+
+    for(let route of dynamicPostTests) {
+        checkPost(route, 'loggedout');
     }
 });
