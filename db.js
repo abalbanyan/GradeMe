@@ -108,6 +108,10 @@ async function canViewAssignment(assignid, courseid, userid, instructor, admin =
     if(!isInCourse)
         return false;
 
+    const assignmentCourse = await Course.findOne({_id: courseid, assignments: assignid});
+    if(!assignmentCourse)
+        return false;
+
     let assignment = null;
     if(admin || instructor) {
         assignment = await Assignment.findById(assignid);
