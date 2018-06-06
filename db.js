@@ -4,6 +4,7 @@ let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('./autograder/autograder.js');
+const EXPIRE_TIME_IN_SECONDS = 24*60*60;  // 24 hours.
 
 if(process.env.NODE_ENV !== 'test') {
     mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
@@ -194,7 +195,9 @@ module.exports = {
     Course: Course,
     Assignment: Assignment,
     Submission: Submission,
+    TempUser: TempUser,
     EmailVerification: nev,
+    EXPIRE_TIME_IN_SECONDS: EXPIRE_TIME_IN_SECONDS,
     utils: {
         getUser: getUser,
         getCourses: getCourses,
