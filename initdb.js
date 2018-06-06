@@ -64,6 +64,20 @@ async function initdb() {
         main_instructor: [willy._id],
         visible: true
     });
+
+    let tempUser = new db.TempUser({
+        GENERATED_VERIFYING_URL: 'xxx',
+        email: 'temp@xxx.edu',
+        name: {first: "A", last: "B"},
+        password: 'none',
+        admin: false,
+        instructor: false,
+        uid: 0 
+    });
+
+    await tempUser.save();
+
+    db.TempUser.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: db.EXPIRE_TIME_IN_SECONDS });
     
     await course.save();
     await course2.save();
