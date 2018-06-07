@@ -3,6 +3,7 @@
 var gulp = require('gulp');
 var casperJs = require('gulp-casperjs');
 var nodemon = require('gulp-nodemon');
+var wait = require('gulp-wait');
 
 gulp.task('nodemon', (cb) => {
   let started = false;
@@ -24,6 +25,7 @@ gulp.task('nodemon', (cb) => {
 
 gulp.task('test-ui', ['nodemon'], function() {
   return gulp.src('./test/ui/*.js')
+    .pipe(wait(5000))
     .pipe(casperJs())
     .once('error', function() {
         process.exit(1);
