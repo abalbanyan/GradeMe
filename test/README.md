@@ -41,6 +41,6 @@ A few quick gotchas that can pop up frequently:
 
 For UI testing with CasperJS, the server will be run locally and it will start up a MongoDB server in memory similar to Jest. However, in this case that server will be persistent for all UI tests, so you need to be careful to cleanup anything you don't want in the database.
 
-When creating tests the [CasperJS Docs](http://docs.casperjs.org/en/latest/testing.html) are a great place to get started. There is also an example test in our repo [here](ui/example.ui.js).
+When creating tests the [CasperJS Docs](http://docs.casperjs.org/en/latest/testing.html) are a great place to get started.
 
 One nice part of testing with CasperJS is that a browser window does not need to be run in order for the UI to be tested. This is great in many respects; however, if your tests start failing it can be frustrating. To alleviate this issue use CasperJS's [snapshot function](https://thejsguy.com/2015/04/30/taking-screenshots-with-casper.html), to get a view of what the webpage would currently look like in the browser.
