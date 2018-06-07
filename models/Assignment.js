@@ -2,7 +2,6 @@ let mongoose = require('mongoose');
 let shortid = require('shortid');
 let fileutils = require('../fileutils.js');
 let Schema = mongoose.Schema;
-let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('autograder');
 
 // Assignment model.
