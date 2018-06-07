@@ -1,5 +1,7 @@
 /**
  * Use this script to initialize the database with some sample data.
+ *
+ * (takes a few seconds, be patient)
  */
 
 let db = require('./db.js');
@@ -17,7 +19,7 @@ async function cleardb() {
 
 // main function
 (async function initdb() {
-    cleardb();
+    await cleardb();
 
     let admin = new db.User({
         email: 'admin@grademe.edu',
