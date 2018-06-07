@@ -1,7 +1,7 @@
 // Our app only needs to work on desktop
 casper.options.viewportSize = { width: 1920, height: 1080 };
 
-casper.test.begin('Able to login as students', 4, function suite(test) {
+casper.test.begin('Able to login as admin', 4, function suite(test) {
     casper.start('http://localhost:3200', function() {
         test.assertExists('form[action="/login"]', 'login form is found');
         this.fill('form[action="/login"]', {
