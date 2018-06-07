@@ -104,7 +104,8 @@ router.get('/', async function(req, res, next) {
                 course: course,
                 headers: headers,
                 assignments: course.assignments,
-                assignment: null
+                assignment: null,
+                maxCourseGrade: maxCourseGrade
             });
         }
     } else {
