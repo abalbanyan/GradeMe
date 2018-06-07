@@ -6,6 +6,7 @@
 
 # testing
 /coverage
+/screenshots
 
 # production
 /build
@@ -32,6 +33,7 @@ Session.vim
 tags
 
 # vscode
+.vscode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
