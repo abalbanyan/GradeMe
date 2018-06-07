@@ -7,23 +7,29 @@
 <div class="container">
     <h2><%- course.name %> </h2>
 
-    <h4><%= assignment.name %></h4>
+    <% if (assignment != null) { %>
+        <h4><%= assignment.name %></h4>
+    <% } %>
     <table class="table table-striped">
         <thead>
             <tr>
                 <% for(var i = 0; i < headers.length; i++) { %>
-                    <th scope="col"><%= headers[i] %></th>
+                    <% if (typeof headers[i] != 'string') { %>
+                        <th scope="col"><a href="<%= headers[i].link %>"><%= headers[i].name %></a></th>
+                    <% } else { %>
+                        <th scope="col"><%= headers[i] %></th>
+                    <% } %>
                 <% } %>
             </tr>
         </thead>
         <tbody>
-        <% if (assignment) { %>
+        <% if (assignment != null) { %>
             <% for(var i = 0; i < tablerows.length; i++) { %>
                 <tr>
                     <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
-                    <th>
+                    <td>
                         <%= tablerows[i].name %>
-                    </th>
+                    </td>
 
                     <td>
                         <span class="original-grade"><%= tablerows[i].grade %></span>
@@ -37,9 +43,9 @@
                     </td>
 
                     <td>
-                        <%= tablerows[i].submissiondate %>
+                            <%= tablerows[i].submissiondate %>
                     </td>
-
+                    
                     <td class="submission-path">
                         <% if (tablerows[i].submissionpath != "n/a") { %>
                             <a href="<%= tablerows[i].submissionpath %>" download>download</a>
@@ -50,7 +56,31 @@
                 </tr>
             <% } %>
         <% } else { %>
+            <% for(var i = 0; i < tablerows.length; i++) { %>
+                <tr>
+                    <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
+                    <td>
+                        <%= tablerows[i].name %>
+                    </td>
 
+                    <% for(var j = 0; j < tablerows[i].assignmentGrades.length; j++) { %>
+                        <td>
+                            <span class="original-grade"><%= tablerows[i].assignmentGrades[j] %></span>
+                            <span>
+                                <input type="number" min="0" class="grade-editor">
+                            </span>
+
+                            <i class="material-icons edit-grade">edit</i>
+                            <i class="material-icons undo-grade">undo</i>
+                            <i class="material-icons done-grade">done</i>
+                        </td>
+
+                    <td>
+                        <span class="total-grade"><%= tablerows[i].studentTotalGrade %></span>
+                    </td>
+                <% } %>
+                </tr>
+            <% } %>
         <% } %>
         </tbody>
     </table>
@@ -61,6 +91,8 @@
 
 <script>
     $(document).ready(function(){
+        let columnsBeforeGrades = 2; // Magic number used for indexing. It is the number of columns before our grade array
+
         $(".edit-grade").click(function(){
             editGrade($(this).closest("td"));
         });
@@ -78,21 +110,44 @@
             parenttd.find(".edit-grade").show();
         });
 
-        $(".done-grade").click(function(){
-            var assignment = <%- JSON.stringify(assignment) %>;
-            if (assignment) {
-                var parenttd = $(this).closest("td");
-                parenttd.find(".grade-editor").change();
+        $(".done-grade").click(async function(){
+            var assignment = <%- JSON.stringify(assignment) %>; // Get assignment variable from ejs variables.
+            var parenttd = $(this).closest("td");
+            parenttd.find(".grade-editor").change();
+            if (assignment != null) {
                 changeGrade(parenttd, assignment._id);
+            } else {
+                if (parenttd != null) {
+                    let assignmentids = <%- JSON.stringify(assignments) %>;
+                    let gradeDifference = await changeGrade(parenttd, assignmentids[parenttd.index()-columnsBeforeGrades]);
+                    if (gradeDifference != 0) {
+                        let totalGradeCell = parenttd.closest("tr").find(".total-grade");
+                        totalGradeCell.text(Number(totalGradeCell.text()) + gradeDifference);
+                    }
+                } else {
+                    alert("error while changing grade");
+                }
             }
         });
 
-        $(".grade-editor").on('keyup', function (e) {
-            var assignment = <%- JSON.stringify(assignment) %>;
-            if (e.keyCode == 13) { // if user presses enter
-                if (assignment) {
-                    $(this).change();
+        $(".grade-editor").on('keyup', async function (e) {
+            var assignment = <%- JSON.stringify(assignment) %>; // Get assignment variable from ejs variables.
+            if (e.keyCode == 13) { // If user presses enter.
+                $(this).change();
+                if (assignment != null) {
                     changeGrade($(this).closest("td"), assignment._id);
+                } else {
+                    let parenttd = $(this).closest("td");
+                    if (parenttd != null) {
+                        let assignmentids = <%- JSON.stringify(assignments) %>;
+                        let gradeDifference = await changeGrade(parenttd, assignmentids[parenttd.index()-columnsBeforeGrades]);
+                        if (gradeDifference != 0) {
+                            let totalGradeCell = parenttd.closest("tr").find(".total-grade");
+                            totalGradeCell.text(Number(totalGradeCell.text()) + gradeDifference);
+                        }
+                    } else {
+                        alert("error while changing grade");
+                    }
                 }
             }
         });
@@ -104,10 +159,13 @@
             el.find(".original-grade").hide();
             el.find(".grade-editor").show();
         }
-
+        
+        // Returns the value of the new grade - old grade or 0 if an error occurred.
         async function changeGrade(el, assignmentid) {
             let user_id = el.closest("tr").find(".user-id").text();
             let new_grade = el.closest("tr").find(".grade-editor").val();
+            let old_grade = el.closest("tr").find(".original-grade").text();
+            old_grade = (old_grade == "n/a") ? 0 : Number(old_grade);
             if ($.isNumeric(new_grade) && new_grade >= 0) {
                 let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade,
                     { method: 'GET', credentials: 'same-origin'});
@@ -115,37 +173,26 @@
                 let data = JSON.parse(json);
 
                 if (data.valid) {
-                    alert("success");
+                    let tableRow = el.closest("tr");
+                    tableRow.find(".undo-grade").hide();
+                    tableRow.find(".done-grade").css("color", "green");
+                    el.find(".original-grade").text(new_grade);
+                    el.find(".original-grade").show();
+                    el.find(".grade-editor").hide();
+                    setTimeout(function () {
+                        tableRow.find(".done-grade").hide();
+                        tableRow.find(".done-grade").css("color", "initial");
+                        el.find(".edit-grade").show();
+                    }, 1500);
                 } else {
-                    alert("fail");
+                    alert("We are experiencing database issues and cannot update this grade. Please notify an administrator.");
+                    return 0;
                 }
             } else {
-                alert("oh no");
+                alert("no negative numbers allowed");
+                return 0;
             }
-            // else { todo: add error text
-
-            // }
+            return new_grade - old_grade;
         }
     });
-
-    // async function verifyCode(el) {
-    //     if (el.value.length > 7) {
-    //         let response = await fetch('/api/verifycode?instructor=<%=user.instructor? 1 : 0 %>&code=' + el.value,
-    //             { method: 'GET', credentials: 'same-origin'});
-    //         let json = await response.json();
-    //         let data = JSON.parse(json);
-    //         let message = document.getElementById('codemessage');
-    //         let button = document.getElementById('enrollbutton');
-    //         if (data.valid) {
-    //             message.style.color = 'green';
-    //             message.innerHTML = 'Would you like to enroll in <b>' + data.coursename + '</b>?';
-    //             button.style.display = 'block';
-    //             button.style.backgroundColor = '#57B55C';
-    //         } else {
-    //             message.style.color = 'red';
-    //             message.innerHTML = 'This code is invalid. ' + (data.err? data.err : '');
-    //             button.style.backgroundColor = '#FF0033';
-    //         }
-    //     }
-    // }
 </script>
