@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "opn http://localhost:3200 && nodemon server.js",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test-ui": "NODE_ENV=development gulp test-ui"
   },
   "author": "",
   "license": "ISC",
@@ -31,10 +32,15 @@
     "tar": "^4.4.2"
   },
   "devDependencies": {
+    "casperjs": "^1.1.4",
+    "gulp": "^3.9.1",
+    "gulp-casperjs": "0.0.7",
+    "gulp-nodemon": "^2.2.1",
     "jest": "^22.4.3",
     "mongodb-memory-server": "^1.7.3",
     "nodemon": "^1.17.3",
     "opn-cli": "^3.1.0",
+    "phantomjs": "^2.1.7",
     "supertest": "^3.0.0"
   }
 }

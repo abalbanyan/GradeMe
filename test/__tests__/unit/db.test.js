@@ -1,7 +1,7 @@
-const app = require('../../app.js'); // This is required for certain dependencies
-const util = require('../../jest/jestutil.js');
-const Course = require('../../models/Course.js');
-const db = require('../../db.js');
+const app = require('../../../app.js'); // This is required for certain dependencies
+const util = require('../../../jest/jestutil.js');
+const Course = require('../../../models/Course.js');
+const db = require('../../../db.js');
 
 const INVALID_ID = 'aaaa';
 
