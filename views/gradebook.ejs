@@ -169,8 +169,9 @@
             let new_grade = el.find(".grade-editor").val();
             let old_grade = el.find(".original-grade").text();
             old_grade = (old_grade == "n/a") ? 0 : Number(old_grade);
+            let course = <%- JSON.stringify(assignments) %>;
             if ($.isNumeric(new_grade) && new_grade >= 0) {
-                let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade,
+                let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade + '&course_id=' + course._id,
                     { method: 'GET', credentials: 'same-origin'});
                 let json = await response.json();
                 let data = JSON.parse(json);

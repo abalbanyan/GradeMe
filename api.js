@@ -46,10 +46,9 @@ router.use('/verifycode', async function(req, res, next) {
  */
 router.use('/changeGrade', async function(req, res, next) {
     let data = {};
-    // Add check to ensure that this is the instructor for the course, may have to have course sent too.
     try {
-        if (req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined ||
-                !res.locals.user.instructor) {
+        if (req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined || req.query.course_id == undefined ||
+                !res.locals.user.instructor || await db.utils.isCourseInstructor(req.query.course_id, res.locals.user._id)) {
             data.valid = false;
             data.err = "Invalid request.";
         } else {
