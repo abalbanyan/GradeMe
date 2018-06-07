@@ -39,6 +39,8 @@ router.get('/', async function(req, res, next) {
     });
 });
 
+router.use('/tests', require('./tests.js'));
+
 /**
  * Submit the user's uploaded file, provided it passes validation.
  */
