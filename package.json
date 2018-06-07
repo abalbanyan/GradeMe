@@ -33,10 +33,12 @@
     "tar": "^4.4.2"
   },
   "devDependencies": {
+    "babel-polyfill": "^6.26.0",
     "casperjs": "^1.1.4",
     "gulp": "^3.9.1",
     "gulp-casperjs": "0.0.7",
     "gulp-nodemon": "^2.2.1",
+    "gulp-wait": "0.0.2",
     "jest": "^22.4.3",
     "mongodb-memory-server": "^1.7.3",
     "nodemon": "^1.17.3",
