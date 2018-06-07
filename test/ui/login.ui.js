@@ -1,4 +1,4 @@
-require('babel-polyfill'); // Required to avoid PhantomJS bug
+var util = require('../util/caspertestutil.js');
 
 // Our app only needs to work on desktop
 casper.options.viewportSize = { width: 1920, height: 1080 };
@@ -110,7 +110,7 @@ casper.test.begin('Unable to login with invalid credentials', 3, function suite(
     casper.then(function() {
         this.waitUntilVisible('div.alert-danger', function() {
             test.assertVisible('div.alert-danger', 'displays error message');
-            var value = this.fetchText('div.alert-danger').includes('Error: incorrect username or password');
+            var value = this.fetchText('div.alert-danger').indexOf('Error: incorrect username or password') !== -1;
             test.assert(value, 'Displays correct error message');
         });
     });
@@ -134,7 +134,7 @@ casper.test.begin('Error message displayed when no form data given', 3, function
     casper.then(function() {
         this.waitUntilVisible('div.alert-danger', function() {
             test.assertVisible('div.alert-danger', 'displays error message');
-            var value = this.fetchText('div.alert-danger').includes('Error: missing username or password');
+            var value = this.fetchText('div.alert-danger').indexOf('Error: missing username or password') !== -1;
             test.assert(value, 'Displays correct error message');
         });
     });

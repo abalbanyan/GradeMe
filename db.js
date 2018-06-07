@@ -1,5 +1,5 @@
 let mongoose = require('mongoose');
-let casperutil = require('./test/util/casperutil'); // For UI testing
+let casperutil = require('./test/util/casperserverutil'); // For UI testing
 let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
