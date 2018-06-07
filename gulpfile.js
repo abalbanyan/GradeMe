@@ -25,7 +25,7 @@ gulp.task('nodemon', (cb) => {
 
 gulp.task('test-ui', ['nodemon'], function() {
   return gulp.src('./test/ui/*.js')
-    .pipe(wait(5000))
+    .pipe(wait(5000)) // Wait 5 seconds to give the server a chance to start up
     .pipe(casperJs())
     .once('error', function() {
         process.exit(1);
