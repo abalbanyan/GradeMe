@@ -9,6 +9,9 @@
 
     <% if (assignment != null) { %>
         <h4><%= assignment.name %></h4>
+        <h6>Assignment Total: <%= assignment.gradetotal %></h6>
+    <% } else { %>
+        <h6>Course Total: <%= maxCourseGrade %></h6>
     <% } %>
     <table class="table table-striped">
         <thead>
@@ -74,11 +77,11 @@
                             <i class="material-icons undo-grade">undo</i>
                             <i class="material-icons done-grade">done</i>
                         </td>
+                    <% } %>
 
                     <td>
                         <span class="total-grade"><%= tablerows[i].studentTotalGrade %></span>
                     </td>
-                <% } %>
                 </tr>
             <% } %>
         <% } %>
@@ -163,8 +166,8 @@
         // Returns the value of the new grade - old grade or 0 if an error occurred.
         async function changeGrade(el, assignmentid) {
             let user_id = el.closest("tr").find(".user-id").text();
-            let new_grade = el.closest("tr").find(".grade-editor").val();
-            let old_grade = el.closest("tr").find(".original-grade").text();
+            let new_grade = el.find(".grade-editor").val();
+            let old_grade = el.find(".original-grade").text();
             old_grade = (old_grade == "n/a") ? 0 : Number(old_grade);
             if ($.isNumeric(new_grade) && new_grade >= 0) {
                 let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade,
@@ -173,15 +176,14 @@
                 let data = JSON.parse(json);
 
                 if (data.valid) {
-                    let tableRow = el.closest("tr");
-                    tableRow.find(".undo-grade").hide();
-                    tableRow.find(".done-grade").css("color", "green");
+                    el.find(".undo-grade").hide();
+                    el.find(".done-grade").css("color", "green");
                     el.find(".original-grade").text(new_grade);
                     el.find(".original-grade").show();
                     el.find(".grade-editor").hide();
                     setTimeout(function () {
-                        tableRow.find(".done-grade").hide();
-                        tableRow.find(".done-grade").css("color", "initial");
+                        el.find(".done-grade").hide();
+                        el.find(".done-grade").css("color", "initial");
                         el.find(".edit-grade").show();
                     }, 1500);
                 } else {

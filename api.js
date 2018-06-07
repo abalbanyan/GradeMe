@@ -77,14 +77,15 @@ router.use('/changeGrade', async function(req, res, next) {
                 });
                 data.valid = true;
             } else { // Editing assignment grade.
-                // TODO: for some reasons this callback never fires even when the save goes through. Defualting to true for now.
+                // TODO: Having trouble with the await's here
                 let submission = await latestSubmission.update({ grade: req.query.new_grade }, async function (err) {
-                    if (err) {
-                        data.err = "Failed request.";
-                    } else {
-                        data.valid = true;
-                    }
+                //     if (err) {
+                //         data.err = "Failed request.";
+                //     } else {
+                //         data.valid = true;
+                //     }
                 });
+                data.valid = true;
             }
         }
     } catch (err) {
