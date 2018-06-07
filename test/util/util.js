@@ -1,31 +1,8 @@
-const mongoose = require('mongoose');
-const app = require('../app.js');
-const MongodbMemoryServer = require('mongodb-memory-server');
-const User = require('../models/User.js');
-const Assignment = require('../models/Assignment.js');
-
-mongoose.Promise = Promise;
-
-// May require additional time for downloading MongoDB binaries
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
-
-const startMongo = async () => {
-    let mongoServer = new MongodbMemoryServer.default();
-    const mongoUri = await mongoServer.getConnectionString();
-    await mongoose.connect(mongoUri, (err) => {
-        if (err) console.error(err);
-    });
-
-    return mongoServer;
-};
-
-const stopMongo = (mongoServer) => {
-    mongoose.disconnect();
-    mongoServer.stop();
-};
+const User = require('../../models/User.js');
+const Assignment = require('../../models/Assignment.js');
 
 /**
- * Creates a user for testing, with the name `type`-`tag`
+ * Creates a user for testing, with the name `tag`
  *
  * @param {String} type
  *   The type of user, either admin, instructor, or student
@@ -36,7 +13,7 @@ const createTestUser = (type, tag) => {
     if(type !== 'admin' && type !== 'instructor' && type !== 'student') return null;
     const instructor = (type === 'instructor') || (type === 'admin');
     const admin = type === 'admin';
-    const name = type + tag;
+    const name = tag;
     const uid = Math.floor(Math.random() * 1000000000);
     const user = new User({
         email: name + '@grademe.edu',
@@ -75,10 +52,6 @@ const createTestAssignment = (name, isVisible = true, isLate = false) => {
 };
 
 module.exports = {
-    mongo: {
-        start: startMongo,
-        stop: stopMongo
-    },
-    createTestUser: createTestUser,
-    createTestAssignment: createTestAssignment
+    createTestAssignment: createTestAssignment,
+    createTestUser: createTestUser
 };

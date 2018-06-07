@@ -8,7 +8,7 @@ const isAuthenticated = require('../../auth/isAuthenticated.js');
 const request = require('supertest');
 const app = require('../../app.js');
 const auth = require('../../auth.js');
-const util = require('../../jest/jestutil.js');
+const util = require('../util/jestutil.js');
 const User = require('../../models/User.js');
 const Course = require('../../models/Course.js');
 

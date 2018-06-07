@@ -1,5 +1,5 @@
-const jestutil = require('../jestutil.js');
-const User = require('../../models/User.js');
+const jestutil = require('../../util/jestutil.js');
+const User = require('../../../models/User.js');
 
 let mongoServer;
 
