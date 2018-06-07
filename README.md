@@ -20,4 +20,4 @@ The server runs on **localhost:3200**.
 
 To start running tests all you need to do is run `yarn test`. This will run through all of the testing suites and give you back the results. Also, when running the tests they will use a different database than your local instance of Mongo, so you don't have to worry about your current database instance being modified when running tests.
 
-To get started building your own tests you can check out the README [here](jest).
+To get started building your own tests you can check out the README [here](test).

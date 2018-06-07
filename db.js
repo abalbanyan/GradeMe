@@ -1,12 +1,18 @@
 let mongoose = require('mongoose');
+let casperutil = require('./test/util/casperutil'); // For UI testing
 let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { GradingEnvironment } = require('./autograder/autograder.js');
 const EXPIRE_TIME_IN_SECONDS = 24*60*60;  // 24 hours.
+const UI_TEST = process.env.NODE_ENV === 'test-ui';
+const JEST_TEST = process.env.NODE_ENV === 'test';
 
-if(process.env.NODE_ENV !== 'test') {
+if (UI_TEST) {
+    casperutil.mongo.start();
+    casperutil.mongo.init();
+} else if (!JEST_TEST) {
     mongoose.connect(`mongodb://127.0.0.1:27017/grademe`)
     .then(() => {
         console.log('Database connection successful.');
@@ -191,7 +197,10 @@ nev.configure({
         return;
     }
 
-    console.log('configured: ' + (typeof options === 'object'));
+    // Makes test output more readable in the terminal
+    if(!(UI_TEST || JEST_TEST)) {
+        console.log('configured: ' + (typeof options === 'object'));
+    }
 });
 
 // TODO: How are we storing user submissions? Might need a "Submission" model.
