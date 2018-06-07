@@ -52,12 +52,60 @@ router.get('/', async function(req, res, next) {
                     tablerows: rows,
                     course: course,
                     assignment: assignment,
+                    assignments: null,
                     headers: ["ID", "Name", "Grade", "Submission Date", "Submission"]
                 });
             }
         } else {
             // TODO
-            res.render('gradebook');
+            var rows = [];
+            var headers = ["ID", "Name"];
+            var maxCourseGrade = 0;
+
+            for (i = 0; i < course.students.length; i++) {
+                let studentName = (await db.User.find({'_id': course.students[i]}).exec())[0];
+                studentName = studentName.name.last + ', ' + studentName.name.first;
+                let row = new Object();
+                row.name = studentName;
+                row.uid = course.students[i];
+                row.assignmentGrades = [];
+                row.studentTotalGrade = 0;
+
+                for (j = 0; j < course.assignments.length; j++) {
+                    let assignment = await db.Assignment.findOne({'_id': course.assignments[j]}).exec();
+                    if (assignment != null) {
+                        let latestSubmission = (await db.Submission.find({ 'userid': course.students[i],
+                                                                        'assignmentid': course.assignments[j]})
+                                                                        .sort({ submissiondate: -1 }).limit(1))[0];
+
+                        let grade = latestSubmission && latestSubmission.grade ? latestSubmission.grade : "n/a";
+                        row.assignmentGrades.push(grade);
+
+                        if (i == 0 && assignment.visible) { // We want to know the maximum grade and know the assignment names.
+                            let assignmentHeader = new Object();
+                            assignmentHeader.name = assignment.name;
+                            assignmentHeader.link = req.originalUrl + "&assignid=" + assignment._id;
+                            headers.push(assignmentHeader);
+                            maxCourseGrade += assignment.gradetotal;
+                        }
+
+                        // TODO: should we add the grades if the assignment isn't visible?
+                        if (grade != "n/a") {
+                            row.studentTotalGrade += grade;
+                        }
+                    }
+                }
+                rows.push(row);
+            }
+            headers.push("Total Grade");
+
+            res.render('gradebook', {
+                tablerows: rows,
+                course: course,
+                headers: headers,
+                assignments: course.assignments,
+                assignment: null
+            });
         }
     } else {
         res.status(403);
