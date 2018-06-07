@@ -1,16 +1,16 @@
 // We mock isAuthentcated here so that we can easily control whether
 // or not Express thinks we have access
-jest.mock('../../auth/isAuthenticated.js', () => {
+jest.mock('../../../auth/isAuthenticated.js', () => {
     return jest.fn();
 });
 
-const isAuthenticated = require('../../auth/isAuthenticated.js');
+const isAuthenticated = require('../../../auth/isAuthenticated.js');
 const request = require('supertest');
-const app = require('../../app.js');
-const auth = require('../../auth.js');
-const util = require('../util/jestutil.js');
-const User = require('../../models/User.js');
-const Course = require('../../models/Course.js');
+const app = require('../../../app.js');
+const auth = require('../../../auth.js');
+const util = require('../../util/jestutil.js');
+const User = require('../../../models/User.js');
+const Course = require('../../../models/Course.js');
 
 // Check whether trying to access route redirects to location
 const checkGetRedirect = async (route, location) => {
