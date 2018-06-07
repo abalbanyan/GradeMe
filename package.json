@@ -33,6 +33,7 @@
     "tar": "^4.4.2"
   },
   "devDependencies": {
+    "babel-polyfill": "^6.26.0",
     "casperjs": "^1.1.4",
     "gulp": "^3.9.1",
     "gulp-casperjs": "0.0.7",
