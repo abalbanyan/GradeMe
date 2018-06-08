@@ -1,5 +1,13 @@
 <%- include partials/header.ejs %>
 
+<style>
+  .ace_editor, .ace_editor * {
+    font-family:  'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+    font-size:13px;
+    /*color:inherit;*/
+  }
+</style>
+
 <div class="container">
   <h3>Tests</h4>
   <br>
@@ -60,25 +68,40 @@
         </div><!-- end submit new testcase -->
       </div><!-- end tabContent -->
 
-      <div id="updateSuccessAlert" class="alert alert-success collapse" role="alert">
-        Sucessfully updated your testcase.
-      </div>
-
-      <div id="createSuccessAlert" class="alert alert-success collapse" role="alert">
-        Sucessfully created your testcase.
-      </div>
     </div><!-- end column -->
   </div><!-- end row -->
+  <hr>
+
+  <%# makefile editor %>
+  <div class="container">
+    <div id="updateMetadataAlert" class="alert alert-success collapse" role="alert">
+      Sucessfully saved test metadata.
+    </div>
+    <form class="mb-2" id="makefileForm">
+      <div class="form-group">
+        <label for="buildCmd">Executable name</label>
+        <input class="form-control" id="execName" name="execName" type="text" value="<%= testcases_meta.execName %>">
+      </div>
+      <div class="form-group">
+        <h6>Makefile</h6>
+        <div style="height: 30em" id="makefileEditor"><%= testcases_meta.makefile %></div>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="submitMetadata()">Update</button>
+    </form>
+  </div>
+
 </div><!-- end container -->
 
-<%- include partials/footer.ejs %>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript"></script>
 <script>
   var testContent = document.getElementById('testcases-tabContent');
   var testTabs = document.getElementById('testcases-tabContent');
   var createForm = document.getElementById('createForm');
-  var updateSuccessAlert = document.getElementById('updateSuccessAlert');
-  var createSuccessAlert = document.getElementById('createSuccessAlert');
+  var updateMetadataAlert = document.getElementById('updateMetadataAlert');
+  var makefileEditor = ace.edit('makefileEditor');
+  makefileEditor.setTheme("ace/theme/monokai");
+  makefileEditor.session.setMode("ace/mode/makefile");
+  var execName = document.getElementById('execName');
 
   function formToJSON(formElem) {
     const formdata = new FormData(formElem);
@@ -116,9 +139,6 @@
       body: JSON.stringify(formToJSON(createForm)),
       credentials: "same-origin"
     });
-    createSuccessAlert.classList.remove("collapse");
-    setTimeout(() => createSuccessAlert.classList.add("collapse"), 5000);
-
     return location.reload();
   }
 
@@ -153,8 +173,25 @@
     });
 
     return location.reload();
-
-    updateSuccessAlert.classList.remove("collapse");
-    setTimeout(() => updateSuccessAlert.classList.add("collapse"), 5000);
   }
+
+  async function submitMetadata() {
+    let res = await fetch('/assignment/upload/testcase_meta' + window.location.search, {
+      method: "PUT",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        execName: execName.value,
+        makefile: makefileEditor.getSession().getValue()
+      }),
+      credentials: "same-origin"
+    });
+
+    updateMetadataAlert.classList.remove('collapse');
+    setTimeout(() => updateMetadataAlert.classList.add('collapse'), 5000);
+  }
+
 </script>
+
+<%- include partials/footer.ejs %>

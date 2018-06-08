@@ -30,19 +30,12 @@ router.get('/', async (req, res) => {
     }
     
     let tests = await db.TestCase.find({ assignid: req.query.assignid });
+    let assignment = await db.Assignment.findById(req.query.assignid);
 
     return res.status(200).render('tests', {
-        assignid: req.query.assignid,
+        testcases_meta: assignment.testcases_meta,
         tests: tests
     });
-    /*
-    {
-        tests: [
-            { id: 0, name: 'test #1', stdin: 'hey there', stdout: 'howdy' },
-            { id: 1, name: 'test #2', stdin: 'wat', stdout: 'ok' }
-        ]
-    }
-    */
 });
 
 router.post('/', async (req, res) => {
