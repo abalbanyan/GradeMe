@@ -2,16 +2,10 @@
 
 There are three types of testing done for GradeMe: unit, integration, and UI tests. Unit and integration tests are done with [Jest](https://facebook.github.io/jest/), and UI testing is done with [CasperJS](http://casperjs.org/).
 
-To run the all test suites use the following command:
-
-```bash
-yarn test
-```
-
 If you want to only run unit and integration tests use:
 
 ```bash
-yarn test-jest
+yarn test
 ```
 
 And if you want to only run UI tests use:
@@ -28,7 +22,7 @@ There are two ways to create a test. One is to put the JavaScript files in a `__
 
 For a few examples of how to write some basic tests, take a look on the [Jest Docs](https://facebook.github.io/jest/docs/en/getting-started.html) or in our repo [here](example).
 
-After you've written some new code or tests you can quickly run them locally with `yarn test-jest`.
+After you've written some new code or tests you can quickly run them locally with `yarn test`.
 
 One major point is that each test suite (.test.js file) will create a new MongoDB server in memory, hence you don't need to worry about Jest messing up your local database instance or any test files conflicting with each other.
 
