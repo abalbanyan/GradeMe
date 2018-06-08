@@ -29,7 +29,7 @@ async function cleardb() {
         instructor: true,
         uid: 0
     });
-    
+
     let danny = new db.User({
         email: 'danny@gmail.com',
         password: 'monkey',
@@ -38,7 +38,7 @@ async function cleardb() {
         name: {first: "Danny", last: "Jung"},
         uid: 100
     });
-    
+
     let willy = new db.User({
         email: 'willy@gmail.com',
         password: 'mindi',
@@ -49,7 +49,7 @@ async function cleardb() {
     await admin.save();
     await willy.save();
     await danny.save();
-    
+
     let assignment = new db.Assignment({
         name: "GradeMe",
         desc: "this lmao",
@@ -60,7 +60,7 @@ async function cleardb() {
         },
     });
     await assignment.save();
-    
+
     let course = new db.Course({
         name: 'CS130 Software Engineering',
         desc: 'idk',
@@ -70,7 +70,7 @@ async function cleardb() {
         main_instructor: [willy._id],
         visible: true
     });
-    
+
     let course2 = new db.Course({
         name: 'CS136 Computer Security',
         desc: 'hewwo OwO',
@@ -88,13 +88,13 @@ async function cleardb() {
         password: 'none',
         admin: false,
         instructor: false,
-        uid: 0 
+        uid: 0
     });
 
     await tempUser.save();
 
     db.TempUser.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: db.EXPIRE_TIME_IN_SECONDS });
-    
+
     await course.save();
     await course2.save();
 

@@ -38,3 +38,9 @@ For UI testing with CasperJS, the server will be run locally and it will start u
 When creating tests the [CasperJS Docs](http://docs.casperjs.org/en/latest/testing.html) are a great place to get started.
 
 One nice part of testing with CasperJS is that a browser window does not need to be run in order for the UI to be tested. This is great in many respects; however, if your tests start failing it can be frustrating. To alleviate this issue use CasperJS's [snapshot function](https://thejsguy.com/2015/04/30/taking-screenshots-with-casper.html), to get a view of what the webpage would currently look like in the browser.
+
+__IMPORTANT__: CasperJS relies on PhantomJS which does not support Javascript features from ES2015 or newer. If you want to use such a feature then you can try to use a polyfill by adding this to the top of your test file:
+
+```js
+require('babel-polyfill');
+```

@@ -1,5 +1,5 @@
 let mongoose = require('mongoose');
-let casperutil = require('./test/util/casperutil'); // For UI testing
+let casperutil = require('./test/util/casperserverutil'); // For UI testing
 let shortid = require('shortid');
 let nev = require('./grademe-email-verification')(mongoose);
 let Schema = mongoose.Schema;
@@ -66,7 +66,7 @@ async function getCourses(userid, instructor = false, admin = false) {
  *
  * @param {String} courseid
  * @param {Boolean} showhidden - Show hidden courses?
- * @return {[Assignment]}
+ * @return {Assignment[]}
  */
 async function getAssignments(courseid, showhidden, admin = false) {
     let course = await Course.findById(courseid);

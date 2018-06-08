@@ -1,9 +1,5 @@
-/**
- * This file is responsible for authenticating user requests
- * using JSON Web Tokens.
- *
- * TODO
- */
+// This file is responsible for authenticating user requests
+// using JSON Web Tokens.
 let jwt = require('jsonwebtoken');
 let bcrypt = require('bcryptjs');
 let secret = 'super-secret';
@@ -21,7 +17,7 @@ async function authChecker(req, res, next) {
     res.locals.path = req.path;
     let pathRegex = new RegExp(req.path);
     let emailRegex = /\/email-verification/g;
-    
+
     if (req.path == '/login' || req.path == '/create-account' || emailRegex.exec(pathRegex) != null) {
         // Some pages don't require authentication.
         next();
@@ -40,7 +36,7 @@ async function authChecker(req, res, next) {
 /**
  * Creates and sends a jwt token to the user as a cookie.
  *
- * @param {Express Response} res
+ * @param {Response} res
  * @param {Number} userid
  */
 function sendCookie(res, userid) {
@@ -54,7 +50,7 @@ function sendCookie(res, userid) {
  * Authenticates a user using their email and password.
  * If authentication passes, sends a cookie to the user.
  *
- * @param {Express Response} res
+ * @param {Response} res
  * @param {String} email
  * @param {String} password - The plaintext password.
  *
