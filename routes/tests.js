@@ -15,7 +15,6 @@ async function isAuthorized(assignId, user) {
 }
 
 router.get('/', async (req, res) => {
-    console.log(res.locals.user);
     if (!(await isAuthorized(req.query.assignid, res.locals.user))){
         return res.status(403).render('error', {
             message: "You do not have access to this assignment."
