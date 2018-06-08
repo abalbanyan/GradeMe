@@ -89,37 +89,8 @@ async function cleardb() {
             filetype: 'pdf'
         },
     });
-    let assignment2 = new db.Assignment({
-        name: "Project 2",
-        desc: "Test Assignment",
-        duedate: new Date(2020, 2, 2),
-        spec: {
-            path: 'specs/loremipsum.pdf',
-            filetype: 'pdf'
-        },
-    });
-    let assignment3 = new db.Assignment({
-        name: "Project 3",
-        desc: "Test Assignment",
-        duedate: new Date(2021, 1, 1),
-        spec: {
-            path: 'specs/loremipsum.pdf',
-            filetype: 'pdf'
-        },
-    });
-    let assignment4 = new db.Assignment({
-        name: "Project 4",
-        desc: "Test Assignment",
-        duedate: new Date(2020, 5, 4),
-        spec: {
-            path: 'specs/loremipsum.pdf',
-            filetype: 'pdf'
-        },
-    });
     await assignment.save();
-    await assignment2.save();
-    await assignment3.save();
-    await assignment4.save();
+
 
     let course = new db.Course({
         name: 'CS130 Software Engineering',
