@@ -88,7 +88,3 @@ initdb().then(err => {
         console.log("Database initialized with data.");
     process.exit();
 })
-<<<<<<< HEAD
-=======
-    
->>>>>>> It works. Code isn't cleaned yet though.
