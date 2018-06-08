@@ -10,7 +10,7 @@ let nodemailer = require('nodemailer');
 let User = require('./models/User.js');
 let TempUser = require('./models/TempUser.js');
 
-module.exports = function(mongoose) {
+module.exports = function() {
 
     var isPositiveInteger = function(x) {
         return ((parseInt(x, 10) === x) && (x >= 0));
@@ -183,11 +183,12 @@ module.exports = function(mongoose) {
     var createTempUser = function(user, codes, callback) {
         if (!options.tempUserModel) {
             return callback(new TypeError('Temporary user model not defined. Either you forgot' +
-                'to generate one or you did not predefine one.'), null);
+                'to generate one or you did not predefine one.'), null, null);
         }
 
         // create our mongoose query
         var query = {email: user.email};
+        console.log('QUERY: ' + query.email);
 
         options.persistentUserModel.findOne(query, function(err, existingPersistentUser) {
             if (err) {
@@ -208,6 +209,7 @@ module.exports = function(mongoose) {
                 if (existingTempUser) {
                     return callback(null, null, null);
                 } else {  // No existing tempuser, so insert new tempuser.
+                    console.log('EXISTING NOT FOUND');
                     user.enroll_codes = codes;
                     user.GENERATED_VERIFYING_URL = randtoken.generate(options.URLLength);
                     
