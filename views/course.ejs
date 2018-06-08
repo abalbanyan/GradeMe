@@ -27,6 +27,9 @@
 
     <br><br>
     <p><%= course.desc %></p>
+    <% if (user.instructor) { %>
+        <h5><a href="/gradebook?courseid=<%=course._id%>">Gradebook</a></h5>
+    <% } %>
 
     <h4 class="mini-title">Assignments</h4>
     <table class="table table-striped">

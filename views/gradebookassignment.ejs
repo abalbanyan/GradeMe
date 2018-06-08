@@ -1,0 +1,163 @@
+
+<%- include partials/header.ejs %>
+<head>
+    <link rel="stylesheet" href="/css/gradebook.css">
+    <script></script>
+</head>
+
+<body>
+<div class="container">
+    <h2><%- course.name %> </h2>
+
+    <h4><%= assignment.name %></h4>
+    <h6>Assignment Total: <%= assignment.gradetotal %></h6>
+    <button type="button" class="btn btn-primary bulk-grade-button">Bulk Grade</button>
+
+    <div class="dropdown show">
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Gradebook Navigation
+        </a>
+        
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="<%= "/gradebook?courseid=" + course._id %>"><%= course.name %></a>
+        <% for(var i = 0; i < assignmentNames.length; i++) { %>
+            <a class="dropdown-item" href="<%= "/gradebook?courseid=" + course._id + "&assignid=" + assignments[i] %>"><%= assignmentNames[i] %></a>
+        <% } %>
+        </div>
+    </div>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <% for(var i = 0; i < headers.length; i++) { %>
+                    <% if (typeof headers[i] != 'string') { %>
+                        <th scope="col"><a href="<%= headers[i].link %>"><%= headers[i].name %></a></th>
+                    <% } else { %>
+                        <th scope="col"><%= headers[i] %></th>
+                    <% } %>
+                <% } %>
+            </tr>
+        </thead>
+        <tbody>
+            <% for(var i = 0; i < tablerows.length; i++) { %>
+                <tr>
+                    <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
+                    <td>
+                        <%= tablerows[i].name %>
+                    </td>
+
+                    <td>
+                        <span class="original-grade"><%= tablerows[i].grade %></span>
+                        <span>
+                            <input type="number" min="0" class="grade-editor">
+                        </span>
+
+                        <i class="material-icons edit-grade">edit</i>
+                        <i class="material-icons undo-grade">undo</i>
+                        <i class="material-icons done-grade">done</i>
+                    </td>
+
+                    <td>
+                            <%= tablerows[i].submissiondate %>
+                    </td>
+                    
+                    <td class="submission-path">
+                        <% if (tablerows[i].submissionpath != "n/a") { %>
+                            <a href="<%= tablerows[i].submissionpath %>" download>download</a>
+                        <% } else { %>
+                            <%= tablerows[i].submissionpath %>
+                        <% } %>
+                    </td>
+                </tr>
+            <% } %>
+        </tbody>
+    </table>
+</div>
+</body>
+
+<%- include partials/footer.ejs %>
+
+<script>
+    $(document).ready(function(){
+
+        $(".edit-grade").click(function(){
+            editGrade($(this).closest("td"));
+        });
+
+        $(".original-grade").dblclick(function(){
+            editGrade($(this).closest("td"));
+        });
+
+        $(".undo-grade").click(function(){
+            $(this).hide();
+            var parenttd = $(this).closest("td");
+            parenttd.find(".done-grade").hide();
+            parenttd.find(".grade-editor").hide();
+            parenttd.find(".original-grade").show();
+            parenttd.find(".edit-grade").show();
+        });
+
+        $(".done-grade").click(async function(){
+            var assignment = <%- JSON.stringify(assignment) %>; // Get assignment variable from ejs variables.
+            var parenttd = $(this).closest("td");
+            parenttd.find(".grade-editor").change();
+            if (assignment != null) {
+                changeGrade(parenttd, assignment._id);
+            }
+        });
+
+        $(".grade-editor").on('keyup', async function (e) {
+            var assignment = <%- JSON.stringify(assignment) %>; // Get assignment variable from ejs variables.
+            if (e.keyCode == 13) { // If user presses enter.
+                $(this).change();
+                if (assignment != null) {
+                    changeGrade($(this).closest("td"), assignment._id);
+                }
+            }
+        });
+
+        function editGrade(el) {
+            el.find(".edit-grade").hide();
+            el.find(".undo-grade").show();
+            el.find(".done-grade").show();
+            el.find(".original-grade").hide();
+            el.find(".grade-editor").show();
+        }
+        
+        // Returns the value of the new grade - old grade or 0 if an error occurred.
+        async function changeGrade(el, assignmentid) {
+            let user_ids = <%- JSON.stringify(students) %>;
+            let user_id = user_ids[el.closest("tr").index()];
+            let new_grade = el.find(".grade-editor").val();
+            let old_grade = el.find(".original-grade").text();
+            old_grade = (old_grade == "ungraded" || old_grade == "no submission") ? 0 : Number(old_grade);
+            let course = <%- JSON.stringify(course) %>;
+            if ($.isNumeric(new_grade) && new_grade >= 0) {
+                let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade + '&course_id=' + course._id,
+                    { method: 'GET', credentials: 'same-origin'});
+                let json = await response.json();
+                let data = JSON.parse(json);
+
+                if (data.valid) {
+                    el.find(".undo-grade").hide();
+                    el.find(".done-grade").css("color", "green");
+                    el.find(".original-grade").text(new_grade);
+                    el.find(".original-grade").show();
+                    el.find(".grade-editor").hide();
+                    setTimeout(function () {
+                        el.find(".done-grade").hide();
+                        el.find(".done-grade").css("color", "initial");
+                        el.find(".edit-grade").show();
+                    }, 1500);
+                } else {
+                    alert("We are experiencing database issues and cannot update this grade. Please notify an administrator.");
+                    return 0;
+                }
+            } else {
+                alert("no negative numbers allowed");
+                return 0;
+            }
+            return new_grade - old_grade;
+        }
+    });
+</script>
