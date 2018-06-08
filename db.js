@@ -28,6 +28,7 @@ let TempUser = require('./models/TempUser.js');
 let Course = require('./models/Course.js');
 let Assignment = require('./models/Assignment.js');
 let Submission = require('./models/Submission.js');
+let TestCase = require('./models/TestCase.js');
 
 // DB Utils.
 /**
@@ -215,6 +216,7 @@ module.exports = {
     Assignment: Assignment,
     Submission: Submission,
     TempUser: TempUser,
+    TestCase: TestCase,
     EmailVerification: nev,
     EXPIRE_TIME_IN_SECONDS: EXPIRE_TIME_IN_SECONDS,
     utils: {

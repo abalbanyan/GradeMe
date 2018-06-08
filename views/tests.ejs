@@ -6,58 +6,155 @@
   <div class="row">
     <div class="col-3">
       <div class="list-group" id="testcases-tab" role="tablist">
+        <%# populate testcase tab list %>
         <% tests.forEach((test, i) => { %>
-          <a class="list-group-item list-group-item-action <%= i==0 ? 'active' : '' %>" data-toggle="list" href="#<%= test._id %>" role="tab">
+          <a class="list-group-item list-group-item-action <%= i==0 ? 'active' : '' %>" data-toggle="list" href="#<%= test.id %>" role="tab">
             <%= test.name %>
           </a>
         <% }); %>
-          <a class="list-group-item list-group-item-action <%= tests.length==0 ? 'active' : '' %>" data-toggle="list" href="#new-testcase" role="tab">+</a>
+          <a class="list-group-item list-group-item-action <%= tests.length==0 ? 'active' : '' %>" id="createTab" data-toggle="list" href="#new-testcase" role="tab">+</a>
       </div>
     </div>
+
     <div class="col">
       <div class="tab-content" id="testcases-tabContent">
+      <%# populate testcase tab pages %>
       <% tests.forEach((test, i) => { %>
-        <div class="tab-pane fade mb-2 <%= i==0 ? 'show active' : '' %>" id="<%= test._id %>" role="tabpanel">
+        <div class="tab-pane fade mb-2 <%= i==0 ? 'show active' : '' %>" id="<%= test.id %>" role="tabpanel">
           <form class="mb-2">
             <div class="form-group">
               <label for="name">Testcase Name</label>
-              <input type="text" class="form-control" id="name" value="<%= test.name %>">
+              <input type="text" class="form-control" id="name" name="name" value="<%= test.name %>">
             </div>
             <div class="form-group">
               <label for="stdin">STDIN</label>
-              <textarea class="form-control" id="stdin" rows="5" cols="80"><%= test.stdin %></textarea>
+              <textarea class="form-control" id="stdin" name="stdin" rows="5" cols="80"><%= test.stdin %></textarea>
             </div>
             <div class="form-group">
               <label for="stdin">STDOUT</label>
-              <textarea class="form-control" id="stdin" rows="5" cols="80"><%= test.stdout %></textarea>
+              <textarea class="form-control" id="stdout" name="stdout" rows="5" cols="80"><%= test.stdout %></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Update</button>
-            <button type="button" class="btn btn-secondary">Delete</button>
+            <button type="button" class="btn btn-primary" onclick="update()">Update</button>
+            <button type="button" class="btn btn-secondary" onclick="remove()">Delete</button>
           </form>
         </div>
       <% }); %>
 
-        <!-- Submit a new testcase -->
+      <%# Submit a new testcase %>
         <div class="tab-pane fade <%= tests.length==0 ? 'show active' : '' %>" id="new-testcase" role="tabpanel">
-          <form class="mb-2">
+          <form class="mb-2" id="createForm">
             <div class="form-group">
               <label for="name">Testcase Name</label>
-              <input type="text" class="form-control" id="name">
+              <input class="form-control" id="name" name="name" type="text">
             </div>
             <div class="form-group">
               <label for="stdin">STDIN</label>
-              <textarea class="form-control" id="stdin" rows="5" cols="80"></textarea>
+              <textarea class="form-control" id="stdin" name="stdin" rows="5" cols="80"></textarea>
             </div>
             <div class="form-group">
-              <label for="stdin">STDOUT</label>
-              <textarea class="form-control" id="stdin" rows="5" cols="80"></textarea>
+              <label for="stdout">STDOUT</label>
+              <textarea class="form-control" id="stdout" name="stdout" rows="5" cols="80"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Create</button>
+            <button type="button" class="btn btn-primary" onclick="create()">Create</button>
           </form>
-        </div>
+        </div><!-- end submit new testcase -->
+      </div><!-- end tabContent -->
+
+      <div id="updateSuccessAlert" class="alert alert-success collapse" role="alert">
+        Sucessfully updated your testcase.
       </div>
-    </div>
-  </div>
-</div>
+
+      <div id="createSuccessAlert" class="alert alert-success collapse" role="alert">
+        Sucessfully created your testcase.
+      </div>
+    </div><!-- end column -->
+  </div><!-- end row -->
+</div><!-- end container -->
 
 <%- include partials/footer.ejs %>
+
+<script>
+  var testContent = document.getElementById('testcases-tabContent');
+  var testTabs = document.getElementById('testcases-tabContent');
+  var createForm = document.getElementById('createForm');
+  var updateSuccessAlert = document.getElementById('updateSuccessAlert');
+  var createSuccessAlert = document.getElementById('createSuccessAlert');
+
+  function formToJSON(formElem) {
+    const formdata = new FormData(formElem);
+    let ret = {};
+    formdata.forEach((value, key) => {
+      ret[key] = value;
+    });
+    return ret;
+  }
+
+/*
+  function insertTestcase(testcase) {
+    // replace create tab with the new testcase's name
+    let createTab = document.getElementById('createTab');
+    let newCreateTab = createTab.cloneNode();
+    createTab.id = '';
+    createTab.href = '#' + testcase.id;
+    createTab.textContent = testcase.name;
+
+    let testCaseContent = document.createElement("div");
+    newTestCase.classList.add();
+  }
+
+  function removeTestcase(testcase) {
+    return location.reload();
+  }
+*/
+
+  async function create() {
+    let res = await fetch(window.location.href, {
+      method: "POST",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(formToJSON(createForm)),
+      credentials: "same-origin"
+    });
+    createSuccessAlert.classList.remove("collapse");
+    setTimeout(() => createSuccessAlert.classList.add("collapse"), 5000);
+
+    return location.reload();
+  }
+
+  async function remove() {
+    let testid = testContent.querySelector('.active').id
+    let res = await fetch(window.location.href, {
+      method: "DELETE",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify({
+        testid: testid
+      }),
+      credentials: "same-origin"
+    });
+
+    return location.reload();
+  }
+
+  async function update() {
+    let curTestContent = testContent.querySelector('.active')
+    let formdata = formToJSON(curTestContent.querySelector('form'));
+    formdata.testid = curTestContent.id;
+
+    let res = await fetch(window.location.href, {
+      method: "PUT",
+      headers: {
+        'content-type': 'application/json'
+      },
+      body: JSON.stringify(formdata),
+      credentials: "same-origin"
+    });
+
+    return location.reload();
+
+    updateSuccessAlert.classList.remove("collapse");
+    setTimeout(() => updateSuccessAlert.classList.add("collapse"), 5000);
+  }
+</script>
