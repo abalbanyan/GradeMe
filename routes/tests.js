@@ -5,32 +5,25 @@ var { isCourseInstructor } = db.utils;
 var _ = require('lodash/core');
 
 async function isAuthorized(assignId, user) {
-    const userId = user.userid;
+    const userId = user._id;
     const isInstructor = user.instructor;
 
-    return assignId && isInstructor && isCourseInstructor(
-        await db.Course.findOne({ assignments: assignId })._id,
+    return assignId && isInstructor && (await isCourseInstructor(
+        (await db.Course.findOne({ assignments: assignId }).exec())._id,
         userId
-    );
+    ));
 }
-
-/*
-const assignment = await db.Assignment.findById(assignid).exec();
-if (!assignment) {
-    res.status(404);
-    return res.render('error', {message: "Assignment not found."});
-}
-*/
 
 router.get('/', async (req, res) => {
-    if (!isAuthorized(req.query.assignid, res.locals.user)){
+    console.log(res.locals.user);
+    if (!(await isAuthorized(req.query.assignid, res.locals.user))){
         return res.status(403).render('error', {
             message: "You do not have access to this assignment."
         });
     }
     
-    let tests = await db.TestCase.find({ assignid: req.query.assignid });
-    let assignment = await db.Assignment.findById(req.query.assignid);
+    let tests = await db.TestCase.find({ assignid: req.query.assignid }).exec();
+    let assignment = await db.Assignment.findById(req.query.assignid).exec();
 
     return res.status(200).render('tests', {
         testcases_meta: assignment.testcases_meta,
@@ -47,7 +40,7 @@ router.post('/', async (req, res) => {
         });
     }
 
-    if (!isAuthorized(req.query.assignid, res.locals.user)) {
+    if (!(await isAuthorized(req.query.assignid, res.locals.user))) {
         return res.status(401).json({
             name: 'Error',
             message: 'Unauthorized to create testcases'
@@ -60,7 +53,7 @@ router.post('/', async (req, res) => {
             name: req.body.name,
             stdin: req.body.stdin,
             stdout: req.body.stdout
-        });
+        }).exec();
     } catch(e) {
         return res.status(500).json({
             name: e.name,
@@ -80,8 +73,8 @@ router.put('/', async (req, res) => {
         });
     }
 
-    let testcase = await db.TestCase.findById(req.body.testid);
-    if (!isAuthorized(testcase.assignid, res.locals.user)) {
+    let testcase = await db.TestCase.findById(req.body.testid).exec();
+    if (!(await isAuthorized(testcase.assignid, res.locals.user))) {
         return res.status(401).json({
             name: 'Error',
             message: 'Unauthorized to modify testcases'
@@ -116,8 +109,8 @@ router.delete('/', async (req, res) => {
         });
     }
 
-    let testcase = await db.TestCase.findById(req.body.testid);
-    if (!isAuthorized(testcase.assignid, res.locals.user)) {
+    let testcase = await db.TestCase.findById(req.body.testid).exec();
+    if (!(await isAuthorized(testcase.assignid, res.locals.user))) {
         return res.status(401).json({
             name: 'Error',
             message: 'Unauthorized to delete testcases'
@@ -125,7 +118,7 @@ router.delete('/', async (req, res) => {
     }
 
     try {
-        await db.TestCase.findByIdAndDelete(testcase.id);
+        await db.TestCase.findByIdAndDelete(testcase.id).exec();
     } catch(e) {
         return res.status(500).json({
             name: e.name,
