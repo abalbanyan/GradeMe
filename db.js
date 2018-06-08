@@ -1,7 +1,7 @@
 let mongoose = require('mongoose');
 let casperutil = require('./test/util/casperserverutil'); // For UI testing
 let shortid = require('shortid');
-let nev = require('./grademe-email-verification')(mongoose);
+let nev = require('./grademe-email-verification')();
 let Schema = mongoose.Schema;
 let ObjectId = Schema.ObjectId;
 const { findGradingEnvironment, GradingEnvironment } = require('autograder');
