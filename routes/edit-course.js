@@ -35,6 +35,11 @@ router.post('/', async function(req, res, next) {
         visible: req.body.course_visible ? true : false
     };
 
+    if(!courseupdate.name) {
+        res.status(500);
+        return res.render('error', {message: "Can't leave field blank."});
+    }
+
     if(!courseid) {
         res.status(404);
         return res.render('error', {message: "No course ID provided."});

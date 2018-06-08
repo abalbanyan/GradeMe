@@ -153,4 +153,42 @@ describe('edit-course form submission', () => {
         expect(response.statusCode).toBe(302);
         expect(response.headers.location).toBe('courses');
     });
+
+    test('empty name is rejected', async () => {
+        let response = await request(app)
+            .post('/edit-course?courseid=' + courses.visible._id)
+            .type('form')
+            .send(blankNameCourseForm);
+
+        expect(response.statusCode).toBe(500);
+    });
+
+    test('empty description is accepted', async () => {
+        let response = await request(app)
+            .post('/edit-course?courseid=' + courses.visible._id)
+            .type('form')
+            .send(blankDescCourseForm);
+
+        expect(response.statusCode).toBe(302);
+        expect(response.headers.location).toBe('courses');
+    });
+
+    test('unicode characters are accepted', async () => {
+        let response = await request(app)
+            .post('/edit-course?courseid=' + courses.visible._id)
+            .type('form')
+            .send(blankDescCourseForm);
+
+        expect(response.statusCode).toBe(302);
+        expect(response.headers.location).toBe('courses');
+    });
+
+    test('1,000,000 character name is rejected', async () => {
+        let response = await request(app)
+            .post('/edit-course?courseid=' + courses.visible._id)
+            .type('form')
+            .send(longNameCourseForm);
+
+        expect(response.statusCode).toBe(413);
+    });
 });
