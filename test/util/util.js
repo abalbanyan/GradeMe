@@ -22,7 +22,8 @@ const createTestUser = (type, tag) => {
         password: name,
         instructor: instructor,
         admin: admin,
-        uid: uid
+        uid: uid,
+        kind: "User"
     });
     return user;
 };
@@ -78,7 +79,8 @@ const createTestTempUser = (type, tag, url, codes) => {
         admin: admin,
         uid: uid,
         GENERATED_VERIFYING_URL: url,
-        enroll_codes: codes
+        enroll_codes: codes,
+        kind: "TempUser"
     });
     return tempUser;
 };

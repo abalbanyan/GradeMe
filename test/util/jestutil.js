@@ -11,12 +11,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 const startMongo = async () => {
     let mongoServer = new MongodbMemoryServer.default();
     const mongoUri = await mongoServer.getConnectionString();
-    // var options = { 
-    //     keepAlive: 30000, 
-    //     connectTimeoutMS: 30000, 
-    //     reconnectTries: 30, 
-    //     reconnectInterval: 5000 
-    // };
+    
     await mongoose.connect(mongoUri, (err) => {
         if (err) console.error(err);
     });
