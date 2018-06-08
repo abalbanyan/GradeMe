@@ -9,3 +9,12 @@
 .done-grade {
     display: none;
 }
+
+.expand-grade {
+    float: right;
+    color: #007bff;
+}
+
+.bulk-grade-button {
+    margin-bottom: 5px;
+}

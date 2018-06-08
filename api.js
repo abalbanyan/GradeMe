@@ -48,7 +48,7 @@ router.use('/changeGrade', async function(req, res, next) {
     let data = {};
     try {
         if (req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined || req.query.course_id == undefined ||
-                !res.locals.user.instructor || await db.utils.isCourseInstructor(req.query.course_id, res.locals.user._id)) {
+                !res.locals.user.instructor || !(await db.utils.isCourseInstructor(req.query.course_id, res.locals.user._id))) {
             data.valid = false;
             data.err = "Invalid request.";
         } else {
