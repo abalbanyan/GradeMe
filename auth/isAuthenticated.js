@@ -4,7 +4,7 @@ const getUserID = require('./getUserID.js');
 /**
  * Checks if the user is authenticated. If so, returns the user's db entry.
  *
- * @param {Express Request} req
+ * @param {Request} req
  * @return {User}
  */
 async function isAuthenticated(req) {

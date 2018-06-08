@@ -1,6 +1,4 @@
-/**
- * Use this script to initialize the database with some sample data.
- */
+// Use this script to initialize the database with some sample data.
 
 let db = require('./db.js');
 
@@ -13,7 +11,7 @@ async function initdb() {
         instructor: true,
         uid: 0
     });
-    
+
     let danny = new db.User({
         email: 'danny@gmail.com',
         password: 'monkey',
@@ -22,7 +20,7 @@ async function initdb() {
         name: {first: "Danny", last: "Jung"},
         uid: 100
     });
-    
+
     let willy = new db.User({
         email: 'willy@gmail.com',
         password: 'mindi',
@@ -33,7 +31,7 @@ async function initdb() {
     await admin.save();
     await willy.save();
     await danny.save();
-    
+
     let assignment = new db.Assignment({
         name: "GradeMe",
         desc: "this lmao",
@@ -44,7 +42,7 @@ async function initdb() {
         },
     });
     await assignment.save();
-    
+
     let course = new db.Course({
         name: 'CS130 Software Engineering',
         desc: 'idk',
@@ -54,7 +52,7 @@ async function initdb() {
         main_instructor: [willy._id],
         visible: true
     });
-    
+
     let course2 = new db.Course({
         name: 'CS136 Computer Security',
         desc: 'hewwo OwO',
@@ -72,13 +70,13 @@ async function initdb() {
         password: 'none',
         admin: false,
         instructor: false,
-        uid: 0 
+        uid: 0
     });
 
     await tempUser.save();
 
     db.TempUser.collection.createIndex({ "createdAt": 1 }, { expireAfterSeconds: db.EXPIRE_TIME_IN_SECONDS });
-    
+
     await course.save();
     await course2.save();
 }
@@ -90,4 +88,3 @@ initdb().then(err => {
         console.log("Database initialized with data.");
     process.exit();
 })
-    

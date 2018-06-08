@@ -103,7 +103,7 @@ module.exports = function(mongoose) {
      * Modify the default configuration.
      *
      * @func configure
-     * @param {object} o - options to be changed
+     * @param {Object} o - options to be changed
      */
     var configure = function(optionsToConfigure, callback) {
         for (let key in optionsToConfigure) {
@@ -150,11 +150,11 @@ module.exports = function(mongoose) {
      * Helper function for actually inserting the temporary user into the database.
      *
      * @func insertTempUser
-     * @param {string} password - the user's password, possibly hashed
+     * @param {String} password - the user's password, possibly hashed
      * @param {TempUser} tempUser - the temporary user's data
      * @param {function} callback - a callback function, which takes an error and the
      *   temporary user object as params
-     * @return {function} returns the callback function
+     * @return {Function} returns the callback function
      */
     var insertTempUser = function(password, tempUser, callback) {
         tempUser.save(function(err, tempUser) {
@@ -173,12 +173,12 @@ module.exports = function(mongoose) {
      * randomly generated URL associated to it.
      *
      * @func createTempUser
-     * @param {object} user - a JSON object representing data in persistent User model
-     * @param {[String]} codes - an array of enroll codes
-     * @param {function} callback - a callback function that takes an error (if one exists),
+     * @param {Object} user - a JSON object representing data in persistent User model
+     * @param {String[]} codes - an array of enroll codes
+     * @param {Function} callback - a callback function that takes an error (if one exists),
      *   a persistent user (if it exists) and the new temporary user as arguments; if the
      *   temporary user already exists, then null is returned in its place
-     * @return {function} returns the callback function
+     * @return {Function} returns the callback function
      */
     var createTempUser = function(user, codes, callback) {
         if (!options.tempUserModel) {
@@ -210,7 +210,7 @@ module.exports = function(mongoose) {
                 } else {  // No existing tempuser, so insert new tempuser.
                     user.enroll_codes = codes;
                     user.GENERATED_VERIFYING_URL = randtoken.generate(options.URLLength);
-                    
+
                     let tempUser = new TempUser(user);
 
                     // PRE-SAVE IN User.js HANDLES HASHING PASSWORD ALREADY.
@@ -225,9 +225,9 @@ module.exports = function(mongoose) {
      * Send an email to the user requesting confirmation.
      *
      * @func sendVerificationEmail
-     * @param {string} email - the user's email address.
-     * @param {string} url - the unique url generated for the user.
-     * @param {function} callback - the callback to pass to Nodemailer's transporter
+     * @param {String} email - the user's email address.
+     * @param {String} url - the unique url generated for the user.
+     * @param {Function} callback - the callback to pass to Nodemailer's transporter
      */
     var sendVerificationEmail = function(email, url, callback) {
         var r = /\$\{URL\}/g;
@@ -251,8 +251,8 @@ module.exports = function(mongoose) {
      * Send an email to the user requesting confirmation.
      *
      * @func sendConfirmationEmail
-     * @param {string} email - the user's email address.
-     * @param {function} callback - the callback to pass to Nodemailer's transporter
+     * @param {String} email - the user's email address.
+     * @param {Function} callback - the callback to pass to Nodemailer's transporter
      */
     var sendConfirmationEmail = function(email, callback) {
         var mailOptions = JSON.parse(JSON.stringify(options.confirmMailOptions));
@@ -268,18 +268,18 @@ module.exports = function(mongoose) {
      * user collection, removing the URL assigned to it.
      *
      * @func confirmTempUser
-     * @param {string} url - the randomly generated URL assigned to a unique email
+     * @param {String} url - the randomly generated URL assigned to a unique email
      */
     var confirmTempUser = function(url, callback) {
         let TempUser = options.tempUserModel;
         let query = {};
         query[options.URLFieldName] = url;
-        
+
         TempUser.findOne(query, function(err, tempUserData, codes) {
             if (err) {
                 return callback(err, null, null);
             }
-            
+
             // temp user is found (i.e. user accessed URL before their data expired)
             if (tempUserData) {
                 let User = options.persistentUserModel;
@@ -307,7 +307,7 @@ module.exports = function(mongoose) {
      * Resend the verification email to the user given only their email.
      *
      * @func resendVerificationEmail
-     * @param {object} email - the user's email address
+     * @param {Object} email - the user's email address
      */
     var resendVerificationEmail = function(email, callback) {
         var query = {};
@@ -330,7 +330,7 @@ module.exports = function(mongoose) {
 
                     sendVerificationEmail(getNestedValue(tempUser, options.emailFieldName), tempUser[options.URLFieldName], function(err) {
                         if (err) {
-                        console.log('error: ' + err);                            
+                        console.log('error: ' + err);
                             return callback(err, null);
                         }
                         return callback(null, true);
