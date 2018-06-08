@@ -8,7 +8,7 @@
     "postinstall": "[ -L node_modules/autograder ] || ln -s ../autograder node_modules/autograder",
     "clean": "rm -rf course-data/assign-* course-data/course-*",
     "dev": "opn http://localhost:3200 && nodemon server.js",
-    "test": "npm run test-jest && npm run test-ui",
+    "test": "npm run test-jest",
     "test-jest": "jest --runInBand --verbose",
     "test-ui": "NODE_ENV=test-ui gulp test-ui"
   },
