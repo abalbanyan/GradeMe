@@ -187,18 +187,18 @@ module.exports = function() {
         }
 
         // create our mongoose query
-        var query = {email: user.email};
-        console.log('QUERY: ' + query.email);
+        var query = {email: user.email, kind: "User"};
 
         options.persistentUserModel.findOne(query, function(err, existingPersistentUser) {
             if (err) {
                 return callback(err, null, null);
             }
-
+            
             // user has already signed up and confirmed their account
             if (existingPersistentUser) {
                 return callback(null, existingPersistentUser, null);
             }
+            query.kind = "TempUser";
 
             options.tempUserModel.findOne(query, function(err, existingTempUser) {
                 if (err) {
@@ -209,7 +209,6 @@ module.exports = function() {
                 if (existingTempUser) {
                     return callback(null, null, null);
                 } else {  // No existing tempuser, so insert new tempuser.
-                    console.log('EXISTING NOT FOUND');
                     user.enroll_codes = codes;
                     user.GENERATED_VERIFYING_URL = randtoken.generate(options.URLLength);
                     
@@ -271,6 +270,7 @@ module.exports = function() {
      *
      * @func confirmTempUser
      * @param {string} url - the randomly generated URL assigned to a unique email
+     * @param {Function} callback - function(err, user, enroll_codes)
      */
     var confirmTempUser = function(url, callback) {
         let TempUser = options.tempUserModel;
