@@ -47,8 +47,10 @@ router.use('/verifycode', async function(req, res, next) {
 router.use('/changeGrade', async function(req, res, next) {
     let data = {};
     try {
-        if (req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined || req.query.course_id == undefined ||
-                !res.locals.user.instructor || !(await db.utils.isCourseInstructor(req.query.course_id, res.locals.user._id))) {
+        let queryCheckFailed = req.query.user == undefined || req.query.assign_id == undefined || req.query.new_grade == undefined || req.query.course_id == undefined;
+        let instructorCheckFailed = !res.locals.user.instructor || !(await db.utils.isCourseInstructor(req.query.course_id, res.locals.user._id));
+        let adminCheckFailed = !res.locals.user.admin;
+        if (queryCheckFailed || (instructorCheckFailed && adminCheckFailed)) {
             data.valid = false;
             data.err = "Invalid request.";
         } else {
