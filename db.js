@@ -66,7 +66,7 @@ async function getCourses(userid, instructor = false, admin = false) {
  *
  * @param {String} courseid
  * @param {Boolean} showhidden - Show hidden courses?
- * @return {[Assignment]}
+ * @return {Assignment[]}
  */
 async function getAssignments(courseid, showhidden, admin = false) {
     let course = await Course.findById(courseid);
