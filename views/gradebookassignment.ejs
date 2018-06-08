@@ -1,18 +1,31 @@
+
 <%- include partials/header.ejs %>
 <head>
     <link rel="stylesheet" href="/css/gradebook.css">
+    <script></script>
 </head>
 
 <body>
 <div class="container">
     <h2><%- course.name %> </h2>
 
-    <% if (assignment != null) { %>
-        <h4><%= assignment.name %></h4>
-        <h6>Assignment Total: <%= assignment.gradetotal %></h6>
-    <% } else { %>
-        <h6>Course Total: <%= maxCourseGrade %></h6>
-    <% } %>
+    <h4><%= assignment.name %></h4>
+    <h6>Assignment Total: <%= assignment.gradetotal %></h6>
+    <button type="button" class="btn btn-primary bulk-grade-button">Bulk Grade</button>
+
+    <div class="dropdown show">
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Gradebook Navigation
+        </a>
+        
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="<%= "/gradebook?courseid=" + course._id %>"><%= course.name %></a>
+        <% for(var i = 0; i < assignmentNames.length; i++) { %>
+            <a class="dropdown-item" href="<%= "/gradebook?courseid=" + course._id + "&assignid=" + assignments[i] %>"><%= assignmentNames[i] %></a>
+        <% } %>
+        </div>
+    </div>
+
     <table class="table table-striped">
         <thead>
             <tr>
@@ -26,7 +39,6 @@
             </tr>
         </thead>
         <tbody>
-        <% if (assignment != null) { %>
             <% for(var i = 0; i < tablerows.length; i++) { %>
                 <tr>
                     <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
@@ -58,33 +70,6 @@
                     </td>
                 </tr>
             <% } %>
-        <% } else { %>
-            <% for(var i = 0; i < tablerows.length; i++) { %>
-                <tr>
-                    <th scope="row" class="user-id"><%= tablerows[i].uid %></th>
-                    <td>
-                        <%= tablerows[i].name %>
-                    </td>
-
-                    <% for(var j = 0; j < tablerows[i].assignmentGrades.length; j++) { %>
-                        <td>
-                            <span class="original-grade"><%= tablerows[i].assignmentGrades[j] %></span>
-                            <span>
-                                <input type="number" min="0" class="grade-editor">
-                            </span>
-
-                            <i class="material-icons edit-grade">edit</i>
-                            <i class="material-icons undo-grade">undo</i>
-                            <i class="material-icons done-grade">done</i>
-                        </td>
-                    <% } %>
-
-                    <td>
-                        <span class="total-grade"><%= tablerows[i].studentTotalGrade %></span>
-                    </td>
-                </tr>
-            <% } %>
-        <% } %>
         </tbody>
     </table>
 </div>
@@ -94,7 +79,6 @@
 
 <script>
     $(document).ready(function(){
-        let columnsBeforeGrades = 2; // Magic number used for indexing. It is the number of columns before our grade array
 
         $(".edit-grade").click(function(){
             editGrade($(this).closest("td"));
@@ -119,17 +103,6 @@
             parenttd.find(".grade-editor").change();
             if (assignment != null) {
                 changeGrade(parenttd, assignment._id);
-            } else {
-                if (parenttd != null) {
-                    let assignmentids = <%- JSON.stringify(assignments) %>;
-                    let gradeDifference = await changeGrade(parenttd, assignmentids[parenttd.index()-columnsBeforeGrades]);
-                    if (gradeDifference != 0) {
-                        let totalGradeCell = parenttd.closest("tr").find(".total-grade");
-                        totalGradeCell.text(Number(totalGradeCell.text()) + gradeDifference);
-                    }
-                } else {
-                    alert("error while changing grade");
-                }
             }
         });
 
@@ -139,18 +112,6 @@
                 $(this).change();
                 if (assignment != null) {
                     changeGrade($(this).closest("td"), assignment._id);
-                } else {
-                    let parenttd = $(this).closest("td");
-                    if (parenttd != null) {
-                        let assignmentids = <%- JSON.stringify(assignments) %>;
-                        let gradeDifference = await changeGrade(parenttd, assignmentids[parenttd.index()-columnsBeforeGrades]);
-                        if (gradeDifference != 0) {
-                            let totalGradeCell = parenttd.closest("tr").find(".total-grade");
-                            totalGradeCell.text(Number(totalGradeCell.text()) + gradeDifference);
-                        }
-                    } else {
-                        alert("error while changing grade");
-                    }
                 }
             }
         });
@@ -165,11 +126,12 @@
         
         // Returns the value of the new grade - old grade or 0 if an error occurred.
         async function changeGrade(el, assignmentid) {
-            let user_id = el.closest("tr").find(".user-id").text();
+            let user_ids = <%- JSON.stringify(students) %>;
+            let user_id = user_ids[el.closest("tr").index()];
             let new_grade = el.find(".grade-editor").val();
             let old_grade = el.find(".original-grade").text();
-            old_grade = (old_grade == "n/a") ? 0 : Number(old_grade);
-            let course = <%- JSON.stringify(assignments) %>;
+            old_grade = (old_grade == "ungraded" || old_grade == "no submission") ? 0 : Number(old_grade);
+            let course = <%- JSON.stringify(course) %>;
             if ($.isNumeric(new_grade) && new_grade >= 0) {
                 let response = await fetch('/api/changeGrade?user=' + user_id + '&assign_id=' + assignmentid + '&new_grade=' + new_grade + '&course_id=' + course._id,
                     { method: 'GET', credentials: 'same-origin'});
