@@ -24,61 +24,44 @@
  * - give TAs control over name testing command/script
  */
 
+var { Transform } = require('stream');
 var Docker = require('dockerode');
 var Promise = require('bluebird');
-var docker = new Docker({
+const docker = new Docker({
     Promise: Promise
 }); // change if docker is running on a different server
 var _ = require('lodash/core');
 
-const { Transform } = require('stream');
-
-var envMap = new Map(); // TODO: assumes that Node.js will never crash?
-
-// Wrap a dockerode container and expose a nicer API
-
-function actuallyGrade(arr) {
-    current = 0;
-    total_score = 0;
-
-    for (let i of arr) {
-        if (i.pass) {
-            current += i.score;
-        }
-        total_score += i.score
-    }
-
-    return [current, total_score];
-}
-
-class GradingContainer {
+/**
+ * Encapsulate a remote docker container.
+ *
+ * @private
+ */
+class _GradingContainer {
     constructor(dockerContainer) {
         this.container = dockerContainer;
-        this.testRe = /^\[(?<score>\d*)\]\s*\((?<pass>pass|fail)\)\s*(?<name>.*)\s*(?:\#(?<comment>.*))?/gm;
-        this.exec = null;
+        this.testRe = /^\[(?<score>\d*)\]\s*\((?<pass>pass|fail)\)\s*(?<name>.*?)\s*(?:\#\s*(?<comment>.*?)\s*)?$/gm;
     }
 
     /**
      * Build a student submission.
      * @returns {Promise} Resolves with a reference to this grading container.
      */
-    build() {
-        return this.container.start()
-        .then((container) => 
-            container.exec({
-                Cmd: ['make'],
-                AttachStdout: true,
-                AttachStderr: true
-            })
-        ).then((exec) =>
-            exec.start()
-        ).then((exec) => {
-            // TODO: collect output from the build instead of printing
-            this.container.modem.demuxStream(exec.output, process.stdout, process.stderr);
-            return new Promise((resolve, reject) => {
-                exec.output.on('end', () => resolve(this));
-                exec.output.on('error', (err) => reject(err));
-            });
+    async build() {
+        let container = await this.container.start();
+        let exec = await container.exec({
+            Cmd: ['make'],
+            AttachStdout: true,
+            AttachStderr: true
+        });
+
+        await exec.start()
+
+        // TODO: collect output from the build instead of printing
+        this.container.modem.demuxStream(exec.output, process.stdout, process.stderr);
+        return new Promise((resolve, reject) => {
+            exec.output.on('end', () => resolve(this));
+            exec.output.on('error', (err) => reject(err));
         });
     }
 
@@ -86,27 +69,26 @@ class GradingContainer {
      * Test a student submission that's been built.
      * @returns {Promise} Resolves with a reference to this grading container.
      */
-    test() {
-        return this.container.exec({
+    async test() {
+        let exec = await this.container.exec({
             Cmd: ['/bin/bash', 'test.sh'],
             AttachStdout: true,
             AttachStderr: true
-        }).then((exec) =>
-            exec.start()
-        ).then((exec) => {
-            let testArray = [];
-            let testStream = this._parseTestResults(exec);
+        });
 
-            testStream.on('data', (testInfo) => {
-                testArray.push(testInfo);
-            });
+        await exec.start();
 
-            return new Promise((resolve, reject) => {
-                exec.output.on('error', reject);
-                exec.output.on('end', () => {
-                    this.container.stop();
-                    resolve(testArray);
-                });
+        let testResults = [];
+        let testStream = this._parseTestResults(exec);
+        testStream.on('data', (testInfo) => {
+            testResults.push(testInfo);
+        });
+
+        return new Promise((resolve, reject) => {
+            exec.output.on('error', reject);
+            exec.output.on('end', () => {
+                this.container.stop();
+                resolve(testResults);
             });
         });
     }
@@ -120,21 +102,20 @@ class GradingContainer {
         let _this = this;
 
         let testStdErr = new Transform({ transform(chunk, encoding, callback) {} });
-        let testStdOut = new Transform({readableObjectMode: true});
+        let testStdOut = new Transform({ readableObjectMode: true });
         testStdOut._transform = function(chunk, encoding, done) {
             let parse;
-            let testInfo = {};
-            do {
-                parse = _this.testRe.exec(chunk.toString());
-                if (parse) {
-                    parse = parse.groups;
-                    testInfo.score = parseInt(parse.score);
-                    testInfo.pass = parse.pass == 'pass';
-                    testInfo.name = parse.name;
-                    testInfo.comment = parse.comment ? parse.comment : '';
-                    this.push(_.clone(testInfo));
-                }
-            } while(parse);
+            let testInfo;
+            while (parse = _this.testRe.exec(chunk.toString())) {
+                parse = parse.groups;
+                testInfo = {
+                    score: parseInt(parse.score),
+                    pass: parse.pass == 'pass',
+                    name: parse.name,
+                    comment: parse.comment ? parse.comment : ''
+                };
+                this.push(_.clone(testInfo));
+            }
             done();
         };
         // XXX: end this transform stream when we run out of things to read?
@@ -145,91 +126,125 @@ class GradingContainer {
     }
 }
 
+var environmentMap = new Map(); // assignmentIds -> GradingEnvironment
+var syncedEnvironments = false;
+
+/**
+ * Query to see if Docker has a (built) GradingEnvironment image.
+ * @param {string} assignmentId 
+ * @param {bool} forceSync
+ * @return {GradingEnvironment}
+ */
+async function findGradingEnvironment(assignmentId, forceSync=false) {
+    // TODO: toLowerCase() is a quick hack. remove later.
+    assignmentId = assignmentId.toString().toLowerCase();
+
+    if (!syncedEnvironments || forceSync) {
+        _.forEach(
+            await docker.listImages({
+                filters: {
+                    // commented because we want all images, not just one
+                    // reference: [assignmentId],
+                    label: ['com.grademe']
+                }
+            }),
+            (image) => {
+                // extract image name, which is the same as assignmentId
+                let id = image.RepoTags[0].split(':')[0];
+
+                // indicate that new GE's image has already been built and cache
+                let env = new GradingEnvironment(id);
+                env.buildPromise = Promise.resolve();
+                environmentMap.set(id, env);
+            }
+        )
+        syncedEnvironments = true;
+    }
+
+    return environmentMap.get(assignmentId);
+}
+
 /**
  * Create student test containers with the same grading environment
  * @param {Number} assignmentId Uniquely identifies the image we build
  * @param {String} envArchive (opt) Tar file with Dockerfile & grading scripts
  */
 class GradingEnvironment {
-    constructor(assignmentId, envArchive) {
-        let existingEnv = envMap.get(assignmentId);
-        if (existingEnv) {
-            return existingEnv;
-        } else {
-            envMap.set(assignmentId, this);
-            this.envArchive = envArchive;
-            this.imageId = assignmentId.toString().toLowerCase(); // TODO: toLowerCase() is a quick hack. remove later.
-            this.buildPromise = null;
-        }
+    constructor(assignmentId) {
+        // TODO: toLowerCase() is a quick hack. remove later.
+        this.imageId = assignmentId.toString().toLowerCase();
+        this.buildPromise; // resolved after buildImage() finishes
     }
 
     /**
-     * Creates an image encapsulating the grading environment
+     * Creates an image encapsulating the grading environment.
+     * 
+     * The image keeps the same container ID as the assignment, and is marked
+     * with the 'com.grademe' label so grademe containers can be identified
+     * later.
+     * 
      * @param {String}   envArchive Rebuild with a new environment
      * @param {Function} onProgress Called with progress descriptions (optional)
      */
-    buildImage(envArchive, onProgress) {
-        if (typeof envArchive === 'string') {
-            this.envArchive = envArchive;
-        }
-        if (typeof envArchive === 'function') {
-            onProgress = envArchive;
+    async buildImage(envArchive, onProgress) {
+        let progressStream = await docker.buildImage(envArchive, {
+            t: this.imageId,
+            labels: { 'com.grademe': '' }
+        })
+
+        if (onProgress) {
+            progressStream.on('data', (buf) => onProgress(buf.toString()));
+        } else {
+            progressStream.on('data', (buf) => {});
         }
 
-        this.buildPromise = docker.buildImage(this.envArchive, {
-            t: this.imageId,
-            buildargs: {}
-        }).then((stream) => {
-            if (onProgress) {
-                stream.on('data', (buf) => onProgress(buf.toString()));
-            } else {
-                stream.on('data', (buf) => {});
-            }
-            return new Promise((resolve, reject) => {
-                stream.on('end', resolve);
-                stream.on('error', reject);
-            });
+        this.buildPromise = new Promise((resolve, reject) => {
+            progressStream.on('end', resolve);
+            progressStream.on('error', reject);
+        }).then(() => {
+            // once built, add to the findGradingEnvironment() lookup cache
+            environmentMap.set(this.assignmentId, this);
         });
+        return this.buildPromise;
     }
 
     /**
      * Create a container environment with submitted code
      * @param {Number} userId     Identifier representing the student
      * @param {String} srcArchive Tarball containing student source code
-     * @returns {Promise} Resolves to a GradingContainer
+     * @return {Gradingcontainer}
      */
-    containerize(userId, srcArchive) {
-        if (!this.buildPromise) {
-            return Promise.reject(new Error('Call buildImage() first'));
+    async containerize(userId, srcArchive) {
+        try {
+            await this.buildPromise;
+        } catch (error) {
+            throw new Error("Grading envrionment image not built yet; " +
+                            "call buildImage() first");
         }
 
-        return this.buildPromise.then(() =>
-            docker.createContainer({
-                name: this.imageId + '-' + userId,
-                Image: this.imageId,
-                AttachStdin: false,
-                AttachStdout: false,
-                AttachStderr: true,
-                Tty: true,
-                OpenStdin: false,
-                StdinOnce: false,
-                AutoRemove: true,
-                Entrypoint: ['/bin/bash']
-            })
-        ).then((container) =>
-            // XXX: potential to overwrite TA files with student files?
-            // TODO: archive upload not working
-            container.putArchive(srcArchive, {
-                path: '/usr/src/app', // not relative to WORKDIR :<
-                noOverwriteDirNonDir: false
-            }).then((_) =>
-                new GradingContainer(container)
-            )
-        );
+        let container = await docker.createContainer({
+            name: this.imageId + '-' + userId,
+            Image: this.imageId,
+            AttachStdin: false,
+            AttachStdout: false,
+            AttachStderr: true,
+            Tty: true,
+            OpenStdin: false,
+            StdinOnce: false,
+            AutoRemove: true,
+            Entrypoint: ['/bin/bash']
+        });
+        // XXX: potential to overwrite TA files with student files?
+        // TODO: archive upload not working
+        await container.putArchive(srcArchive, {
+            path: '/usr/src/app', // not relative to WORKDIR :<
+            noOverwriteDirNonDir: false
+        });
+        return new _GradingContainer(container);
     }
 }
 
 module.exports = {
     GradingEnvironment: GradingEnvironment,
-    actuallyGrade: actuallyGrade
+    findGradingEnvironment: findGradingEnvironment
 }

@@ -16,6 +16,12 @@ This will use nodemon to run the server. This very conveniently restarts the ser
 
 The server runs on **localhost:3200**.
 
+#### NOTE:
+```
+yarn install
+```
+Will also symlink autograder.js into the node_modules directory if it doesn't already exist.
+
 ### Testing Instructions
 
 To start running tests all you need to do is run `yarn test`. This will run through all of the testing suites and give you back the results. Also, when running the tests they will use a different database than your local instance of Mongo, so you don't have to worry about your current database instance being modified when running tests.

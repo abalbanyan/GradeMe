@@ -2,7 +2,7 @@ var express = require('express');
 var router =  express.Router();
 let db = require('../db.js');
 let fileutils = require('../fileutils.js');
-const { GradingEnvironment } = require('../autograder/autograder.js');
+const { findGradingEnvironment, GradingEnvironment } = require('autograder');
 
 let multer = require('multer');
 let upload = multer({dest: 'course-data/uploads'});
@@ -93,13 +93,23 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
 
         // Remake grading tar if dockerfile, testscript, or makefile were updated.
         if (newassignment) {
-            let gradingenvfiles =  [ newassignment.gradingenv.dockerfile, newassignment.gradingenv.testscript, newassignment.gradingenv.makefile ];
+            let gradingenvfiles =  [
+                newassignment.gradingenv.dockerfile,
+                newassignment.gradingenv.testscript,
+                newassignment.gradingenv.makefile
+            ];
             let envArchive = await fileutils.makeEnvTar(assignid, gradingenvfiles, 'env.tar');
             if (!envArchive) { throw new Error(); }
 
-            // Update the autograder grading environment.
-            let gradingEnvironment = new GradingEnvironment(assignid, envArchive);
-            await gradingEnvironment.buildImage();
+            // Rebuild the autograder's grading environment using the new archive.
+            let gradingEnvironment = await findGradingEnvironment(assignid);
+            if (!gradingEnvironment) {
+                console.log("WARNING: couldn't find a docker image for an " +
+                            "assignment that supposedly exists");
+                gradingEnvironment = new GradingEnvironment(assignid);
+            }
+            await gradingEnvironment.buildImage(envArchive);
+            console.log("Rebuilding image.");
         }
 
     } catch (err) {

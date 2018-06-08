@@ -39,6 +39,8 @@ router.get('/', async function(req, res, next) {
     });
 });
 
+router.use('/tests', require('./tests.js'));
+
 /**
  * Submit the user's uploaded file, provided it passes validation.
  */
@@ -82,6 +84,21 @@ router.post('/upload/submission', upload.single('file'), async function(req, res
             }
         }
     });
+});
+
+router.put('/upload/testcase_meta', async (req, res) => {
+    try {
+        let assignment = await db.Assignment.findById(req.query.assignid).exec();
+        assignment.testcases_meta.makefile = req.body.makefile;
+        assignment.testcases_meta.execName = req.body.execName;
+        await assignment.save();
+        return res.status(200).end();
+    } catch (e) {
+        return res.status(400).json({
+            name: e.name,
+            message: e.message
+        });
+    }
 });
 
 module.exports = router;
