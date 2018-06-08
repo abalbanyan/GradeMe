@@ -22,6 +22,10 @@ let AssignmentSchema = new Schema({
         testscript:             { type: String },
         archive:                { type: String, default: 'course-data/defaults/env.tar' }
     },
+    testcases_meta: {
+        makefile:               { type: String, default: '' },
+        execName:               { type: String, default: '' }
+    },
     // submissions:                { type: [String] }, // List of student submission ids.
     duedate:                    { type: Date },
     gradetotal:                 { type: Number, required: true, default: 100 },
