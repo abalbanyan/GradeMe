@@ -27,9 +27,6 @@
 
     <br><br>
     <p><%= course.desc %></p>
-    <% if (user.instructor) { %>
-        <h5><a href="/gradebook?courseid=<%=course._id%>">Gradebook</a></h5>
-    <% } %>
 
     <h4 class="mini-title">Assignments</h4>
     <table class="table table-striped">
@@ -68,17 +65,28 @@
             <% }); %>
         </tbody>
     </table>
-      <% if (user.instructor) { %>    
-        <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
-            <div class="row create-assignment-btn">
-                <div class="col-sm-10 create-assignment-text">
-                    Create New Assignment
+      <% if (user.instructor) { %> 
+        <div class="row">
+
+            <div class="col-sm-6" >
+                <% if (user.instructor) { %>
+                    <a class="btn btn-info" role="button" href="/gradebook?courseid=<%=course._id%>">Course Gradebook</a>
+                    <% } %>        
                 </div>
-                <div class="col-sm-2">
-                    <i class="material-icons">add_circle</i>
+                
+                <div class="col-sm-6" >
+                    <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
+                        <div class="row create-assignment-btn">
+                            <div class="col-sm-10 create-assignment-text">
+                                Create New Assignment
+                            </div>
+                            <div class="col-sm-2">
+                                <i class="material-icons">add_circle</i>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-            </div>
-        </a>
+        </div>
       <% } %>        
 </div>
 
