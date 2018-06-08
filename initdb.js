@@ -36,7 +36,34 @@ async function cleardb() {
         instructor: false,
         admin: false,
         name: {first: "Danny", last: "Jung"},
-        uid: 100
+        uid: 123456789
+    });
+
+    let test1 = new db.User({
+        email: 'test1@gmail.com',
+        password: 'monkey',
+        instructor: false,
+        admin: false,
+        name: {first: "Test", last: "One"},
+        uid: 133742069
+    });
+
+    let test2 = new db.User({
+        email: 'test2@gmail.com',
+        password: 'monkey',
+        instructor: false,
+        admin: false,
+        name: {first: "Test", last: "Two"},
+        uid: 304479543
+    });
+
+    let test3 = new db.User({
+        email: 'test3@gmail.com',
+        password: 'monkey',
+        instructor: false,
+        admin: false,
+        name: {first: "Test", last: "Three"},
+        uid: 567498292
     });
 
     let willy = new db.User({
@@ -49,23 +76,56 @@ async function cleardb() {
     await admin.save();
     await willy.save();
     await danny.save();
+    await test1.save();
+    await test2.save();
+    await test3.save();
 
     let assignment = new db.Assignment({
-        name: "GradeMe",
-        desc: "this lmao",
+        name: "Project 1",
+        desc: "Test Assignment",
         duedate: new Date(2020, 1, 1),
         spec: {
             path: 'specs/loremipsum.pdf',
             filetype: 'pdf'
         },
     });
+    let assignment2 = new db.Assignment({
+        name: "Project 2",
+        desc: "Test Assignment",
+        duedate: new Date(2020, 2, 2),
+        spec: {
+            path: 'specs/loremipsum.pdf',
+            filetype: 'pdf'
+        },
+    });
+    let assignment3 = new db.Assignment({
+        name: "Project 3",
+        desc: "Test Assignment",
+        duedate: new Date(2021, 1, 1),
+        spec: {
+            path: 'specs/loremipsum.pdf',
+            filetype: 'pdf'
+        },
+    });
+    let assignment4 = new db.Assignment({
+        name: "Project 4",
+        desc: "Test Assignment",
+        duedate: new Date(2020, 5, 4),
+        spec: {
+            path: 'specs/loremipsum.pdf',
+            filetype: 'pdf'
+        },
+    });
     await assignment.save();
+    await assignment2.save();
+    await assignment3.save();
+    await assignment4.save();
 
     let course = new db.Course({
         name: 'CS130 Software Engineering',
-        desc: 'idk',
+        desc: 'Course objective: Turn the student into a practicing software engineer.',
         assignments: [assignment._id],
-        students: [danny._id],
+        students: [danny._id, test1._id, test2._id, test3._id],
         instructors: [willy._id],
         main_instructor: [willy._id],
         visible: true
@@ -75,7 +135,7 @@ async function cleardb() {
         name: 'CS136 Computer Security',
         desc: 'hewwo OwO',
         assignments: [],
-        students: [danny._id],
+        students: [danny._id, test1._id, test2._id, test3._id],
         instructors: [willy._id],
         main_instructor: [willy._id],
         visible: true
