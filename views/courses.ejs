@@ -7,11 +7,11 @@
             <ul class="list-group">
             <% courselist.forEach(function(course) { %>
                 <li class="list-group-item">
-                    <a href='<%= "/course?courseid=" + course._id %>'>
-                        <%= course.name %> 
+                    <a class='course-link' href='<%= "/course?courseid=" + course._id %>'>
+                        <%= course.name %>
                     </a>
                     <% if (instructor) { %>
-                    <a href='<%= "/edit-course?courseid=" + course._id %>'>
+                    <a class='edit-course-link' href='<%= "/edit-course?courseid=" + course._id %>'>
                         <i style="float: right;" class="material-icons">settings</i>
                     </a>
                     <% } %>
@@ -31,7 +31,7 @@
                     <a href='/create-course'>
                         <i style="float: right;" class="material-icons">add</i>
                     </a>
-                </li>    
+                </li>
                 <% } %>
             </ul>
         </div>

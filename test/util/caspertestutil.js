@@ -9,6 +9,13 @@ var login = function(_casper, name, password) {
     });
 };
 
+var logout = function(_casper) {
+    _casper.waitUntilVisible('a[href="/login?logout=1"]', function() {
+        _casper.click('a[href="/login?logout=1"]');
+    });
+};
+
 module.exports = {
-    login: login
+    login: login,
+    logout: logout
 };

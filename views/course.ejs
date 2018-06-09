@@ -4,7 +4,7 @@
 </head>
 
 <div class="container">
-    <h2><%= course.name %> </h2>
+    <h2 id='course-title'><%= course.name %> </h2>
     <b>Instructors:</b>
 
     <% instructors.forEach(function(instructor, index, array) { %>
@@ -65,15 +65,15 @@
             <% }); %>
         </tbody>
     </table>
-      <% if (user.instructor) { %> 
+      <% if (user.instructor) { %>
         <div class="row">
 
             <div class="col-sm-6" >
                 <% if (user.instructor) { %>
                     <a class="btn btn-info" role="button" href="/gradebook?courseid=<%=course._id%>">Course Gradebook</a>
-                    <% } %>        
+                    <% } %>
                 </div>
-                
+
                 <div class="col-sm-6" >
                     <a href="/create-assignment?courseid=<%=course._id%>" class="add-assignment">
                         <div class="row create-assignment-btn">
@@ -87,7 +87,7 @@
                     </a>
                 </div>
         </div>
-      <% } %>        
+      <% } %>
 </div>
 
 <%- include partials/footer.ejs %>
