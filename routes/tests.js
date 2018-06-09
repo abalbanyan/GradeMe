@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-    let required = ['name', 'stdin', 'stdout'];
+    let required = ['name', 'stdin', 'stdout', 'points'];
     if (!required.every(prop => prop in req.body)) {
         return res.status(400).json({
             name: 'Error',
@@ -50,6 +50,7 @@ router.post('/', async (req, res) => {
         await db.TestCase.create({
             assignid: req.query.assignid,
             name: req.body.name,
+            points: req.body.points,
             stdin: req.body.stdin,
             stdout: req.body.stdout
         }).exec();
@@ -82,6 +83,7 @@ router.put('/', async (req, res) => {
 
     let delta = {
         name: req.body.name,
+        points: req.body.points,
         stdin: req.body.stdin,
         stdout: req.body.stdout
     }

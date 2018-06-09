@@ -70,9 +70,11 @@ async function createAssignment(assignid) {
         fs.mkdirSync(assigndir + 'submissions/');
 
         // Copy default grading env files.
-        await copyFile('course-data/defaults/Dockerfile', assigndir + 'Dockerfile');
-        await copyFile('course-data/defaults/Makefile', assigndir + 'Makefile');
-        await copyFile('course-data/defaults/test.sh', assigndir + 'test.sh');
+        await copyFile('course-data/testcase-ui-defaults', assigndir + 'Dockerfile');
+        await copyFile('course-data/testcase-ui-defaults', assigndir + 'test.sh');
+        await copyFile('course-data/testcase-ui-defaults', assigndir + 'test.py');
+        //await copyFile('course-data/defaults/Makefile', assigndir + 'Makefile');
+        //await copyFile('course-data/defaults/test.sh', assigndir + 'test.sh');
 
         return assigndir;
     } catch (err) {

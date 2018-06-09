@@ -128,14 +128,19 @@ async function canViewAssignment(assignid, courseid, userid, instructor, admin =
     return (assignment !== null);
 }
 
+function hasTestAndMakefile(assignment) {
+    let gradingEnv = assignment.gradingenv;
+    return gradingEnv.makefile && gradingEnv.testscript;
+}
+
 /**
  * Looks for this student's most recent submission in this assignment, and grades it.
  */
 async function gradeSubmission(studentid, assignid) {
     let submissions = await Submission.find({
         userid: studentid,
-        assignmentid: assignid}
-    ).exec();
+        assignmentid: assignid
+    }).exec();
     let assignment = await Assignment.findById(assignid).exec();
 
     // Look for the most recent submission.
@@ -147,12 +152,28 @@ async function gradeSubmission(studentid, assignid) {
     // assignment.gradingenv.archive;
     let gradingEnvironment = await findGradingEnvironment(assignment._id);
     if (!gradingEnvironment) {
-        throw new Error("Couldn't find a docker image corresponding to a " +
-                        "submission's assignment: " + assignment._id);
+        throw new Error("Couldn't find a docker image corresponding to this " +
+                        "assignment: " + assignment._id);
     }
     let gradingContainer = await gradingEnvironment.containerize(studentid, mostrecent.submissionpath);
-    await gradingContainer.build();
-    let output = await gradingContainer.test();
+
+    let output;
+    // if user has uploaded these two files, disable the testcase-ui and use
+    // them instead
+    // otherwise, build and test the gradingContainer with the makefile and
+    // testcases supplied through the UI
+    if (!assignment.testcases_meta.isUIEnabled) {
+        await gradingContainer.build();
+        output = await gradingContainer.test();
+    } else {
+        await gradingContainer.build(assignment.testcases_meta.makefile);
+        let testcases = await TestCase.find({ assignid: assignment._id }).exec();
+        testcases.forEach((testcase) => delete testcase.assignid);
+        output = await gradingContainer.test(JSON.stringify({
+            executable: assignment.testcases_meta.execName,
+            testcases: testcases
+        }));
+    }
 
     let score = 0;
     let total = 0;
@@ -166,6 +187,15 @@ async function gradeSubmission(studentid, assignid) {
     await Submission.findByIdAndUpdate(mostrecent._id, {grade: grade}).exec();
     return grade;
 }
+
+/*
+async function gradeAllSubmissions(assignid) {
+    let course = await Course.find({ assignments: assignid }).exec();
+    for (let student of course.students) {
+
+    }
+}
+*/
 
 /**
  * Checks if a course has the specified instructor

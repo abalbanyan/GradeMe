@@ -7,7 +7,7 @@
     "start": "node server.js",
     "postinstall": "[ -L node_modules/autograder ] || ln -s ../autograder node_modules/autograder",
     "clean": "rm -rf course-data/assign-* course-data/course-*",
-    "dev": "opn http://localhost:3200 && nodemon server.js",
+    "dev": "nodemon server.js",
     "test": "jest --runInBand --verbose",
     "test-ui": "NODE_ENV=test-ui gulp test-ui"
   },
@@ -28,9 +28,11 @@
     "mongoose": "^5.0.16",
     "multer": "^1.3.0",
     "nodemailer": "^4.6.4",
+    "nodemon": "^1.17.3",
     "password-strength-meter": "^1.2.1",
     "rand-token": "^0.4.0",
     "shortid": "^2.2.8",
+    "simple-dockerode": "^0.2.2",
     "tar": "^4.4.2"
   },
   "devDependencies": {
@@ -42,9 +44,7 @@
     "gulp-wait": "0.0.2",
     "jest": "^22.4.3",
     "mongodb-memory-server": "^1.7.3",
-    "nodemon": "^1.17.3",
     "opn-cli": "^3.1.0",
-    "phantomjs": "^2.1.7",
     "supertest": "^3.0.0"
   }
 }

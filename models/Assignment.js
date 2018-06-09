@@ -20,11 +20,13 @@ let AssignmentSchema = new Schema({
         dockerfile:             { type: String },
         makefile:               { type: String },
         testscript:             { type: String },
-        archive:                { type: String, default: 'course-data/defaults/env.tar' }
+        // by default, enable the testcase-ui grading environment
+        archive:                { type: String, default: 'course-data/testcase-ui-defaults/env.tar.gz' }
     },
     testcases_meta: {
         makefile:               { type: String, default: '' },
-        execName:               { type: String, default: '' }
+        execName:               { type: String, default: '' },
+        isUIEnabled:            { type: Boolean, default: true }
     },
     // submissions:                { type: [String] }, // List of student submission ids.
     duedate:                    { type: Date },
@@ -37,9 +39,9 @@ AssignmentSchema.pre('save', async function(next) {
     if (this.isNew) {
         await fileutils.createAssignment(this._id);
         // Copy default grading env files.
-        this.gradingenv.makefile = 'course-data/assign-' + this._id + '/Makefile';
+        //this.gradingenv.makefile = 'course-data/assign-' + this._id + '/Makefile';
         this.gradingenv.dockerfile = 'course-data/assign-' + this._id + '/Dockerfile';
-        this.gradingenv.testscript = 'course-data/assign-' + this._id + '/test.sh';
+        //this.gradingenv.testscript = 'course-data/assign-' + this._id + '/test.sh';
         this.gradingenv.archive = fileutils.makeEnvTar(this._id);
 
         // Create and build docker environment, uniquely identified by the assignment id.

@@ -9,7 +9,7 @@ clean-docker-containers:
 	docker rm $(shell docker ps -aq) 2> /dev/null || \
 	true
 
-clean-docker-images:
+clean-docker-images: clean-docker-containers
 	docker rmi $(shell docker images | grep -v "gcc" | awk '{print $3}')
 
 clean-%:

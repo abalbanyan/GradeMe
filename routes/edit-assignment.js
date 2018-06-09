@@ -92,7 +92,12 @@ router.post('/upload/:action', upload.single('file'), async function(req, res, n
         }
 
         // Remake grading tar if dockerfile, testscript, or makefile were updated.
-        if (newassignment) {
+        if (newassignment && db.hasTestAndMakefile(newassignment)) {
+            if (newassignment.testcases_meta.isUIEnabled) {
+                newassignment.testcases_meta.isUIEnabled = false;
+                newassignment.gradingenv.dockerfile = 'course-data/default-dockerfile/Dockerfile';
+                await newassignment.save().exec();
+            }
             let gradingenvfiles =  [
                 newassignment.gradingenv.dockerfile,
                 newassignment.gradingenv.testscript,

@@ -24,8 +24,8 @@
  * - give TAs control over name testing command/script
  */
 
-var { Transform } = require('stream');
-var Docker = require('dockerode');
+var { Readable, Transform } = require('stream');
+var Docker = require('simple-dockerode');
 var Promise = require('bluebird');
 const docker = new Docker({
     Promise: Promise
@@ -46,66 +46,100 @@ class _GradingContainer {
     /**
      * Build a student submission.
      * @returns {Promise} Resolves with a reference to this grading container.
+     * @param {String} makefile makefile used to build app
      */
-    async build() {
+    async build(makefileStr) {
         let container = await this.container.start();
-        let exec = await container.exec({
-            Cmd: ['make'],
-            AttachStdout: true,
-            AttachStderr: true
-        });
 
-        await exec.start()
-
-        // TODO: collect output from the build instead of printing
-        this.container.modem.demuxStream(exec.output, process.stdout, process.stderr);
-        return new Promise((resolve, reject) => {
-            exec.output.on('end', () => resolve(this));
-            exec.output.on('error', (err) => reject(err));
+        let results;
+        if (makefileStr) {
+            results = await container.exec(['make', '-f-'], {
+                stdin: makefileStr,
+                stdout: true,
+                stderr: true
         });
+        } else {
+            results = await container.exec(['make'], {
+                stdout: true,
+                stderr: true
+            });
+        }
+        console.log(results.stdout);
     }
 
     /**
      * Test a student submission that's been built.
      * @returns {Promise} Resolves with a reference to this grading container.
+     * @param {String} stdinStr optional
      */
-    async test() {
+    async test(stdinStr) {
+        /*
         let exec = await this.container.exec({
             Cmd: ['/bin/bash', 'test.sh'],
+            AttachStdin: true,
             AttachStdout: true,
-            AttachStderr: true
+            AttachStderr: true,
+            Tty: true
         });
 
-        await exec.start();
-
-        let testResults = [];
-        let testStream = this._parseTestResults(exec);
-        testStream.on('data', (testInfo) => {
-            testResults.push(testInfo);
-        });
-
-        return new Promise((resolve, reject) => {
-            exec.output.on('error', reject);
-            exec.output.on('end', () => {
-                this.container.stop();
-                resolve(testResults);
+        await new Promise((resolve, reject) => {
+            exec.start({}, (err, stdin) => {
+                if (err) {
+                    return reject(err);
+                }
+                if (stdinStr) {
+                    const sender = new Readable();
+                    sender.push(stdinStr);
+                    sender.push(null);
+                    sender.pipe(stdin);
+                }
+                return resolve();
             });
         });
+        */
+
+        let results = await this.container.exec(['/bin/bash', 'test.sh'], {
+            stdin: stdinStr,
+            stdout: true,
+            stderr: true
+        });
+
+        console.log(results.stdout);
+        console.log(results.stderr);
+
+        let parse;
+        let testInfo;
+        let testResults = [];
+        while (parse = this.testRe.exec(results.stdout)) {
+            parse = parse.groups;
+            testInfo = {
+                score: parseInt(parse.score),
+                pass: parse.pass == 'pass',
+                name: parse.name,
+                comment: parse.comment ? parse.comment : ''
+            };
+            testResults.push(_.clone(testInfo));
+        }
+
+        return testResults;
+        this.container.stop();
+
     }
 
     /**
      * Parse the output of a test script.
-     * @param {Exec} exec stdout from executing test.sh
+     * @param {Stream} muxedStream stdout+stderr from executing test.sh
      * @returns {Stream} Stream of testInfo objects
      */
-    _parseTestResults(exec) {
+    _parseTestResults(muxedStream) {
         let _this = this;
 
-        let testStdErr = new Transform({ transform(chunk, encoding, callback) {} });
+        let testStdErr = new Transform({ transform(chunk, encoding, callback) { console.log(chunk.toString()); } });
         let testStdOut = new Transform({ readableObjectMode: true });
         testStdOut._transform = function(chunk, encoding, done) {
             let parse;
             let testInfo;
+            console.log(chunk.toString());
             while (parse = _this.testRe.exec(chunk.toString())) {
                 parse = parse.groups;
                 testInfo = {
@@ -120,7 +154,7 @@ class _GradingContainer {
         };
         // XXX: end this transform stream when we run out of things to read?
 
-        this.container.modem.demuxStream(exec.output, testStdOut, testStdErr);
+        this.container.modem.demuxStream(muxedStream, testStdOut, testStdErr);
 
         return testStdOut;
     }
@@ -229,7 +263,7 @@ class GradingEnvironment {
             AttachStdout: false,
             AttachStderr: true,
             Tty: true,
-            OpenStdin: false,
+            OpenStdin: true,
             StdinOnce: false,
             AutoRemove: true,
             Entrypoint: ['/bin/bash']

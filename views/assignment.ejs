@@ -14,6 +14,7 @@
                     <a class="btn btn-outline-dark" href="/course?courseid=<%= course._id %>">Return to Course</a>
                         <% if (instructor) { %>
                         <a class="btn btn-outline-dark" href="/edit-assignment?assignid=<%= assignment._id %>">Edit Assignment</a>
+                        <a class="btn btn-outline-dark" href="/assignment/tests?assignid=<%= assignment._id %>">Edit Test Cases</a>
                         <% } %>
                 </div>
             </div>

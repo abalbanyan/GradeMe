@@ -28,11 +28,17 @@
       <div class="tab-content" id="testcases-tabContent">
       <%# populate testcase tab pages %>
       <% tests.forEach((test, i) => { %>
-        <div class="tab-pane fade mb-2 <%= i==0 ? 'show active' : '' %>" id="<%= test.id %>" role="tabpanel">
-          <form class="mb-2">
+        <div class="tab-pane mb-2 <%= i==0 ? 'show active' : '' %>" id="<%= test.id %>" role="tabpanel">
+          <form class="mb-2 needs-validation">
             <div class="form-group">
               <label for="name">Testcase Name</label>
-              <input type="text" class="form-control" id="name" name="name" value="<%= test.name %>">
+              <input type="text" class="form-control" id="name" name="name" value="<%= test.name %>" required>
+              <div class="invalid-feedback">Please provide a test name.</div>
+            </div>
+            <div class="form-group">
+              <label for="name">Point Value</label>
+              <input class="form-control" id="points" name="points" type="number" value="<%= test.points %>" required>
+              <div class="invalid-feedback">Please provide a point value.</div>
             </div>
             <div class="form-group">
               <label for="stdin">STDIN</label>
@@ -49,11 +55,17 @@
       <% }); %>
 
       <%# Submit a new testcase %>
-        <div class="tab-pane fade <%= tests.length==0 ? 'show active' : '' %>" id="new-testcase" role="tabpanel">
-          <form class="mb-2" id="createForm">
+        <div class="tab-pane <%= tests.length==0 ? 'show active' : '' %>" id="new-testcase" role="tabpanel">
+          <form class="mb-2 needs-validation" id="createForm">
             <div class="form-group">
               <label for="name">Testcase Name</label>
-              <input class="form-control" id="name" name="name" type="text">
+              <input class="form-control" id="name" name="name" type="text" required>
+              <div class="invalid-feedback">Please provide a test name.</div>
+            </div>
+            <div class="form-group">
+              <label for="name">Point Value</label>
+              <input class="form-control" id="points" name="points" type="number" required>
+              <div class="invalid-feedback">Please provide a point value.</div>
             </div>
             <div class="form-group">
               <label for="stdin">STDIN</label>
@@ -103,6 +115,15 @@
   makefileEditor.session.setMode("ace/mode/makefile");
   var execName = document.getElementById('execName');
 
+  function formCheck(form) {
+    if (form.checkValidity() === false) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    form.classList.add('was-validated');
+    return form.checkValidity();
+  }
+
   function formToJSON(formElem) {
     const formdata = new FormData(formElem);
     let ret = {};
@@ -131,6 +152,8 @@
 */
 
   async function create() {
+    if (!formCheck(createForm)) return;
+
     let res = await fetch(window.location.href, {
       method: "POST",
       headers: {
@@ -162,6 +185,8 @@
     let curTestContent = testContent.querySelector('.active')
     let formdata = formToJSON(curTestContent.querySelector('form'));
     formdata.testid = curTestContent.id;
+
+    if (!formCheck(curTestContent.querySelector('form'))) return;
 
     let res = await fetch(window.location.href, {
       method: "PUT",

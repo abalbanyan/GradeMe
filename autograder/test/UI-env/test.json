@@ -1,0 +1,17 @@
+{
+    "executable": "./a.out",
+    "testcases": [
+        {
+            "name": "test 1",
+            "points": 10,
+            "stdin": "hey there",
+            "stdout": "Software Engineer\n"
+        },
+        {
+            "name": "test 2",
+            "points": 15,
+            "stdin": "howdy",
+            "stdout": "hey there\n"
+        }
+    ]
+}
