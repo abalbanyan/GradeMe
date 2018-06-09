@@ -11,6 +11,7 @@ jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 const startMongo = async () => {
     let mongoServer = new MongodbMemoryServer.default();
     const mongoUri = await mongoServer.getConnectionString();
+    
     await mongoose.connect(mongoUri, (err) => {
         if (err) console.error(err);
     });
@@ -29,5 +30,7 @@ module.exports = {
         stop: stopMongo
     },
     createTestUser: util.createTestUser,
-    createTestAssignment: util.createTestAssignment
+    createTestAssignment: util.createTestAssignment,
+    createTestTempUser: util.createTestTempUser,
+    createTestUserObject: util.createTestUserObject
 };

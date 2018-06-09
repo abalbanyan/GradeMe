@@ -10,7 +10,7 @@ let nodemailer = require('nodemailer');
 let User = require('./models/User.js');
 let TempUser = require('./models/TempUser.js');
 
-module.exports = function(mongoose) {
+module.exports = function() {
 
     var isPositiveInteger = function(x) {
         return ((parseInt(x, 10) === x) && (x >= 0));
@@ -183,21 +183,22 @@ module.exports = function(mongoose) {
     var createTempUser = function(user, codes, callback) {
         if (!options.tempUserModel) {
             return callback(new TypeError('Temporary user model not defined. Either you forgot' +
-                'to generate one or you did not predefine one.'), null);
+                'to generate one or you did not predefine one.'), null, null);
         }
 
         // create our mongoose query
-        var query = {email: user.email};
+        var query = {email: user.email, kind: "User"};
 
         options.persistentUserModel.findOne(query, function(err, existingPersistentUser) {
             if (err) {
                 return callback(err, null, null);
             }
-
+            
             // user has already signed up and confirmed their account
             if (existingPersistentUser) {
                 return callback(null, existingPersistentUser, null);
             }
+            query.kind = "TempUser";
 
             options.tempUserModel.findOne(query, function(err, existingTempUser) {
                 if (err) {
@@ -268,7 +269,8 @@ module.exports = function(mongoose) {
      * user collection, removing the URL assigned to it.
      *
      * @func confirmTempUser
-     * @param {String} url - the randomly generated URL assigned to a unique email
+     * @param {string} url - the randomly generated URL assigned to a unique email
+     * @param {Function} callback - function(err, user, enroll_codes)
      */
     var confirmTempUser = function(url, callback) {
         let TempUser = options.tempUserModel;

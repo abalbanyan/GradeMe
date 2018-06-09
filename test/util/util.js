@@ -1,4 +1,5 @@
 const User = require('../../models/User.js');
+const TempUser = require('../../models/TempUser.js');
 const Assignment = require('../../models/Assignment.js');
 
 /**
@@ -21,9 +22,67 @@ const createTestUser = (type, tag) => {
         password: name,
         instructor: instructor,
         admin: admin,
-        uid: uid
+        uid: uid,
+        kind: "User"
     });
     return user;
+};
+
+/**
+ * Creates a user OBJECT for testing, with the name `tag`
+ *
+ * @param {String} type
+ *   The type of user, either admin, instructor, or student
+ * @param {String} tag
+ *   A tag to identify the user
+ */
+const createTestUserObject = (type, tag) => {
+    if(type !== 'admin' && type !== 'instructor' && type !== 'student') return null;
+    const instructor = (type === 'instructor') || (type === 'admin');
+    const admin = type === 'admin';
+    const name = tag;
+    const uid = Math.floor(Math.random() * 1000000000);
+    const user = {
+        email: name + '@grademe.edu',
+        name: {first: name, last: name},
+        password: name,
+        instructor: instructor,
+        admin: admin,
+        uid: uid
+    };
+    return user;
+};
+
+/**
+ * Creates a TempUser for testing, with the name `tag`
+ *
+ * @param {String} type
+ *   The type of user, either admin, instructor, or student
+ * @param {String} tag
+ *   A tag to identify the user
+ * @param {String} url
+ *   String to user as verification url code
+ * @param {[String]} codes
+ *   Array of Strings which represent enrollment codes
+ */
+const createTestTempUser = (type, tag, url, codes) => {
+    if(type !== 'admin' && type !== 'instructor' && type !== 'student') return null;
+    const instructor = (type === 'instructor') || (type === 'admin');
+    const admin = type === 'admin';
+    const name = tag;
+    const uid = Math.floor(Math.random() * 1000000000);
+    const tempUser = new TempUser({
+        email: name + '@grademe.edu',
+        name: {first: name, last: name},
+        password: name,
+        instructor: instructor,
+        admin: admin,
+        uid: uid,
+        GENERATED_VERIFYING_URL: url,
+        enroll_codes: codes,
+        kind: "TempUser"
+    });
+    return tempUser;
 };
 
 /**
@@ -53,5 +112,7 @@ const createTestAssignment = (name, isVisible = true, isLate = false) => {
 
 module.exports = {
     createTestAssignment: createTestAssignment,
-    createTestUser: createTestUser
+    createTestUser: createTestUser,
+    createTestTempUser: createTestTempUser,
+    createTestUserObject: createTestUserObject
 };
