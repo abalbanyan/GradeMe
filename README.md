@@ -5,7 +5,7 @@
 GradeMe is a desktop web application designed to be a grade portal for computer science classes. It has the standard features one might expect like the ability to: create courses, create assignments, upload assignment specifications, accept student submissions, etc, but also the novel feature of automating the testing and grading of assignments. In addition, we offer the ability for instructors to allow students to pregrade assignments using the test scripts uploaded by the instructor. This allows students to get immediate feedback and fix their program should anything be wrong.
 
 ### Development Instructions
-Make sure you have mongodb installed. Run `mongod` in a separate tab before starting the server.
+Make sure you have mongodb and Docker installed on a Linux box. Run `mongod` in a separate tab before starting the server (or run `systemctl start mongodb`). Make sure the Docker daemon is also running (`systemctl start docker`).
 If you want to initialize the db with some random sample data, also run `node initdb.js` from the base directory. You can also refer to this file if you want to look at some sample mongoose code.
 
 To run the express server, use:
