@@ -16,11 +16,15 @@ This will use nodemon to run the server. This very conveniently restarts the ser
 
 The server runs on **localhost:3200**.
 
+#### Testcases UI
+The testcases UI is still pretty experimental, and we considered it too risky to merge into master. It can be checked out and viewed at `rodrigo/testcases`. Setup instructions are the same.
+
 #### NOTE:
 ```
 yarn install
 ```
 Will also symlink autograder.js into the node_modules directory if it doesn't already exist.
+(Linux is *required*, our app assumes this)
 
 ### Testing Instructions
 
